@@ -1,0 +1,71 @@
+﻿@model TrackingSheet.Models.VMLogin;
+
+@{
+
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"  />
+    <title>Login</title>
+  
+</head>
+<body>
+    <form asp-controller="Access" asp-action="Login" method="post">
+        <div class="row d-flex justify-content-center align-items-center" style="width:100%">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5" style="max-width: 25%">
+                <div class="card text-white" style="border-radius: 1rem; background-color: #008b8b">
+                    <div class="card-body p-5 text-center">
+
+                        <div class="mb-md-5 mt-md-4 pb-5">
+
+                            <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
+                            <p class="text-white mb-5">Введите ваш 431 и пароль!</p>
+
+                            <div data-mdb-input-init class="form-outline form-white mb-4">
+                                <input type="text" class="form-control" placeholder="Логин" asp-for="Login431" />
+                                <label class="form-label" for="typeEmail">431</label>
+                            </div>
+
+                            <div data-mdb-input-init class="form-outline form-white mb-4">
+                                <input type="password" class="form-control" placeholder="Пароль" asp-for="PassWord" />
+                                <label class="form-label" for="typePasswordX">Password</label>
+                            </div>
+                            <label>
+                                <input type="checkbox" asp-for="KeepLogged" />
+
+                                Не выходить из аккаунта
+                            </label>
+
+                            <p></p>
+                            <p></p>
+                            <div>
+                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">Вход</button>
+                            </div>
+
+                            @if (ViewData["ValidateMessage"] != null)
+                            {
+                                <br />
+                                <br />
+                                <label>@ViewData["ValidateMessage"]</label>
+                            }
+
+
+
+                        </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+               
+            
+    </form>
+</body>
+</html>

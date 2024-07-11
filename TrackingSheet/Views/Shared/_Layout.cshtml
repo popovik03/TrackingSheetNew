@@ -1,0 +1,81 @@
+﻿
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.2" />
+    <title>@ViewData["Title"] - TrackingSheet </title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TrackingSheet.styles.css" asp-append-version="true" />
+</head>
+<body>
+
+    
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3" style="background-color: #008b8b;">
+            <div class="container-fluid display-flex">
+
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex">
+                    <ul class="navbar-nav align-items-center flex-grow-1">
+                        <!-- Ебался с выравниванием гребаного текста - в итоге выравнил через align-items-center -->
+                        
+                        <li class="nav-item">
+                            <h4><a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Главная</a></h4>
+                            
+                        </li>
+                        
+                        
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Incidents" asp-action="Index">Журнал инцидентов</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Incidents" asp-action="Add">Новая запись</a>
+
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">О проекте</a>
+                        </li>
+                        
+                        
+                    </ul>
+                </div>
+
+                <div class="position-absolute top-50 start-50 translate-middle">
+                    <a class="navbar-brand text-white align-bottom" asp-area="" asp-controller="Home" asp-action="Index">
+                        <img src="~/css/Pictures/ofs-white.png"
+                             height="70px" width="400px"/>
+                    </a>
+                </div>
+                
+                <p style="color:white; margin-top: auto; font-weight: bold;">Пользователь: @TempData.Peek("Login")</p>
+                <h4><a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="LogOut">  Выход</a></h4>
+            </div>
+        </nav>
+    </header>
+    <div class="section">
+        <main role="main" class="pb-3">
+            
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-white" style="background-color:#008b8b; text-align: center">
+        <div class="d-flex" style="text-align:center; width: 100%; justify-content: center"> &copy; 2024 - TrackingSheet - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></div>
+
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

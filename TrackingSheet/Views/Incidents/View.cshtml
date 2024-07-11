@@ -1,0 +1,151 @@
+﻿@model TrackingSheet.Models.UpdateIncidentViewModel
+
+@{
+}
+
+<form method="post" action="View">
+    <h1>Описание и редактирование инцидента</h1>
+    <div class="newcontainer">
+
+        <div class="left">
+
+            <div class="mb-3">
+                <label for="" class="form-label">Дата и время инцидента</label>
+                <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
+            </div>
+
+
+
+            <div class="mb-3">
+                <label for="" class="form-label">Смена</label>
+                <div class="col-sm-12">
+                    <select class="form-select" asp-for="Shift">
+                        <option value="Day">День</option>
+                        <option value="Night">Ночь</option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="" class="form-label">431</label>
+                <input type="text" class="form-control form-control-sm" asp-for="Reporter" /> 
+            </div>
+            <div class="mb-3">
+                <label for="" class="form-label">VSAT</label>
+                <input type="number" class="form-control form-control-sm" asp-for="VSAT" />
+            </div>
+            <div class="mb-3">
+                <label for="" class="form-label">Скважина</label>
+                <input type="text" class="form-control form-control-sm" asp-for="Well" />
+            </div>
+            <div class="mb-3">
+                <label for="" class="form-label">Рейс</label>
+                <input type="number" class="form-control form-control-sm" asp-for="Run" />
+            </div>
+            <div class="mb-3">
+                <label for="" class="form-label">Сохраненное НПВ, ч</label>
+                <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" />
+            </div>
+            <div class="mb-3">
+                <label for="" class="form-label">Тип проблемы</label>
+                <div class="col-sm-12">
+                    <select class="form-select form-select-sm" asp-for="ProblemType">
+                        <option value="Advantage">Advantage</option>
+                        <option value="ATK issue">ATK issue</option>
+                        <option value="APS">APS</option>
+                        <option value="BCPM II">BCPM II</option>
+                        <option value="Cadence">Cadence</option>
+                        <option value="Computer">Computer</option>
+                        <option value="Curve Failure">Curve Failure</option>
+                        <option value="Decoding">Decoding</option>
+                        <option value="Desync">Desync</option>
+                        <option value="Downlink">Downlink</option>
+                        <option value="LTK">LTK</option>
+                        <option value="M30">M30</option>
+                        <option value="Memfix">Memfix</option>
+                        <option value="Organization">Organisation</option>
+                        <option value="OTK">OTK</option>
+                        <option value="Pressure">Pressure</option>
+                        <option value="Procedures">Procedures</option>
+                        <option value="Programming | Tip">Programming | Tip</option>
+                        <option value="Pulser issue">Pulser issue</option>
+                        <option value="Service delivery">Service delivery</option>
+                        <option value="Surface issue">Surface issue</option>
+                        <option value="Survey issue">Survey issue</option>
+                        <option value="UsMPR">UsMPR</option>
+                        <option value="WellArchitect">WellArchitect</option>
+                        <option value="Win10">Win10</option>
+                        <option value="WITS">WITS</option>
+                        <option value="Other">Other</option>
+
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="" class="form-label">Отметка</label>
+                <div class="col-sm-12">
+                    <select class="form-select form-select-sm" asp-for="HighLight">
+                        <option value=""></option>
+                        <option value="🚩">🚩</option>
+
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="" class="form-label">Статус</label>
+                <div class="col-sm-12">
+                    <select class="form-select form-select-sm" asp-for="Status">
+                        <option value="Success" style="background-color: lawngreen">Success</option>
+                        <option value="Process" style="background-color: yellow">Process</option>
+                        <option value="Fail" style="background-color: orangered">Fail</option>
+                        <option value="None" style="background-color: darkgrey">None</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="right">
+            <div class="right2">
+
+                <div class="mb-3">
+                    <label for="" class="form-label">ID</label>
+                    <input type="text" class="form-control" asp-for="ID" readonly />
+                </div>
+
+                <label for="" class="form-label">Описание и решение</label>
+                <textarea class="form-control" id="exampleFormControlTextarea1" rows="22" asp-for="Solution"></textarea>
+
+            </div>
+            <p></p>
+            <div class="d-grid gap-2 col-6 mx-auto">
+                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                <button type="submit" class="btn btn-danger btn-lg"
+                        asp-action="Delete"
+                        asp-controller="Incidents" onclick="return confirm('Вы уверены что хотите удалить запись?')">Delete</button>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
