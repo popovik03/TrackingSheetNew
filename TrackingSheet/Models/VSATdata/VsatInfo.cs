@@ -114,10 +114,10 @@
         public string OOIN_NAME  { get; set; } //название месторождения в таблице OBJECT_OF_INTEREST_TAB, последняя строка
 
         // Далее идут элементы КНБК
-        public int MWRC_POSITION { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
-        public float MWRC_OFFSET_FROM_BIT { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
-        public string MWCO_IDENTIFIER { get; set; } //// в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
-        public int TOCO_IDENTIFIER {  get; set; } // в таблице MWD_COMPONENT в зависимости от MWCO_IDENTIFIER
+        public List<int> MWRC_POSITION { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
+        public List<float> MWRC_OFFSET_FROM_BIT { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
+        public List<string> MWCO_IDENTIFIER { get; set; } //// в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
+        public List<int> TOCO_IDENTIFIER {  get; set; } // в таблице MWD_COMPONENT в зависимости от MWCO_IDENTIFIER
 
 
 
