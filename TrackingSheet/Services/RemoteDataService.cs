@@ -7,10 +7,10 @@ using Microsoft.Extensions.Configuration;
 using NuGet.Packaging.Signing;
 using TrackingSheet.Models.VSATdata;
 
-
+////////////////////////////////////   Сервис для подключения к удаленной базе данных и получения инфы из нее 
 namespace TrackingSheet.Services
 {
-    public class RemoteDataService
+    public class RemoteDataService 
     {
         //Подключение к базе данных 
         private readonly string _connectionString;
@@ -113,7 +113,7 @@ namespace TrackingSheet.Services
                     {
                         if (await reader.ReadAsync())
                         {
-                            vsatInfo.MWRU_HOLE_DIAMETER = Convert.ToSingle(reader["MWRU_HOLE_DIAMETER"])*1000;
+                            vsatInfo.MWRU_HOLE_DIAMETER = Convert.ToSingle(reader["MWRU_HOLE_DIAMETER"]) * 1000;
                         }
                     }
                 }
@@ -131,11 +131,11 @@ namespace TrackingSheet.Services
                     }
                 }
 
-                //
+                //получение ID компонента 
                 string queryMWCO_IDENTIFIER = @"SELECT MWCO_IDENTIFIER FROM MWD_RUN_TO_COMPONENT WHERE MWRU_IDENTIFIER = @MWRU_IDENTIFIER";
                 using (var command = new SqlCommand(queryMWCO_IDENTIFIER, connection)) //@MWRU_IDENTIFIER это переменная которая была определена выше
                 {
-                    command.Parameters.AddWithValue("@MWRU_IDENTIFIER", vsatInfo.MWRU_IDENTIFIER); //отправляем запрос в базу данных заменяем параметр на реальный из код с помощью .Add
+                    command.Parameters.AddWithValue("@MWRU_IDENTIFIER", vsatInfo.MWRU_IDENTIFIER); //отправляем запрос в базу данных заменяем параметр на реальный код с помощью .Add
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -146,12 +146,75 @@ namespace TrackingSheet.Services
                         }
                     }
                 }
+
+                string queryMWRC_POSITION = @"SELECT MWRC_POSITION FROM MWD_RUN_TO_COMPONENT WHERE MWRU_IDENTIFIER = @MWRU_IDENTIFIER";
+                using (var command = new SqlCommand(queryMWRC_POSITION, connection)) //@MWRU_IDENTIFIER это переменная которая была определена выше
+                {
+                    command.Parameters.AddWithValue("@MWRU_IDENTIFIER", vsatInfo.MWRU_IDENTIFIER); //отправляем запрос в базу данных заменяем параметр на реальный код с помощью .Add
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync()) //каждый цикл ReadAsync возвращает true и сдвигает указатель на следующую строку результат запроса
+                        {
+                            int mwrcPosition = Convert.ToInt32(reader["MWDRC_POS"]);
+                            vsatInfo.MWRC_POSITION.Add(mwrcPosition);
+                        }
+                    }
+                }
+
+                string queryMWRC_OFFSET_FROM_BIT = @"SELECT MWRC_OFFSET_FROM_BIT FROM MWD_RUN_TO_COMPONENT WHERE MWRU_IDENTIFIER = @MWRU_IDENTIFIER";
+                using (var command = new SqlCommand(queryMWRC_OFFSET_FROM_BIT, connection)) //@MWRU_IDENTIFIER это переменная которая была определена выше
+                {
+                    command.Parameters.AddWithValue("@MWRU_IDENTIFIER", vsatInfo.MWRU_IDENTIFIER); //отправляем запрос в базу данных заменяем параметр на реальный код с помощью .Add
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync()) //каждый цикл ReadAsync возвращает true и сдвигает указатель на следующую строку результат запроса
+                        {
+                            float mwrcOffsetFromBit = Convert.ToSingle(reader["MWDRC_POS"]);
+                            vsatInfo.MWRC_OFFSET_FROM_BIT.Add(mwrcOffsetFromBit);
+                        }
+                    }
+
+
+                }
+                // Получение серийных номеров из списка ID компонентов
+                string queryMWCO_SN = "SELECT MWCO_SN FROM MWD_COMPONENT WHERE MWCO_IDENTIFIER IN (";
+                for (int i = 0; i < vsatInfo.MWCO_IDENTIFIER.Count; i++)
+                {
+                    queryMWCO_SN += $"@MWCO_IDENTIFIER{i}";
+                    if (i < vsatInfo.MWCO_IDENTIFIER.Count - 1)
+                    {
+                        queryMWCO_SN += ", ";
+                    }
+                }
+                queryMWCO_SN += ")";
+
+
+                using (var command = new SqlCommand(queryMWCO_SN, connection))
+                {
+                    // Добавление параметров к команде
+                    for (int i = 0; i < vsatInfo.MWCO_IDENTIFIER.Count; i++)
+                    {
+                        command.Parameters.AddWithValue($"@MWCO_IDENTIFIER{i}", vsatInfo.MWCO_IDENTIFIER[i]);
+                    }
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            string mwCoSn = reader["MWCO_SN"].ToString();
+                            vsatInfo.MWCO_SN.Add(mwCoSn);
+                        }
+                    }
+                }
+                return vsatInfo;
             }
-            return vsatInfo;
+
+
+
+
         }
-
-       
-        
-
     }
 }
+

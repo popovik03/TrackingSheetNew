@@ -118,6 +118,7 @@
         public List<float> MWRC_OFFSET_FROM_BIT { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
         public List<string> MWCO_IDENTIFIER { get; set; } //// в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
         public List<int> TOCO_IDENTIFIER {  get; set; } // в таблице MWD_COMPONENT в зависимости от MWCO_IDENTIFIER
+        public List<string> MWCO_SN { get; set; } //// в таблице MWD_COMPONENT по MWCO_IDENTIFIER
 
 
 
