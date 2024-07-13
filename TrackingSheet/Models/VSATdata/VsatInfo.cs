@@ -1,7 +1,11 @@
-﻿namespace TrackingSheet.Models.VSATdata
+﻿using System.Collections.Generic;
+
+namespace TrackingSheet.Models.VSATdata
 {
     public class VsatInfo
     {
+
+        //Словарь для сравнения MWCO с их наименованием
         public Dictionary<int, string> componentID = new Dictionary<int, string>
         {
             {1, "OTK DAS"},
@@ -103,6 +107,7 @@
             {97, ""}
         };
 
+        //Примитивные переменные из базы 
         public string WELL_NAME { get; set; } //в таблице WELL_TAB, последняя строка
         public string WELL_IDENTIFIER  { get; set; } //в таблице WELL_TAB, последняя строка
         public int MWRU_NUMBER {get; set; } //в таблице MWD_RUN
@@ -113,12 +118,29 @@
         public string CPNM_NAME { get; set; } //таблица COMPANY_NAME по номеру CPNM_ID
         public string OOIN_NAME  { get; set; } //название месторождения в таблице OBJECT_OF_INTEREST_TAB, последняя строка
 
-        // Далее идут элементы КНБК
-        public List<int> MWRC_POSITION { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
-        public List<float> MWRC_OFFSET_FROM_BIT { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
-        public List<string> MWCO_IDENTIFIER { get; set; } //// в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
-        public List<int> TOCO_IDENTIFIER {  get; set; } // в таблице MWD_COMPONENT в зависимости от MWCO_IDENTIFIER
-        public List<string> MWCO_SN { get; set; } //// в таблице MWD_COMPONENT по MWCO_IDENTIFIER
+
+
+
+        // Далее идут элементы КНБК в виде списокв
+        public Dictionary<string, int> MWRC_POSITION { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
+        
+        public Dictionary<string, float> MWRC_OFFSET_FROM_BIT { get; set; } // в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
+
+        //// в таблице MWD_RUN_TO_COMPONENT по MWRU_IDENTIFIER
+        public List<string> MWCO_IDENTIFIER { get; set; }
+        
+        public Dictionary<string, int> MWCT_IDENTIFIER {  get; set; } // в таблице MWD_COMPONENT в зависимости от MWCO_IDENTIFIER
+        public Dictionary<string, string> MWCO_SN { get; set; } //// в таблице MWD_COMPONENT по MWCO_IDENTIFIER
+        public Dictionary<int, string> MWCO_REAL_NAME { get; set; }
+        public VsatInfo()
+        {
+            MWCO_IDENTIFIER = new List<string>(); // Инициализация списка (конструктор класса) обязателен т.к. списки умолчанию инициализируются со значением NULL
+            MWRC_POSITION = new Dictionary<string, int>();
+            MWRC_OFFSET_FROM_BIT = new Dictionary<string, float>();
+            MWCT_IDENTIFIER = new Dictionary<string, int>();
+            MWCO_SN = new Dictionary<string, string>();
+            MWCO_REAL_NAME = new Dictionary<int, string>();
+        }
 
 
 

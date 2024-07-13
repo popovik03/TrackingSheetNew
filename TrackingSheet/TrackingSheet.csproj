@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\VsatInfo\GetLatestVsatInfo.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\VsatInfo\GetLatestVsatInfo.cshtml" />
     <None Include="wwwroot\css\Pictures\tofs.png" />
   </ItemGroup>
 
@@ -23,6 +28,14 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\VsatInfo\GetLatestVsatInfo.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\VsatInfo\GetLatestVsatInfo.cshtml" />
   </ItemGroup>
 
 </Project>

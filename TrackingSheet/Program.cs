@@ -9,7 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddTransient<RemoteDataService>();
+builder.Services.AddScoped<RemoteDataService>();
+//builder.Services.AddSingleton<IConfiguration>(builder.Configuration); ;
+
 builder.Services.AddSession();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -19,11 +21,11 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-
+//Сервис Entity
 builder.Services.AddDbContext<MVCDbContext>(options => 
     options.UseSqlServer(builder.Configuration
     .GetConnectionString("MVCDbConnectionString")));
-//Присобачил библиотеку для аутентификации
+//Сервис для аутентификации
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(option => {
     option.LoginPath = "/Access/Login";
