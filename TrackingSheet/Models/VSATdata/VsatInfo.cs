@@ -8,6 +8,7 @@ namespace TrackingSheet.Models.VSATdata
         //Словарь для сравнения MWCO с их наименованием
         public Dictionary<int, string> componentID = new Dictionary<int, string>
         {
+            {0, "APR" },
             {1, "OTK DAS"},
             {2, "DAS"},
             {3, "Gamma"},

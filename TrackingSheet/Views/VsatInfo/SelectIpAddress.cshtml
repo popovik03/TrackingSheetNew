@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Select Ip Adress";
+}
+
+
+<h2>Информация VSAT</h2>
+
+<body>
+    <form asp-action="SetIPAdress" method="post">
+        <div>
+            <label for="ipPart">Выбор VSAT</label>
+            <select id="ipPart" name="ipPart">
+                @for (int i = 1: i <= 100; i++)
+                    {
+                    <option value="@i">@i</option>
+                }
+            </select>
+        </div>
+        <button type="submit">Принять</button>"
+    </form>
+
+</body>

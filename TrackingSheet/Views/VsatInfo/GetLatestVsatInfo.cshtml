@@ -1,15 +1,73 @@
 ﻿@model TrackingSheet.Models.VSATdata.VsatInfo
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>VsatInfo Details</title>
-</head>
-<body>
-    <h1>Vsat Information</h1>
-    <p><strong>Well Name:</strong> @Model.WELL_NAME</p>
-    <p><strong>Object of Interest Name:</strong> @Model.OOIN_NAME</p>
-    <p><strong>Facility Name:</strong> @Model.FCTY_NAME</p>
-    <!-- Add other properties of VsatInfo as needed -->
-</body>
-</html>
+@{
+    ViewData["Title"] = "Latest Vsat Info";
+}
+
+<h2>Latest Vsat Info</h2>
+
+@if (Model != null)
+{
+    <div>
+        <h3>Well Information</h3>
+        <p><strong>Well Name:</strong> @Model.WELL_NAME</p>
+        <p><strong>Well Identifier:</strong> @Model.WELL_IDENTIFIER</p>
+        <p><strong>Facility Name:</strong> @Model.FCTY_NAME</p>
+        <p><strong>Company Identifier:</strong> @Model.CPNM_IDENTIFIER</p>
+        <p><strong>Company Name:</strong> @Model.CPNM_NAME</p>
+        <p><strong>Object of Interest:</strong> @Model.OOIN_NAME</p>
+
+        <h3>MWD Run Information</h3>
+        <p><strong>MWD Run Number:</strong> @Model.MWRU_NUMBER</p>
+        <p><strong>MWD Run Identifier:</strong> @Model.MWRU_IDENTIFIER</p>
+        <p><strong>Hole Diameter:</strong> @Model.MWRU_HOLE_DIAMETER</p>
+
+        <h3>Components</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Offset From Bit</th>
+                    <th>MWCO Identifier</th>
+                    <th>TOCO Identifier</th>
+                    <th>Serial Number</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.MWRC_POSITION.Count; i++)
+                {
+                    <tr>
+                        <td>@Model.MWRC_POSITION[i]</td>
+                        <td>@Model.MWRC_OFFSET_FROM_BIT[i]</td>
+                        <td>@Model.MWCO_IDENTIFIER[i]</td>
+                        <td>@Model.TOCO_IDENTIFIER[i]</td>
+                        <td>@Model.MWCO_SN[i]</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <h3>Component Real Names</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>TOCO Identifier</th>
+                    <th>Component Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.MWCO_REAL_NAME)
+                {
+                    <tr>
+                        <td>@entry.Key</td>
+                        <td>@entry.Value</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>No data available.</p>
+}

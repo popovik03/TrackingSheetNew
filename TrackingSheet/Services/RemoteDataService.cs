@@ -13,16 +13,20 @@ namespace TrackingSheet.Services
     public class RemoteDataService
     {
         //Подключение к базе данных 
-        private readonly string _connectionString;
+        private string _connectionString;
 
-        public RemoteDataService(IConfiguration configuration)
+        public void SetConnectionString(string connectionString)
         {
-            _connectionString = configuration.GetConnectionString("RemoteDatabase");
+            _connectionString = connectionString;
         }
 
         //Получение информации из базы данных 
         public async Task<VsatInfo> GetLatestVsatInfoAsync()
         {
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                throw new InvalidOperationException("Connection string is not set.");
+            }
             VsatInfo vsatInfo = new VsatInfo();
             using (var connection = new SqlConnection(_connectionString))
 
@@ -251,7 +255,17 @@ namespace TrackingSheet.Services
                         while (await reader.ReadAsync())
                         {
                             string mwctIdentifier = reader["MWCO_IDENTIFIER"].ToString();
-                            int tocoID = Convert.ToInt32(reader["MWCT_IDENTIFIER"]);
+                            int tocoID;
+
+                            if (reader["MWCT_IDENTIFIER"] == DBNull.Value || string.IsNullOrEmpty(reader["MWCT_IDENTIFIER"].ToString())) // DBNull.Value это специальное значение в .NET для определения NULL - далее определение если ячейка пустая
+                            {
+                                tocoID = 0; // По умолчанию
+                            }
+                            else
+                            {
+                                tocoID = Convert.ToInt32(reader["MWCT_IDENTIFIER"]);
+                            }
+
                             mwrCtDictionary[mwctIdentifier] = tocoID;
                         }
                     }
