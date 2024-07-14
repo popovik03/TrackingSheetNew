@@ -2,16 +2,11 @@
 using TrackingSheet.Services;
 using TrackingSheet.Models.VSATdata;
 using System.Threading.Tasks;
-using System.Net;
 
 namespace TrackingSheet.Controllers
 {
     public class VsatInfoController : Controller
     {
-
-
-
-        //внедрение зависимости DI
         private readonly RemoteDataService _remoteDataService;
         private readonly IConfiguration _configuration;
 
@@ -19,39 +14,42 @@ namespace TrackingSheet.Controllers
         {
             _remoteDataService = remoteDataService;
             _configuration = configuration;
-            
         }
-        //Выбор номера VSAT
+
         [HttpGet]
         public IActionResult SelectIPAddress()
         {
             return View();
         }
-        //Применение номера VSAT в качестве IP-адреса
+
         [HttpPost]
-        public async Task<IActionResult> SetIpAddress(int ipPart)
+        public IActionResult SetIpAddress(int ipPart)
         {
             string connectionStringTemplate = _configuration.GetConnectionString("RemoteDatabase");
             string connectionString = connectionStringTemplate.Replace("${IPAddress}", ipPart.ToString());
 
-            _remoteDataService.SetConnectionString(connectionString);
+            // Сохранение строки подключения в сессии в HttpContext.Seesion, до этого передавал напрямую через SetConnectionString, но кажется она не сохраняла ее между вызовами
+            HttpContext.Session.SetString("RemoteDbConnectionString", connectionString);
+
             return RedirectToAction(nameof(GetLatestVsatInfo));
         }
 
         [HttpGet]
-        public async Task<ActionResult<VsatInfo>> GetLatestVsatInfo()
+        public async Task<IActionResult> GetLatestVsatInfo()
         {
             try
             {
+                // Получение строки подключения из сессии которую создал выше
+                string connectionString = HttpContext.Session.GetString("RemoteDbConnectionString");
+                _remoteDataService.SetConnectionString(connectionString);
+
                 VsatInfo vsatInfo = await _remoteDataService.GetLatestVsatInfoAsync();
                 if (vsatInfo == null)
                 {
                     return NotFound();
                 }
-                
                 return Ok(vsatInfo);
             }
-
             catch (Exception ex)
             {
                 // Логирование ошибки
