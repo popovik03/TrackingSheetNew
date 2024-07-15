@@ -133,6 +133,7 @@ namespace TrackingSheet.Models.VSATdata
         public Dictionary<string, int> MWCT_IDENTIFIER {  get; set; } // в таблице MWD_COMPONENT в зависимости от MWCO_IDENTIFIER
         public Dictionary<string, string> MWCO_SN { get; set; } //// в таблице MWD_COMPONENT по MWCO_IDENTIFIER
         public Dictionary<int, string> MWCO_REAL_NAME { get; set; }
+        public Dictionary<string, string> NEW_REAL_NAME { get; set; }
         public VsatInfo()
         {
             MWCO_IDENTIFIER = new List<string>(); // Инициализация списка (конструктор класса) обязателен т.к. списки умолчанию инициализируются со значением NULL
@@ -141,6 +142,8 @@ namespace TrackingSheet.Models.VSATdata
             MWCT_IDENTIFIER = new Dictionary<string, int>();
             MWCO_SN = new Dictionary<string, string>();
             MWCO_REAL_NAME = new Dictionary<int, string>();
+            NEW_REAL_NAME = new Dictionary<string, string>();
+
         }
 
 

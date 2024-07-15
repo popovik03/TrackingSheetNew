@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using NuGet.Packaging.Signing;
 using TrackingSheet.Models.VSATdata;
+using System.Data;
+using SciChart.Data.Model;
 
 ////////////////////////////////////   Сервис для подключения к удаленной базе данных и получения инфы из нее 
 namespace TrackingSheet.Services
@@ -229,6 +231,9 @@ namespace TrackingSheet.Services
 
 
 
+
+
+
                 // Получение определителя КНБК по коду 
                 string queryMWCT_IDENTIFIER = "SELECT MWCT_IDENTIFIER, MWCO_IDENTIFIER FROM MWD_COMPONENT WHERE MWCO_IDENTIFIER IN (";
                 for (int i = 0; i < vsatInfo.MWCO_IDENTIFIER.Count; i++)
@@ -269,7 +274,10 @@ namespace TrackingSheet.Services
                             mwrCtDictionary[mwctIdentifier] = tocoID;
                         }
                     }
+                    List<string> listMWCOID = mwrCtDictionary.Keys.ToList();   // Использование списка MWCO_IDENTIFIER для дальнейшей обработки
+
                     vsatInfo.MWCT_IDENTIFIER = mwrCtDictionary;
+
 
 
                     //словарь сопоставления названия компонента и ID
@@ -282,9 +290,35 @@ namespace TrackingSheet.Services
                         }
 
                     }
-
                     vsatInfo.MWCO_REAL_NAME = mwcoRealNameDictionary;
+                    List<string> listREALNAMES = mwcoRealNameDictionary.Values.ToList();
 
+
+
+
+                    //Создал словарь и объединил два списка в словарь 
+                    Dictionary<string, string> newREALNAME = new Dictionary<string, string>();
+                    if (listMWCOID.Count == listREALNAMES.Count)
+                    {
+                        for (int i = 0; i < listMWCOID.Count; i++)
+                        {
+                            string mwcoIdentifier = listMWCOID[i];
+                            string realName = listREALNAMES[i];
+
+                            // Добавляем элементы в новый словарь
+                            newREALNAME[mwcoIdentifier] = realName;
+                        }
+                    }
+                    else
+                    {
+                        // Обработка ошибки, если списки разной длины
+                        Console.WriteLine("Списки должны иметь одинаковую длину для создания словаря.");
+                    }
+                    vsatInfo.NEW_REAL_NAME = newREALNAME;
+                    
+
+
+                    
                 }
 
                 return vsatInfo;

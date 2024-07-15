@@ -2,17 +2,18 @@
     ViewData["Title"] = "Select IP Address";
 }
 
-<h2>Select IP Address</h2>
+<h2>Выбор VSAT</h2>
 
 <form asp-action="SetIpAddress" method="post">
     <div class="form-group">
-        <label for="ipPart">Select the last part of IP address:</label>
+        <label for="ipPart"></label>
         <select id="ipPart" name="ipPart" class="form-control">
-            @for (int i = 1; i <= 100; i++)
+            @for (int i = 1; i <= 200; i++)
             {
                 <option value="@i">@i</option>
             }
         </select>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <p></p>
+    <button type="submit" class="btn btn-primary">Принять</button>
 </form>

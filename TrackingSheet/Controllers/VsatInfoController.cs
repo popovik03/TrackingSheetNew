@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TrackingSheet.Services;
-using TrackingSheet.Models.VSATdata;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.Threading.Tasks;
+using TrackingSheet.Models.VSATdata;
+using TrackingSheet.Services;
 
 namespace TrackingSheet.Controllers
 {
@@ -28,7 +30,7 @@ namespace TrackingSheet.Controllers
             string connectionStringTemplate = _configuration.GetConnectionString("RemoteDatabase");
             string connectionString = connectionStringTemplate.Replace("${IPAddress}", ipPart.ToString());
 
-            // Сохранение строки подключения в сессии в HttpContext.Seesion, до этого передавал напрямую через SetConnectionString, но кажется она не сохраняла ее между вызовами
+            // Сохранение строки подключения в сессии
             HttpContext.Session.SetString("RemoteDbConnectionString", connectionString);
 
             return RedirectToAction(nameof(GetLatestVsatInfo));
@@ -39,16 +41,19 @@ namespace TrackingSheet.Controllers
         {
             try
             {
-                // Получение строки подключения из сессии которую создал выше
+                // Получение строки подключения из сессии
                 string connectionString = HttpContext.Session.GetString("RemoteDbConnectionString");
                 _remoteDataService.SetConnectionString(connectionString);
 
+                // Получение данных VSAT
                 VsatInfo vsatInfo = await _remoteDataService.GetLatestVsatInfoAsync();
+
                 if (vsatInfo == null)
                 {
                     return NotFound();
                 }
-                return Ok(vsatInfo);
+
+                return View(vsatInfo);
             }
             catch (Exception ex)
             {

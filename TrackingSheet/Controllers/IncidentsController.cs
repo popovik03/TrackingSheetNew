@@ -57,7 +57,7 @@ namespace TrackingSheet.Controllers
             await mvcDbContext.IncidentList.AddAsync(incident);
             await mvcDbContext.SaveChangesAsync();
             //return RedirectToAction("Add");
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
 
         [Authorize]

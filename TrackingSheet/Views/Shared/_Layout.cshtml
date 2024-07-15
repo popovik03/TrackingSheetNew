@@ -25,32 +25,26 @@
 
                 <div class="navbar-collapse collapse d-sm-inline-flex">
                     <ul class="navbar-nav align-items-center flex-grow-1">
-                        <!-- Ебался с выравниванием гребаного текста - в итоге выравнил через align-items-center -->
+                        <!-- выравнивание текста -выравнил через align-items-center -->
                         
                         <li class="nav-item">
                             <h4><a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Главная</a></h4>
                             
                         </li>
-                        
-                        
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Incidents" asp-action="Index">Журнал инцидентов</a>
+                        <li class="nav-item>">
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle text-white font-weight-bold" style="background-color:#008b8b; font-size: 20px;  margin-top: auto; font-weight: bold" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Меню
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu2" style="background-color:#008b8b;">
+                                    <li><a class="nav-link text-white" asp-area="" asp-controller="Incidents" asp-action="Index">Журнал инцидентов</a></li>
+                                    <li> <a class="nav-link text-white" asp-area="" asp-controller="Incidents" asp-action="Add">Новая запись инцидента</a></li>
+                                    <li> <a class="nav-link text-white" asp-area="" asp-controller="VsatInfo" asp-action="SelectIpAddress">VSAT КНБК</a></li>
+                                    <li> <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">О проекте</a></li>
+                                </ul>
+                            </div>
                         </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Incidents" asp-action="Add">Новая запись</a>
-
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">О проекте</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="VsatInfo" asp-action="SelectIpAddress">VSAT КНБК</a>
-                        </li>
-                        
-                        
+                         
                     </ul>
                 </div>
 
@@ -61,14 +55,13 @@
                     </a>
                 </div>
                 
-                <p style="color:white; margin-top: auto; font-weight: bold;">Пользователь: @TempData.Peek("Login")</p>
+                <p style="color:white; margin-top: auto; font-weight: bold; font-size: 18px;">Пользователь: @TempData.Peek("Login")</p>
                 <h4><a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="LogOut">  Выход</a></h4>
             </div>
         </nav>
     </header>
     <div class="section">
         <main role="main" class="pb-3">
-            
             @RenderBody()
         </main>
     </div>

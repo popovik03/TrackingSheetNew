@@ -4,67 +4,49 @@
     ViewData["Title"] = "Latest Vsat Info";
 }
 
-<h2>Latest Vsat Info</h2>
+<h2>Информация по VSAT</h2>
 
 @if (Model != null)
 {
     <div>
-        <h3>Well Information</h3>
-        <p><strong>Well Name:</strong> @Model.WELL_NAME</p>
-        <p><strong>Well Identifier:</strong> @Model.WELL_IDENTIFIER</p>
-        <p><strong>Facility Name:</strong> @Model.FCTY_NAME</p>
-        <p><strong>Company Identifier:</strong> @Model.CPNM_IDENTIFIER</p>
-        <p><strong>Company Name:</strong> @Model.CPNM_NAME</p>
-        <p><strong>Object of Interest:</strong> @Model.OOIN_NAME</p>
+        <h4>Общая информация</h4>
+        <p><strong>Номер скважины:</strong> @Model.WELL_NAME</p>
+        
+        <p><strong>Номер куста:</strong> @Model.FCTY_NAME</p>
+       
+        <p><strong>Заказчик:</strong> @Model.CPNM_NAME</p>
+        <p><strong>Месторождение:</strong> @Model.OOIN_NAME</p>
 
-        <h3>MWD Run Information</h3>
-        <p><strong>MWD Run Number:</strong> @Model.MWRU_NUMBER</p>
-        <p><strong>MWD Run Identifier:</strong> @Model.MWRU_IDENTIFIER</p>
-        <p><strong>Hole Diameter:</strong> @Model.MWRU_HOLE_DIAMETER</p>
+        <h4>Текущий рейс</h4>
+        <p><strong>Рейс:</strong> @Model.MWRU_NUMBER</p>
+       
+        <p><strong>Секция:</strong> @Model.MWRU_HOLE_DIAMETER</p>
 
-        <h3>Components</h3>
+        <h4>Текущая КНБК</h4>
         <table>
             <thead>
                 <tr>
-                    <th>Position</th>
-                    <th>Offset From Bit</th>
-                    <th>MWCO Identifier</th>
-                    <th>TOCO Identifier</th>
-                    <th>Serial Number</th>
+                    <th>N</th>
+                    <th>Расстояние от низа</th>
+                    
+                    <th>Элемент КНБК</th>
+                    <th>С/Н</th>
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 0; i < Model.MWRC_POSITION.Count; i++)
+                @foreach (var position in Model.MWRC_POSITION.OrderBy(kv => kv.Value))
                 {
                     <tr>
-                        <td>@Model.MWRC_POSITION[i]</td>
-                        <td>@Model.MWRC_OFFSET_FROM_BIT[i]</td>
-                        <td>@Model.MWCO_IDENTIFIER[i]</td>
-                        <td>@Model.TOCO_IDENTIFIER[i]</td>
-                        <td>@Model.MWCO_SN[i]</td>
+                        <td>@position.Value</td>
+                        <td>@(Model.MWRC_OFFSET_FROM_BIT.ContainsKey(position.Key) ? Model.MWRC_OFFSET_FROM_BIT[position.Key] : "")</td>
+                        
+                        <td>@(Model.NEW_REAL_NAME.ContainsKey(position.Key) ? Model.NEW_REAL_NAME[position.Key] : "")</td>
+                        <td>@(Model.MWCO_SN.ContainsKey(position.Key) ? Model.MWCO_SN[position.Key] : "")</td>
                     </tr>
                 }
             </tbody>
         </table>
-
-        <h3>Component Real Names</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>TOCO Identifier</th>
-                    <th>Component Name</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var entry in Model.MWCO_REAL_NAME)
-                {
-                    <tr>
-                        <td>@entry.Key</td>
-                        <td>@entry.Value</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        
     </div>
 }
 
