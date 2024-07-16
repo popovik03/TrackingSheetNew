@@ -20,7 +20,13 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
+//логирование
+builder.Services.AddLogging(logging =>
+{
+    logging.ClearProviders();
+    logging.AddConsole();
+    logging.AddDebug();
+});
 //Сервис Entity
 builder.Services.AddDbContext<MVCDbContext>(options => 
     options.UseSqlServer(builder.Configuration

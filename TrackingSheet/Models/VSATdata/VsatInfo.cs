@@ -21,7 +21,7 @@ namespace TrackingSheet.Models.VSATdata
             {10, "SRIG"},
             {11, "Resistivity"},
             {12, "Resistivity"},
-            {13, "Resistivity"},
+            {13, "APR"},
             {14, "Multi-Resistivity"},
             {15, "USMPR"},
             {16, "MPR"},
@@ -105,7 +105,12 @@ namespace TrackingSheet.Models.VSATdata
             {94, ""},
             {95, ""},
             {96, "Pulser"},
-            {97, ""}
+            {410, "Exact"},
+            {128, "Exact"},
+            {228, "Exact"},
+            {328, "Exact"},
+            {428, "Exact"},
+
         };
 
         //Примитивные переменные из базы 

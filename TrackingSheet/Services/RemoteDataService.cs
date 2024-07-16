@@ -235,7 +235,7 @@ namespace TrackingSheet.Services
 
 
                 // Получение определителя КНБК по коду 
-                string queryMWCT_IDENTIFIER = "SELECT MWCT_IDENTIFIER, MWCO_IDENTIFIER FROM MWD_COMPONENT WHERE MWCO_IDENTIFIER IN (";
+                string queryMWCT_IDENTIFIER = "SELECT MWCT_IDENTIFIER, MWCO_IDENTIFIER, TOCO_IDENTIFIER FROM MWD_COMPONENT WHERE MWCO_IDENTIFIER IN (";
                 for (int i = 0; i < vsatInfo.MWCO_IDENTIFIER.Count; i++)
                 {
                     queryMWCT_IDENTIFIER += $"@MWCO_IDENTIFIER{i}";
@@ -260,33 +260,44 @@ namespace TrackingSheet.Services
                         while (await reader.ReadAsync())
                         {
                             string mwctIdentifier = reader["MWCO_IDENTIFIER"].ToString();
-                            int tocoID;
+                            int mwctID;
 
                             if (reader["MWCT_IDENTIFIER"] == DBNull.Value || string.IsNullOrEmpty(reader["MWCT_IDENTIFIER"].ToString())) // DBNull.Value это специальное значение в .NET для определения NULL - далее определение если ячейка пустая
                             {
-                                tocoID = 0; // По умолчанию
+                                mwctID = Convert.ToInt32(reader["TOCO_IDENTIFIER"]);
+
                             }
                             else
                             {
-                                tocoID = Convert.ToInt32(reader["MWCT_IDENTIFIER"]);
+                                mwctID = Convert.ToInt32(reader["MWCT_IDENTIFIER"]);
                             }
 
-                            mwrCtDictionary[mwctIdentifier] = tocoID;
+                            mwrCtDictionary[mwctIdentifier] = mwctID;
+                            Console.WriteLine(mwrCtDictionary);
+
                         }
                     }
                     List<string> listMWCOID = mwrCtDictionary.Keys.ToList();   // Использование списка MWCO_IDENTIFIER для дальнейшей обработки
 
                     vsatInfo.MWCT_IDENTIFIER = mwrCtDictionary;
 
+                    
+
 
 
                     //словарь сопоставления названия компонента и ID
                     Dictionary<int, string> mwcoRealNameDictionary = new Dictionary<int, string>();
-                    foreach (int tocoID in mwrCtDictionary.Values)
+                    foreach (int tocoID in vsatInfo.MWCT_IDENTIFIER.Values)
                     {
                         if (vsatInfo.componentID.TryGetValue(tocoID, out string componentName))
                         {
-                            mwcoRealNameDictionary[tocoID] = componentName;
+                            int newKey = tocoID;
+                            while (mwcoRealNameDictionary.ContainsKey(newKey))
+                            {
+                                newKey += 100; // Изменение ключа, чтобы избежать повторений
+                            }
+
+                            mwcoRealNameDictionary[newKey] = componentName;
                         }
 
                     }
@@ -311,9 +322,20 @@ namespace TrackingSheet.Services
                     }
                     else
                     {
-                        // Обработка ошибки, если списки разной длины
-                        Console.WriteLine("Списки должны иметь одинаковую длину для создания словаря.");
+                        int indexORD = listREALNAMES.IndexOf("ORD");
+                        int indexCCN = listREALNAMES.IndexOf("CCN");
+                        //listREALNAMES.Insert(indexORD, "");
+
+                        
+                        for (int i = 0; i < listMWCOID.Count-1; i++)
+                        {
+                            string mwcoIdentifier = listMWCOID[i];
+                            string realName = listREALNAMES[i];
+                            newREALNAME[mwcoIdentifier] = realName;
+                        }
+
                     }
+
                     vsatInfo.NEW_REAL_NAME = newREALNAME;
                     
 

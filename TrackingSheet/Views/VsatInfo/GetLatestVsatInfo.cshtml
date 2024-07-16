@@ -2,9 +2,11 @@
 
 @{
     ViewData["Title"] = "Latest Vsat Info";
+    
 }
 
-<h2>Информация по VSAT</h2>
+<h2>
+    Информация по VSAT @TempData.Peek("ipPart")</h2>
 
 @if (Model != null)
 {

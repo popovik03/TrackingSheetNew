@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using NuGet.Packaging.Signing;
 using System;
 using System.Threading.Tasks;
 using TrackingSheet.Models.VSATdata;
@@ -9,13 +10,17 @@ namespace TrackingSheet.Controllers
 {
     public class VsatInfoController : Controller
     {
+        
+
         private readonly RemoteDataService _remoteDataService;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<VsatInfoController> _logger;
 
-        public VsatInfoController(RemoteDataService remoteDataService, IConfiguration configuration)
+        public VsatInfoController(RemoteDataService remoteDataService, IConfiguration configuration, ILogger<VsatInfoController> logger)
         {
             _remoteDataService = remoteDataService;
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -32,6 +37,7 @@ namespace TrackingSheet.Controllers
 
             // Сохранение строки подключения в сессии
             HttpContext.Session.SetString("RemoteDbConnectionString", connectionString);
+            TempData["ipPart"] = ipPart;
 
             return RedirectToAction(nameof(GetLatestVsatInfo));
         }
@@ -58,8 +64,9 @@ namespace TrackingSheet.Controllers
             catch (Exception ex)
             {
                 // Логирование ошибки
-                Console.WriteLine($"Exception occurred: {ex}");
-                return StatusCode(500, "Внутренняя ошибка сервера");
+                _logger.LogError(ex, "Exception occurred while getting latest VSAT info.");
+                string status_message = string.Format("Получение данных по адресу {0}", HttpContext.Session.GetString("RemoteDbConnectionString"));
+                return StatusCode(500, status_message);
             }
         }
     }
