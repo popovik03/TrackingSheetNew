@@ -17,7 +17,7 @@ main {
     line-height: 1;
     margin-left: 5px; /* Левый отступ */
     margin-right: 5px; /* Правый отступ */
-   
+    position: relative;
 }
 
 html {

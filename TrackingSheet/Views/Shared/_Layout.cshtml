@@ -1,6 +1,4 @@
-﻿
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -60,16 +58,17 @@
             </div>
         </nav>
     </header>
-    <div class="section">
+    <div class="section" style="position: relative; margin-bottom: 30px">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-white" style="background-color:#008b8b; text-align: center">
+    @* <footer class="border-top footer text-white" style="background-color:#008b8b; text-align: center">
         <div class="d-flex" style="text-align:center; width: 100%; justify-content: center"> &copy; 2024 - TrackingSheet - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></div>
 
-    </footer>
+    </footer> *@
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -9,14 +9,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+//Мои сервисы
 builder.Services.AddScoped<RemoteDataService>();
+
+string rootPath = builder.Configuration.GetValue<string>("FolderIndexing:RootPath");
+string outputPath = builder.Configuration.GetValue<string>("FolderIndexing:OutputPath");
+builder.Services.AddSingleton(new PassportFolderIndexerService(rootPath, outputPath));
+builder.Services.AddSingleton(new PassportFolderSearchService(outputPath));
 //builder.Services.AddSingleton<IConfiguration>(builder.Configuration); ;
 
 builder.Services.AddSession();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(100);
+    options.IdleTimeout = TimeSpan.FromSeconds(1000);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });

@@ -136,8 +136,20 @@ namespace TrackingSheet.Controllers
 
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetIncidents(int page = 1, int pageSize = 50)
+        {
+            var incidents = await mvcDbContext.IncidentList
+                .OrderByDescending(p => p.Date)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
-        
+            return Json(incidents);
+        }
+
+
+
     }
 
 }

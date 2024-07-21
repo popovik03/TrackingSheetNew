@@ -1,58 +1,64 @@
 ﻿@model TrackingSheet.Models.VSATdata.VsatInfo
 
 @{
-    ViewData["Title"] = "Latest Vsat Info";
-    
+    ViewData["Title"] = "Информация по VSAT";
 }
 
-<h2>
-    Информация по VSAT @TempData.Peek("ipPart")</h2>
+<h2>Информация по VSAT @TempData.Peek("ipPart")</h2>
 
-@if (Model != null)
-{
-    <div>
-        <h4>Общая информация</h4>
-        <p><strong>Номер скважины:</strong> @Model.WELL_NAME</p>
-        
-        <p><strong>Номер куста:</strong> @Model.FCTY_NAME</p>
-       
-        <p><strong>Заказчик:</strong> @Model.CPNM_NAME</p>
-        <p><strong>Месторождение:</strong> @Model.OOIN_NAME</p>
+<div class="BHA" style="display: flex">
+    <div class="BHA tab" style="flex: 1; border: 1px solid black; padding: 10px;">
+        @if (Model != null)
+        {
+            <div>
+                <h4>Общая информация</h4>
+                <p><strong>Номер скважины:</strong> @Model.WELL_NAME</p>
+                <p><strong>Номер куста:</strong> @Model.FCTY_NAME</p>
+                <p><strong>Заказчик:</strong> @Model.CPNM_NAME</p>
+                <p><strong>Месторождение:</strong> @Model.OOIN_NAME</p>
 
-        <h4>Текущий рейс</h4>
-        <p><strong>Рейс:</strong> @Model.MWRU_NUMBER</p>
-       
-        <p><strong>Секция:</strong> @Model.MWRU_HOLE_DIAMETER</p>
-
-        <h4>Текущая КНБК</h4>
-        <table>
-            <thead>
-                <tr>
-                    <th>N</th>
-                    <th>Расстояние от низа</th>
-                    
-                    <th>Элемент КНБК</th>
-                    <th>С/Н</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var position in Model.MWRC_POSITION.OrderBy(kv => kv.Value))
-                {
-                    <tr>
-                        <td>@position.Value</td>
-                        <td>@(Model.MWRC_OFFSET_FROM_BIT.ContainsKey(position.Key) ? Model.MWRC_OFFSET_FROM_BIT[position.Key] : "")</td>
-                        
-                        <td>@(Model.NEW_REAL_NAME.ContainsKey(position.Key) ? Model.NEW_REAL_NAME[position.Key] : "")</td>
-                        <td>@(Model.MWCO_SN.ContainsKey(position.Key) ? Model.MWCO_SN[position.Key] : "")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        
+                <h4>Текущий рейс</h4>
+                <p><strong>Рейс:</strong> @Model.MWRU_NUMBER</p>
+                <p><strong>Секция:</strong> @Model.MWRU_HOLE_DIAMETER</p>
+            </div>
+        }
+        else
+        {
+            <p>Нет данных.</p>
+        }
     </div>
-}
 
-else
-{
-    <p>No data available.</p>
-}
+    <div class="BHA passports" style="flex: 1.5; border: 1px solid black; display: flex; padding: 10px; overflow-x: auto;">
+        <div>
+            <h4>Текущая КНБК</h4>
+            <table class="table table-striped" style="font-size: 12px; width: 350px; align-content: center; width: 50%">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>N</th>
+                        <th>Расстояние от низа</th>
+                        <th>Элемент КНБК</th>
+                        <th>С/Н</th>
+                        <th>Паспорт</th>
+                        
+                    </tr>
+                </thead>
+                <tbody style="font-size: 16px; width: 350px;">
+                    @foreach (var position in Model.MWRC_POSITION.OrderBy(kv => kv.Value))
+                    {
+                        <tr>
+                            <td>@position.Value</td>
+                            <td>@(Model.MWRC_OFFSET_FROM_BIT.ContainsKey(position.Key) ? Model.MWRC_OFFSET_FROM_BIT[position.Key] : "")</td>
+                            <td>@Html.DisplayFor(model => Model.NEW_REAL_NAME[position.Key])</td>
+                            <td>@Html.DisplayFor(model => Model.MWCO_SN[position.Key])</td>
+
+                            <td>
+                                <a href="@Url.Action("SearchAndOpenFolders", "VsatInfo", new { folderName = Model.MWCO_SN[position.Key] })" target="_blank" class="btn btn-primary btn-sm">Паспорт</a>
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

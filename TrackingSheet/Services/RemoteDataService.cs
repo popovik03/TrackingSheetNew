@@ -1,4 +1,4 @@
-﻿// Services/RemoteDataService.cs
+﻿////////////////////////////////////   Сервис для подключения к удаленной базе данных и получения инфы из нее 
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System;
@@ -9,7 +9,7 @@ using TrackingSheet.Models.VSATdata;
 using System.Data;
 using SciChart.Data.Model;
 
-////////////////////////////////////   Сервис для подключения к удаленной базе данных и получения инфы из нее 
+
 namespace TrackingSheet.Services
 {
     public class RemoteDataService
