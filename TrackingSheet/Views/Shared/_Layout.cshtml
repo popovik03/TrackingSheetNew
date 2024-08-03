@@ -1,77 +1,126 @@
-﻿<!DOCTYPE html>
+﻿@{
+    
+    var loggeduser = TempData.Peek("Login") as string ?? string.Empty;
+
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.2" />
+    <meta charset="UTF-8">
     <title>@ViewData["Title"] - TrackingSheet </title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/TrackingSheet.styles.css" asp-append-version="true" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="~/css/default_layout.css" asp-append-version="true">
 </head>
 <body>
-
-    
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3" style="background-color: #008b8b;">
-            <div class="container-fluid display-flex">
-
-                
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="navbar-collapse collapse d-sm-inline-flex">
-                    <ul class="navbar-nav align-items-center flex-grow-1">
-                        <!-- выравнивание текста -выравнил через align-items-center -->
-                        
-                        <li class="nav-item">
-                            <h4><a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Главная</a></h4>
-                            
-                        </li>
-                        <li class="nav-item>">
-                            <div class="dropdown">
-                                <button class="btn dropdown-toggle text-white font-weight-bold" style="background-color:#008b8b; font-size: 20px;  margin-top: auto; font-weight: bold" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Меню
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu2" style="background-color:#008b8b;">
-                                    <li><a class="nav-link text-white" asp-area="" asp-controller="Incidents" asp-action="Index">Журнал инцидентов</a></li>
-                                    <li> <a class="nav-link text-white" asp-area="" asp-controller="Incidents" asp-action="Add">Новая запись инцидента</a></li>
-                                    <li> <a class="nav-link text-white" asp-area="" asp-controller="VsatInfo" asp-action="SelectIpAddress">VSAT КНБК</a></li>
-                                    <li> <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">О проекте</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                         
-                    </ul>
-                </div>
-
-                <div class="position-absolute top-50 start-50 translate-middle">
-                    <a class="navbar-brand text-white align-bottom" asp-area="" asp-controller="Home" asp-action="Index">
-                        <img src="~/css/Pictures/ofs-white.png"
-                             height="70px" width="400px"/>
-                    </a>
-                </div>
-                
-                <p style="color:white; margin-top: auto; font-weight: bold; font-size: 18px;">Пользователь: @TempData.Peek("Login")</p>
-                <h4><a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="LogOut">  Выход</a></h4>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="~/content/logo_only.png" alt="Logo">
             </div>
-        </nav>
-    </header>
-    <div class="section" style="position: relative; margin-bottom: 30px">
-        <main role="main" class="pb-3">
+            <nav class="menu">
+                <ul id="menuList">
+                    <li id="main" class="active">
+                        <a asp-area="" asp-controller="Home" asp-action="Index">
+                            <svg class="icon_main" viewBox="0 0 24 24">
+                                <path d="M8.4 3H4.6C4.03995 3 3.75992 3 3.54601 3.10899C3.35785 3.20487 3.20487 3.35785 3.10899 3.54601C3 3.75992 3 4.03995 3 4.6V8.4C3 8.96005 3 9.24008 3.10899 9.45399C3.20487 9.64215 3.35785 9.79513 3.54601 9.89101C3.75992 10 4.03995 10 4.6 10H8.4C8.96005 10 9.24008 10 9.45399 9.89101C9.64215 9.79513 9.79513 9.64215 9.89101 9.45399C10 9.24008 10 8.96005 10 8.4V4.6C10 4.03995 10 3.75992 9.89101 3.54601C9.79513 3.35785 9.64215 3.20487 9.45399 3.10899C9.24008 3 8.96005 3 8.4 3Z"></path>
+                                <path d="M19.4 3H15.6C15.0399 3 14.7599 3 14.546 3.10899C14.3578 3.20487 14.2049 3.35785 14.109 3.54601C14 3.75992 14 4.03995 14 4.6V8.4C14 8.96005 14 9.24008 14.109 9.45399C14.2049 9.64215 14.3578 9.79513 14.546 9.89101C14.7599 10 15.0399 10 15.6 10H19.4C19.9601 10 20.2401 10 20.454 9.89101C20.6422 9.79513 20.7951 9.64215 20.891 9.45399C21 9.24008 21 8.96005 21 8.4V4.6C21 4.03995 21 3.75992 20.891 3.54601C20.7951 3.35785 20.6422 3.20487 20.454 3.10899C20.2401 3 19.9601 3 19.4 3Z"></path>
+                                <path d="M19.4 14H15.6C15.0399 14 14.7599 14 14.546 14.109C14.3578 14.2049 14.2049 14.3578 14.109 14.546C14 14.7599 14 15.0399 14 15.6V19.4C14 19.9601 14 20.2401 14.109 20.454C14.2049 20.6422 14.3578 20.7951 14.546 20.891C14.7599 21 15.0399 21 15.6 21H19.4C19.9601 21 20.2401 21 20.454 20.891C20.6422 20.7951 20.7951 20.6422 20.891 20.454C21 20.2401 21 19.9601 21 19.4V15.6C21 15.0399 21 14.7599 20.891 14.546C20.7951 14.3578 20.6422 14.2049 20.454 14.109C20.2401 14 19.9601 14 19.4 14Z"></path>
+                                <path d="M8.4 14H4.6C4.03995 14 3.75992 14 3.54601 14.109C3.35785 14.2049 3.20487 14.3578 3.10899 14.546C3 14.7599 3 15.0399 3 15.6V19.4C3 19.9601 3 20.2401 3.10899 20.454C3.20487 20.6422 3.35785 20.7951 3.54601 20.891C3.75992 21 4.03995 21 4.6 21H8.4C8.96005 21 9.24008 21 9.45399 20.891C9.64215 20.7951 9.79513 20.6422 9.89101 20.454C10 20.2401 10 19.9601 10 19.4V15.6C10 15.0399 10 14.7599 9.89101 14.546C9.79513 14.3578 9.64215 14.2049 9.45399 14.109C9.24008 14 8.96005 14 8.4 14Z"></path>
+                            </svg>
+                            Главная
+                        </a>
+                    </li>
+                    <li id="journal">
+                        <a asp-area="" asp-controller="Incidents" asp-action="Index">
+                            <svg class="icon_journal" viewBox="0 0 24 24">
+                                <path d="M4 7.9966C3.83599 7.99236 3.7169 7.98287 3.60982 7.96157C2.81644 7.80376 2.19624 7.18356 2.03843 6.39018C2 6.19698 2 5.96466 2 5.5C2 5.03534 2 4.80302 2.03843 4.60982C2.19624 3.81644 2.81644 3.19624 3.60982 3.03843C3.80302 3 4.03534 3 4.5 3H19.5C19.9647 3 20.197 3 20.3902 3.03843C21.1836 3.19624 21.8038 3.81644 21.9616 4.60982C22 4.80302 22 5.03534 22 5.5C22 5.96466 22 6.19698 21.9616 6.39018C21.8038 7.18356 21.1836 7.80376 20.3902 7.96157C20.2831 7.98287 20.164 7.99236 20 7.9966M10 13H14M4 8H20V16.2C20 17.8802 20 18.7202 19.673 19.362C19.3854 19.9265 18.9265 20.3854 18.362 20.673C17.7202 21 16.8802 21 15.2 21H8.8C7.11984 21 6.27976 21 5.63803 20.673C5.07354 20.3854 4.6146 19.9265 4.32698 19.362C4 18.7202 4 17.8802 4 16.2V8Z"></path>
+                            </svg>
+                            Журнал инцидентов
+                        </a>
+                    </li>
+                    <li id="newIncident">
+                        <a asp-area="" asp-controller="Incidents" asp-action="Add">
+                            <svg class="icon_new_note" viewBox="0 0 24 24">
+                                <path d="M16 8V5.2C16 4.0799 16 3.51984 15.782 3.09202C15.5903 2.71569 15.2843 2.40973 14.908 2.21799C14.4802 2 13.9201 2 12.8 2H5.2C4.0799 2 3.51984 2 3.09202 2.21799C2.71569 2.40973 2.40973 2.71569 2.21799 3.09202C2 3.51984 2 4.0799 2 5.2V12.8C2 13.9201 2 14.4802 2.21799 14.908C2.40973 15.2843 2.71569 15.5903 3.09202 15.782C3.51984 16 4.0799 16 5.2 16H8M12 15L14 17L18.5 12.5M11.2 22H18.8C19.9201 22 20.4802 22 20.908 21.782C21.2843 21.5903 21.5903 21.2843 21.782 20.908C22 20.4802 22 19.9201 22 18.8V11.2C22 10.0799 22 9.51984 21.782 9.09202C21.5903 8.71569 21.2843 8.40973 20.908 8.21799C20.4802 8 19.9201 8 18.8 8H11.2C10.0799 8 9.51984 8 9.09202 8.21799C8.71569 8.40973 8.40973 8.71569 8.21799 9.09202C8 9.51984 8 10.0799 8 11.2V18.8C8 19.9201 8 20.4802 8.21799 20.908C8.40973 21.2843 8.71569 21.5903 9.09202 21.782C9.51984 22 10.0799 22 11.2 22Z"></path>
+                            </svg>
+                            Новый инцидент
+                        </a>
+                    </li>
+                    <li id="vsatBHA">
+                        <a asp-area="" asp-controller="VsatInfo" asp-action="SelectIpAddress">
+                            <svg class="icon_bha" viewBox="0 0 24 24">
+                                <path d="M3 3V13.2C3 14.8802 3 15.7202 3.32698 16.362C3.6146 16.9265 4.07354 17.3854 4.63803 17.673C5.27976 18 6.11984 18 7.8 18H15M15 18C15 19.6569 16.3431 21 18 21C19.6569 21 21 19.6569 21 18C21 16.3431 19.6569 15 18 15C16.3431 15 15 16.3431 15 18ZM3 8L15 8M15 8C15 9.65686 16.3431 11 18 11C19.6569 11 21 9.65685 21 8C21 6.34315 19.6569 5 18 5C16.3431 5 15 6.34315 15 8Z"></path>
+                            </svg>
+                            VSAT КНБК
+                        </a>
+                    </li>
+                    <li id="statistics">
+                        <a asp-area="" asp-controller="IncidentsStatistics" asp-action="SelectPeriod">
+                            <svg class="icon_stat" viewBox="0 0 24 24">
+                                <path d="M12 16V21M12 16L18 21M12 16L6 21M21 3V11.2C21 12.8802 21 13.7202 20.673 14.362C20.3854 14.9265 19.9265 15.3854 19.362 15.673C18.7202 16 17.8802 16 16.2 16H7.8C6.11984 16 5.27976 16 4.63803 15.673C4.07354 15.3854 3.6146 14.9265 3.32698 14.362C3 13.7202 3 12.8802 3 11.2V3M8 9V12M12 7V12M16 11V12M22 3H2" />
+                            </svg>
+                            Статистика инцидентов
+                        </a>
+                    </li>
+                    <li id="planer">
+                        <a asp-area="" asp-controller="Planer" asp-action="Index">
+                            <svg class="icon_about" viewBox="0 0 24 24">
+                                <path d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" />
+                            </svg>
+                            RO-планер
+                        </a>
+                    </li>
+                    <li id="about">
+                        <a asp-area="" asp-controller="Home" asp-action="Privacy">
+                            <svg class="icon_about" viewBox="0 0 24 24">
+                                <path d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" />
+                            </svg>
+                            О проекте
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="" asp-controller="Home" asp-action="LogOut">
+                            <svg class="icon_exit" viewBox="0 0 24 24">
+                                <path d="M16 17L21 12M21 12L16 7M21 12H9M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9"></path>
+                            </svg>
+                            Выйти
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="account">
+                <div class="user">
+                    <div class="icon-container-acc">
+                        <svg class="icon_account" viewBox="0 0 24 24">
+                            <path d="M20 21C20 19.6044 20 18.9067 19.8278 18.3389C19.44 17.0605 18.4395 16.06 17.1611 15.6722C16.5933 15.5 15.8956 15.5 14.5 15.5H9.5C8.10444 15.5 7.40665 15.5 6.83886 15.6722C5.56045 16.06 4.56004 17.0605 4.17224 18.3389C4 18.9067 4 19.6044 4 21M16.5 7.5C16.5 9.98528 14.4853 12 12 12C9.51472 12 7.5 9.98528 7.5 7.5C7.5 5.01472 9.51472 3 12 3C14.4853 3 16.5 5.01472 16.5 7.5Z"></path>
+                        </svg>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">@loggeduser</span>
+                        <span class="user-username">Пользователь</span>
+                    </div>
+                    <div class="icon-container-settings">
+                        <svg class="icon_settings" viewBox="0 0 24 24">
+                            <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" />
+                            <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" />
+                            <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <main class="main-container">
             @RenderBody()
         </main>
     </div>
 
-    @* <footer class="border-top footer text-white" style="background-color:#008b8b; text-align: center">
-        <div class="d-flex" style="text-align:center; width: 100%; justify-content: center"> &copy; 2024 - TrackingSheet - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></div>
 
-    </footer> *@
-
+    <script src="~/js/menu.js"> </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

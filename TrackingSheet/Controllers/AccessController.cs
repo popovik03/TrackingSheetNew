@@ -41,7 +41,8 @@ namespace TrackingSheet.Controllers
                 {"konoili","konoili" },
                 {"yagudam","yagudam" },
                 {"pushvla","pushvla" },
-                {"bulyrom","bulyrom" }
+                {"bulyrom","bulyrom" },
+                {"shulgdmi","shulgdmi" }
             };
 
             if (users.TryGetValue(modelLogin.Login431, out var expectedPassword) && expectedPassword == modelLogin.PassWord)

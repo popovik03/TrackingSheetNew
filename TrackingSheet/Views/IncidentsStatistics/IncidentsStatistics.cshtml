@@ -1,0 +1,205 @@
+﻿@model List<TrackingSheet.Models.ProblemTypeStatisticsViewModel>
+
+@{
+    ViewData["Title"] = "Статистика инцидентов";
+
+    // Подсчет суммарного количества
+    int totalCount = Model.Sum(item => item.Count);
+    int totalSuccessCount = Model.Sum(item => item.SuccessCount);
+    int totalFailCount = Model.Sum(item => item.FailCount);
+    int totalSavedNPTCount = Model.Sum(item => item.SavedNPTCount);
+    int totalSuccessFailCount = totalSuccessCount + totalFailCount;
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<h2>Статистика инцидентов</h2>
+
+<!-- Форма для выбора периода -->
+<form asp-controller="IncidentsStatistics" asp-action="IncidentsStatistics" method="post">
+    <div class="form-group">
+        <label for="year">Год</label>
+        <input type="number" id="year" name="year" class="form-control" value="@DateTime.Now.Year" required />
+    </div>
+    <div class="form-group">
+        <label for="quarter">Квартал</label>
+        <select id="quarter" name="quarter" class="form-control" required>
+            <option value="1">1-й квартал</option>
+            <option value="2">2-й квартал</option>
+            <option value="3">3-й квартал</option>
+            <option value="4">4-й квартал</option>
+            <option value="5">Весь год</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Показать статистику</button>
+</form>
+
+<!-- Таблица с данными -->
+<div style="display:flex">
+    <div style="flex: 1; font-size: 14px; padding-right: 40px; width: 40%; margin-right: 40px">
+        <table class="table sm">
+            <thead>
+                <tr>
+                    <th>Тип проблемы</th>
+                    <th>Количество обращений</th>
+                    <th>Закрытых</th>
+                    <th>Успешно</th>
+                    <th>Неуспешно</th>
+                    <th>Сохраненное НПВ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.ProblemType</td>
+                        <td>@item.Count</td>
+                        <td>@(item.SuccessCount + item.FailCount)</td>
+                        <td>@item.SuccessCount</td>
+                        <td>@item.FailCount</td>
+                        <td>@item.SavedNPTCount</td>
+                    </tr>
+                }
+                <tr>
+                    <td><strong>Итого</strong></td>
+                    <td><strong>@totalCount</strong></td>
+                    <td><strong>@totalSuccessFailCount</strong></td>
+                    <td><strong>@totalSuccessCount</strong></td>
+                    <td><strong>@totalFailCount</strong></td>
+                    <td><strong>@totalSavedNPTCount</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+
+
+    <div style="flex: 1.5; padding-left: 20px; margin-left: 30px">
+        <div>
+            <canvas id="barChart" width="40" height="20"></canvas>
+            <canvas id="pieChart" width="40" height="20"></canvas>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const initialLabels = @Html.Raw(Json.Serialize(Model.Select(m => m.ProblemType)));
+                const initialCountData = @Html.Raw(Json.Serialize(Model.Select(m => m.Count)));
+                const initialSuccessFailData = @Html.Raw(Json.Serialize(Model.Select(m => m.SuccessCount + m.FailCount)));
+                const initialSavedNPTData = @Html.Raw(Json.Serialize(Model.Select(m => m.SavedNPTCount)));
+
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                const barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: initialLabels,
+                        datasets: [
+                            {
+                                label: 'Количество обращений, шт',
+                                data: initialCountData,
+                                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                                borderColor: 'rgba(0, 0, 0, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Количество закрытых обращений, шт',
+                                data: initialSuccessFailData,
+                                backgroundColor: 'rgba(0, 0, 128, 0.6)',
+                                borderColor: 'rgba(0, 0, 0, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Сохраненное НПВ, ч',
+                                data: initialSavedNPTData,
+                                backgroundColor: 'rgba(0, 255, 0, 0.6)',
+                                borderColor: 'rgba(0, 0, 0, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                const pieCtx = document.getElementById('pieChart').getContext('2d');
+                const pieChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: initialLabels,
+                        datasets: [
+                            {
+                                data: initialCountData,
+                                backgroundColor: [
+                                    'rgba(255, 0, 0, 0.6)', 'rgba(0, 255, 0, 0.6)', 'rgba(0, 0, 255, 0.6)',
+                                    'rgba(255, 255, 0, 0.6)', 'rgba(255, 0, 255, 0.6)', 'rgba(0, 255, 255, 0.6)',
+                                    'rgba(128, 0, 0, 0.6)', 'rgba(0, 128, 0, 0.6)', 'rgba(0, 0, 128, 0.6)',
+                                    'rgba(128, 128, 0, 0.6)', 'rgba(128, 0, 128, 0.6)', 'rgba(0, 128, 128, 0.6)',
+                                    'rgba(255, 128, 0, 0.6)', 'rgba(255, 0, 128, 0.6)', 'rgba(128, 255, 0, 0.6)',
+                                    'rgba(0, 255, 128, 0.6)', 'rgba(128, 0, 255, 0.6)', 'rgba(0, 128, 255, 0.6)',
+                                    'rgba(192, 192, 192, 0.6)', 'rgba(128, 128, 128, 0.6)', 'rgba(64, 64, 64, 0.6)',
+                                    'rgba(255, 192, 203, 0.6)', 'rgba(210, 180, 140, 0.6)', 'rgba(0, 255, 127, 0.6)'
+                                ],
+                                borderColor: 'rgba(0, 0, 0, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Количество обращений по типам проблем'
+                            }
+                        }
+                    }
+                });
+
+                document.querySelector('form[asp-action="IncidentsStatistics"]').addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const year = document.getElementById('year').value;
+                    const quarter = document.getElementById('quarter').value;
+
+                    fetch(`/IncidentsStatistics/IncidentsStatisticsJson?year=${year}&quarter=${quarter}`, {
+                        method: 'POST'
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            const labels = data.map(stat => stat.problemType);
+                            const countData = data.map(stat => stat.count);
+                            const successFailData = data.map(stat => stat.successCount + stat.failCount);
+                            const savedNPTData = data.map(stat => stat.savedNPTCount);
+
+                            barChart.data.labels = labels;
+                            barChart.data.datasets[0].data = countData;
+                            barChart.data.datasets[1].data = successFailData;
+                            barChart.data.datasets[2].data = savedNPTData;
+                            barChart.update();
+
+                            pieChart.data.labels = labels;
+                            pieChart.data.datasets[0].data = countData;
+                            pieChart.update();
+                        })
+                        .catch(error => console.error('Error:', error));
+                });
+            });
+        </script>
+
+    </div>
+</div>
+
+
+<!-- Графики -->

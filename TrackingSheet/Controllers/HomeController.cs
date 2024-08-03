@@ -42,6 +42,10 @@ namespace TrackingSheet.Controllers
                 .ToListAsync();
             var allData = await _context.IncidentList.ToListAsync();
 
+
+
+
+
             /// Статистика по кварталам
             /// Q1
             DateTime firstQuarterStartDate = new DateTime(2024, 1, 1); // Начало первого квартала 2024 года
@@ -111,7 +115,7 @@ namespace TrackingSheet.Controllers
 
         /// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         /// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-        ///  &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&>   ПЕРЕДАЧА ДАННЫХ в JSON
+        ///   ПЕРЕДАЧА ДАННЫХ в JSON
 
         [HttpGet]
         public async Task<ActionResult> GetFirstQuarterStatistics()

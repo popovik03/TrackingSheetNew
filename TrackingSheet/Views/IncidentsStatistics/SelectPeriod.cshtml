@@ -1,0 +1,25 @@
+﻿@model TrackingSheet.Models.QuarterYearStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Выбор года и квартала";
+}
+
+<h2>Выбор года и квартала</h2>
+
+<form asp-controller="IncidentsStatistics" asp-action="IncidentsStatistics" method="post">
+    <div class="form-group">
+        <label for="year">Год</label>
+        <input type="number" id="year" name="year" class="form-control" value="@DateTime.Now.Year" required />
+    </div>
+    <div class="form-group">
+        <label for="quarter">Квартал</label>
+        <select id="quarter" name="quarter" class="form-control" required>
+            <option value="1">1-й квартал</option>
+            <option value="2">2-й квартал</option>
+            <option value="3">3-й квартал</option>
+            <option value="4">4-й квартал</option>
+            <option value="5">Весь год</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Показать статистику</button>
+</form>

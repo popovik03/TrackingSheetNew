@@ -1,0 +1,97 @@
+﻿@model TrackingSheet.Models.RO_Planer.EmployeePlanViewModel
+@{
+    ViewData["Title"] = "RO-Planer";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/handsontable@latest/dist/handsontable.full.min.css" rel="stylesheet">
+    <style>
+        .highlighted {
+            background-color: #ffeb3b; /* Желтый цвет для выделения изменений */
+        }
+
+        .handsontable th, .handsontable td {
+            border: 1px solid #ddd;
+        }
+
+        .handsontable {
+            margin: 20px 0;
+        }
+
+        #save-button {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>@ViewData["Title"]</h1>
+    <button id="save-button">Save Changes</button>
+    <div id="handsontable-container"></div>
+
+    <button id="save-button">Save Changes</button>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@latest/dist/handsontable.full.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.getElementById('handsontable-container');
+            const saveButton = document.getElementById('save-button');
+
+            // Передаем данные в представление из ViewBag
+            const headerColumns = @Html.Raw(ViewBag.HeaderColumns);
+            const tableData = @Html.Raw(ViewBag.TableData);
+
+            // Инициализация Handsontable
+            const hot = new Handsontable(container, {
+                data: tableData,
+                colHeaders: headerColumns,
+                rowHeaders: true,
+                manualColumnResize: true,
+                manualRowResize: true,
+                contextMenu: true,
+                stretchH: 'all',
+                width: '100%',
+                height: 'auto',
+                licenseKey: 'non-commercial-and-evaluation',
+                fixedRowsTop: 1,  // Фиксируем верхнюю строку
+                fixedColumnsLeft: 2,  // Фиксируем первые два столбца
+                afterChange: function (changes, source) {
+                    if (source === 'loadData') {
+                        return; // Don't highlight changes when loading data
+                    }
+                    changes.forEach(([row, prop, oldValue, newValue]) => {
+                        if (oldValue !== newValue) {
+                            hot.getCellMeta(row, prop).className = 'highlighted';
+                            hot.render();
+                        }
+                    });
+                }
+            });
+
+            // Обработка нажатия на кнопку сохранения
+            saveButton.addEventListener('click', function () {
+                const updatedData = hot.getData();
+                fetch('@Url.Action("SaveChanges", "Planer")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '@(Html.AntiForgeryToken().ToString().Replace("<input name=\"__RequestVerificationToken\" type=\"hidden\" value=\"", "").Replace("\" />", ""))'
+                    },
+                    body: JSON.stringify(updatedData)
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Changes saved successfully');
+                        } else {
+                            alert('Error saving changes');
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        alert('Error saving changes');
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

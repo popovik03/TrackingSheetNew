@@ -5,129 +5,136 @@
 
 @{
     ViewData["Title"] = "1";
+    var reporter = TempData.Peek("Login") as string ?? string.Empty;
+
 }
 
-<form method="post" action="Add">
-    <h4 style="text-align: center">Новый инцидент</h4>
-    <div class="newcontainer" style="padding-right: 15%; padding-left: 15%; padding-bottom: 5%; font-size: 12px">
 
-        <div class="left">
+<!DOCTYPE html>
+<html lang="en">
 
-            <div class="mb-3">
-                <label for="" class="form-label">Дата и время инцидента</label>
-                <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+
+<body>
+    <form method="post" action="Add">
+        <h1>
+            <label>Новый инцидент</label>
+            <div class="button-container">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <svg class="icon_plus" viewBox="0 0 24 24">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                    Добавить
+                </button>
             </div>
-
-
-
-            <div class="mb-3">
-                <label for="" class="form-label">Смена</label>
-                <div class="col-sm-12">
+        </h1>
+        <h2>
+            <label>Добавьте новый инцидент</label>
+        </h2>
+        <div class="container-new-incident">
+            <div class="left">
+                <div class="input-field">
+                    <label for="" class="form-label">Дата инцидента</label>
+                    <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Смена</label>
                     <select class="form-select" asp-for="Shift">
                         <option value="Day">День</option>
                         <option value="Night">Ночь</option>
                     </select>
                 </div>
-            </div>
+                <div class="input-field">
+                    <label for="reporter" class="form-label">431</label>
+                    <input type="text" class="form-control form-control-sm" asp-for="Reporter" value="@reporter" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">VSAT</label>
+                    <input type="number" class="form-control form-control-sm" asp-for="VSAT" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Скважина</label>
+                    <input type="text" class="form-control form-control-sm" asp-for="Well" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Рейс</label>
+                    <input type="number" class="form-control form-control-sm" asp-for="Run" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Сохраненное НПВ, ч.</label>
+                    <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Тип проблемы</label>
+                    <div class="col-sm-12">
+                        <select class="form-select form-select-sm" asp-for="ProblemType">
+                            <option value="Advantage">Advantage</option>
+                            <option value="ATK issue">ATK issue</option>
+                            <option value="APS">APS</option>
+                            <option value="BCPM II">BCPM II</option>
+                            <option value="Cadence">Cadence</option>
+                            <option value="Computer">Computer</option>
+                            <option value="Curve Failure">Curve Failure</option>
+                            <option value="Decoding">Decoding</option>
+                            <option value="Desync">Desync</option>
+                            <option value="Downlink">Downlink</option>
+                            <option value="LTK">LTK</option>
+                            <option value="M30">M30</option>
+                            <option value="Memfix">Memfix</option>
+                            <option value="Organization">Organisation</option>
+                            <option value="OTK">OTK</option>
+                            <option value="Pressure">Pressure</option>
+                            <option value="Procedures">Procedures</option>
+                            <option value="Programming | Tip">Programming | Tip</option>
+                            <option value="Pulser issue">Pulser issue</option>
+                            <option value="Service delivery">Service delivery</option>
+                            <option value="Surface issue">Surface issue</option>
+                            <option value="Survey issue">Survey issue</option>
+                            <option value="UsMPR">UsMPR</option>
+                            <option value="WellArchitect">WellArchitect</option>
+                            <option value="Win10">Win10</option>
+                            <option value="WITS">WITS</option>
+                            <option value="Other">Other</option>
 
+                        </select>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label for="" class="form-label">431</label>
-                <input type="text" class="form-control form-control-sm" asp-for="Reporter" value=@TempData.Peek("Login") />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">VSAT</label>
-                <input type="number" class="form-control form-control-sm" asp-for="VSAT" />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Скважина</label>
-                <input type="text" class="form-control form-control-sm" asp-for="Well" />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Рейс</label>
-                <input type="number" class="form-control form-control-sm" asp-for="Run" />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Сохраненное НПВ, ч</label>
-                <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Тип проблемы</label>
-                <div class="col-sm-12">
-                    <select class="form-select form-select-sm" asp-for="ProblemType">
-                        <option value="Advantage">Advantage</option>
-                        <option value="ATK issue">ATK issue</option>
-                        <option value="APS">APS</option>
-                        <option value="BCPM II">BCPM II</option>
-                        <option value="Cadence">Cadence</option>
-                        <option value="Computer">Computer</option>
-                        <option value="Curve Failure">Curve Failure</option>
-                        <option value="Decoding">Decoding</option>
-                        <option value="Desync">Desync</option>
-                        <option value="Downlink">Downlink</option>
-                        <option value="LTK">LTK</option>
-                        <option value="M30">M30</option>
-                        <option value="Memfix">Memfix</option>
-                        <option value="Organization">Organisation</option>
-                        <option value="OTK">OTK</option>
-                        <option value="Pressure">Pressure</option>
-                        <option value="Procedures">Procedures</option>
-                        <option value="Programming | Tip">Programming | Tip</option>
-                        <option value="Pulser issue">Pulser issue</option>
-                        <option value="Service delivery">Service delivery</option>
-                        <option value="Surface issue">Surface issue</option>
-                        <option value="Survey issue">Survey issue</option>
-                        <option value="UsMPR">UsMPR</option>
-                        <option value="WellArchitect">WellArchitect</option>
-                        <option value="Win10">Win10</option>
-                        <option value="WITS">WITS</option>
-                        <option value="Other">Other</option>
+                <div class="input-field">
+                    <label for="" class="form-label">Отметка</label>
+                    <div class="col-sm-12">
+                        <select class="form-select form-select-sm" asp-for="HighLight">
+                            <option value=""></option>
+                            <option value="🚩">🚩</option>
 
-                    </select>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Статус</label>
+                    <div class="col-sm-12">
+                        <select class="form-select form-select-sm" asp-for="Status">
+                            <option value="Success" style="background-color: lawngreen">Success</option>
+                            <option value="Process" style="background-color: yellow">Process</option>
+                            <option value="Fail" style="background-color: orangered">Fail</option>
+                            <option value="None" style="background-color: darkgrey">None</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Отметка</label>
-                <div class="col-sm-12">
-                    <select class="form-select form-select-sm" asp-for="HighLight">
-                        <option value=""></option>
-                        <option value="🚩">🚩</option>
-
-                    </select>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Статус</label>
-                <div class="col-sm-12">
-                    <select class="form-select form-select-sm" asp-for="Status">
-                        <option value="Success" style="background-color: lawngreen">Success</option>
-                        <option value="Process" style="background-color: yellow">Process</option>
-                        <option value="Fail" style="background-color: orangered">Fail</option>
-                        <option value="None" style="background-color: darkgrey">None</option>
-                    </select>
+            <div class="right">
+                <div class="input-field">
+                    <label for="" class="form-label">Описание инцидента:</label>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="22" asp-for="Solution"></textarea>
                 </div>
             </div>
         </div>
+    </form>
+</body>
+</html>
 
-        <div class="right">
-            <div class="right2">
-                <label for="" class="form-label">Описание и решение</label>
-                <textarea class="form-control" id="exampleFormControlTextarea1" rows="26"  asp-for="Solution"></textarea>
-                
-            </div>
-            <p></p>
-            <div class="d-grid gap-2 col-6 mx-auto">
-                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
-                
-            </div>
-            
-        </div>
-
-
-
-        
-    </div>
-</form>
-    
-    
