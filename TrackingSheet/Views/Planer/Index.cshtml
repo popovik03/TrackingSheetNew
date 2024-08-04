@@ -1,9 +1,4 @@
-﻿@model TrackingSheet.Models.RO_Planer.EmployeePlanViewModel
-@{
-    ViewData["Title"] = "RO-Planer";
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,23 +10,33 @@
 
         .handsontable th, .handsontable td {
             border: 1px solid #ddd;
+            /* Убедитесь, что высота строк фиксирована */
         }
 
-        .handsontable {
-            margin: 20px 0;
+        .main {
+            height: 95vh; /* Высота родительского элемента */
+            display: flex;
+            flex-direction: column;
+        }
+
+        #handsontable-container {
+            flex: 1; /* Заполняет все доступное пространство */
+            overflow: auto; /* Добавляем прокрутку по содержимому контейнера */
+            margin-bottom: 10px; /* Отступ снизу для кнопки */
         }
 
         #save-button {
-            margin: 20px 0;
+            margin: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>@ViewData["Title"]</h1>
-    <button id="save-button">Save Changes</button>
-    <div id="handsontable-container"></div>
+    <div class="main">
+        <h1>@ViewData["Title"]</h1>
+        <div id="handsontable-container"></div>
+        <button id="save-button">Сохранить изменения</button>
+    </div>
 
-    <button id="save-button">Save Changes</button>
     <script src="https://cdn.jsdelivr.net/npm/handsontable@latest/dist/handsontable.full.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -41,6 +46,23 @@
             // Передаем данные в представление из ViewBag
             const headerColumns = @Html.Raw(ViewBag.HeaderColumns);
             const tableData = @Html.Raw(ViewBag.TableData);
+            const nestedHeaders = @Html.Raw(ViewBag.NestedHeaders);
+
+            // Определяем количество строк и фиксированную высоту строк
+            const rowHeight = 15; // Установите фиксированную высоту строки, например 15px
+
+            // Устанавливаем фиксированную ширину для столбцов
+            const colWidths = headerColumns.map((col, index) => {
+                if (index === 0) {
+                    return 200; // Ширина первого столбца 100 пикселей
+                } else if (index = 1) {
+                    return 80;
+                } else if (index >= 2) {
+                    return 40; // Ширина столбцов с днями (индексы от 2 до последнего) 40 пикселей
+                } else {
+                    return null; // Используйте ширину по умолчанию для остальных столбцов
+                }
+            });
 
             // Инициализация Handsontable
             const hot = new Handsontable(container, {
@@ -49,13 +71,33 @@
                 rowHeaders: true,
                 manualColumnResize: true,
                 manualRowResize: true,
-                contextMenu: true,
+                contextMenu: {
+                    items: {
+                        "remove_col": {
+                            name: 'Remove column',
+                            callback: function (key, selection) {
+                                const selected = selection[0];
+                                hot.alter('remove_col', selected.start.col, selected.end.col + 1);
+                            }
+                        },
+                        "remove_row": {
+                            name: 'Remove row',
+                            callback: function (key, selection) {
+                                const selected = selection[0];
+                                hot.alter('remove_row', selected.start.row, selected.end.row + 1);
+                            }
+                        }
+                    }
+                },
+                nestedHeaders: nestedHeaders,
                 stretchH: 'all',
                 width: '100%',
-                height: 'auto',
+                height: '100%', // Устанавливаем высоту таблицы на 100% высоты контейнера
+                fixedRowsTop: 0,
+                fixedColumnsLeft: 2, // Фиксируем первые 2 столбца
+                colWidths: colWidths,
+                rowHeights: Array(tableData.length).fill(rowHeight), // Устанавливаем высоту всех строк
                 licenseKey: 'non-commercial-and-evaluation',
-                fixedRowsTop: 1,  // Фиксируем верхнюю строку
-                fixedColumnsLeft: 2,  // Фиксируем первые два столбца
                 afterChange: function (changes, source) {
                     if (source === 'loadData') {
                         return; // Don't highlight changes when loading data

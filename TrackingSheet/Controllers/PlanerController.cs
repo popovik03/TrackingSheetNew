@@ -22,11 +22,9 @@ namespace TrackingSheet.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            // Получаем данные из базы данных
             var employeePlans = _context.EmployeePlaner2024.ToList();
             var employees = _context.ROemployees.ToList();
 
-            // Создаем ViewModel для отображения
             var employeePlanViewModels = employees.Select(employee => new EmployeePlanViewModel
             {
                 EmployeeId = employee.Id,
@@ -35,13 +33,13 @@ namespace TrackingSheet.Controllers
                 MonthlyPlans = GetMonthlyPlans(employee.Id, employeePlans)
             }).ToList();
 
-            // Получаем заголовки столбцов и данные для таблицы
             var headerColumns = GetHeaderColumns();
             var tableData = GetTableData(employeePlanViewModels);
+            var nestedHeaders = GetNestedHeaders();
 
-            // Передаем данные в представление
             ViewBag.HeaderColumns = JsonConvert.SerializeObject(headerColumns);
             ViewBag.TableData = JsonConvert.SerializeObject(tableData);
+            ViewBag.NestedHeaders = JsonConvert.SerializeObject(nestedHeaders);
 
             return View();
         }
@@ -56,7 +54,7 @@ namespace TrackingSheet.Controllers
 
                 foreach (var row in updatedData)
                 {
-                    if (row.Count < 2) continue; // Проверка на корректность строки данных
+                    if (row.Count < 2) continue;
 
                     var employeeName = row[0];
                     var stol = int.Parse(row[1]);
@@ -64,7 +62,7 @@ namespace TrackingSheet.Controllers
                     var employee = employees.FirstOrDefault(e => e.Name == employeeName);
                     if (employee == null) continue;
 
-                    var monthNames = new[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+                    var monthNames = new[] { "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
                     var dayIndex = 2;
 
                     var employeePlan = employeePlans.FirstOrDefault(ep => ep.EmployeeId == employee.Id && ep.Year == DateTime.Now.Year);
@@ -90,18 +88,18 @@ namespace TrackingSheet.Controllers
 
                         switch (month)
                         {
-                            case "January": employeePlan.January = string.Join(",", days); break;
-                            case "February": employeePlan.February = string.Join(",", days); break;
-                            case "March": employeePlan.March = string.Join(",", days); break;
-                            case "April": employeePlan.April = string.Join(",", days); break;
-                            case "May": employeePlan.May = string.Join(",", days); break;
-                            case "June": employeePlan.June = string.Join(",", days); break;
-                            case "July": employeePlan.July = string.Join(",", days); break;
-                            case "August": employeePlan.August = string.Join(",", days); break;
-                            case "September": employeePlan.September = string.Join(",", days); break;
-                            case "October": employeePlan.October = string.Join(",", days); break;
-                            case "November": employeePlan.November = string.Join(",", days); break;
-                            case "December": employeePlan.December = string.Join(",", days); break;
+                            case "Январь": employeePlan.January = string.Join(",", days); break;
+                            case "Февраль": employeePlan.February = string.Join(",", days); break;
+                            case "Март": employeePlan.March = string.Join(",", days); break;
+                            case "Апрель": employeePlan.April = string.Join(",", days); break;
+                            case "Май": employeePlan.May = string.Join(",", days); break;
+                            case "Июнь": employeePlan.June = string.Join(",", days); break;
+                            case "Июль": employeePlan.July = string.Join(",", days); break;
+                            case "Август": employeePlan.August = string.Join(",", days); break;
+                            case "Сентябрь": employeePlan.September = string.Join(",", days); break;
+                            case "Октябрь": employeePlan.October = string.Join(",", days); break;
+                            case "Ноябрь": employeePlan.November = string.Join(",", days); break;
+                            case "Декабрь": employeePlan.December = string.Join(",", days); break;
                         }
                     }
                 }
@@ -111,12 +109,10 @@ namespace TrackingSheet.Controllers
             }
             catch (Exception ex)
             {
-                // Логирование ошибки для отладки
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
 
         private Dictionary<string, List<string>> GetMonthlyPlans(int employeeId, List<EmployeePlaner2024> employeePlans)
         {
@@ -145,75 +141,72 @@ namespace TrackingSheet.Controllers
         private List<string> GetHeaderColumns()
         {
             var months = new[] { "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
-            var daysInMonth = new Dictionary<string, int>
-            {
-                { "Январь", 31 },
-                { "Февраль", 29 },
-                { "Март", 31 },
-                { "Апрель", 30 },
-                { "Май", 31 },
-                { "Июнь", 30 },
-                { "Июль", 31 },
-                { "Август", 31 },
-                { "Сентябрь", 30 },
-                { "Октябрь", 31 },
-                { "Ноябрь", 30 },
-                { "Декабрь", 31 }
-            };
-
-            var headerColumns = new List<string> { "Сотрудник", "Стол" };
+            var headerColumns = new List<string> { "Имя", "Стол" };
 
             foreach (var month in months)
             {
-                headerColumns.Add(month); // Название месяца
-                for (int day = 1; day <= daysInMonth[month]; day++)
+                for (int day = 1; day <= DateTime.DaysInMonth(DateTime.Now.Year, Array.IndexOf(months, month) + 1); day++)
                 {
-                    headerColumns.Add(day.ToString()); // Дни месяца
+                    headerColumns.Add(day.ToString());
                 }
             }
 
             return headerColumns;
         }
 
-        private List<List<string>> GetTableData(List<EmployeePlanViewModel> employeePlanViewModels)
+        private List<object[]> GetNestedHeaders()
         {
             var months = new[] { "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
             var daysInMonth = new Dictionary<string, int>
-            {
-                { "Январь", 31 },
-                { "Февраль", 29 },
-                { "Март", 31 },
-                { "Апрель", 30 },
-                { "Май", 31 },
-                { "Июнь", 30 },
-                { "Июль", 31 },
-                { "Август", 31 },
-                { "Сентябрь", 30 },
-                { "Октябрь", 31 },
-                { "Ноябрь", 30 },
-                { "Декабрь", 31 }
-            };
+    {
+        { "Январь", 31 },
+        { "Февраль", 29 },
+        { "Март", 31 },
+        { "Апрель", 30 },
+        { "Май", 31 },
+        { "Июнь", 30 },
+        { "Июль", 31 },
+        { "Август", 31 },
+        { "Сентябрь", 30 },
+        { "Октябрь", 31 },
+        { "Ноябрь", 30 },
+        { "Декабрь", 31 }
+    };
 
+            var nestedHeaders = new List<object[]>();
+
+            var monthHeader = new List<object> { "Сотрудник", "Стол" };
+            var dayHeader = new List<object> { "", "" };
+
+            // Для каждого месяца добавляем заголовок месяца и дни
+            foreach (var month in months)
+            {
+                monthHeader.Add(new { label = month, colspan = daysInMonth[month] });
+                for (int day = 1; day <= daysInMonth[month]; day++)
+                {
+                    dayHeader.Add(day.ToString());
+                }
+            }
+
+            // Добавляем заголовок месяца и дни в список nestedHeaders
+            nestedHeaders.Add(monthHeader.ToArray());
+            nestedHeaders.Add(dayHeader.ToArray());
+
+            return nestedHeaders;
+        }
+
+
+        private List<List<string>> GetTableData(List<EmployeePlanViewModel> employeePlanViewModels)
+        {
             var tableData = new List<List<string>>();
 
-            foreach (var employee in employeePlanViewModels)
+            foreach (var viewModel in employeePlanViewModels)
             {
-                var row = new List<string> { employee.Name, employee.Stol.ToString() };
-
-                foreach (var month in months)
+                var row = new List<string> { viewModel.Name, viewModel.Stol.ToString() };
+                foreach (var month in viewModel.MonthlyPlans.Keys)
                 {
-                    row.Add(month); // Название месяца
-                    if (employee.MonthlyPlans.ContainsKey(month))
-                    {
-                        row.AddRange(employee.MonthlyPlans[month]);
-                    }
-                    else
-                    {
-                        var days = new string[daysInMonth[month]];
-                        row.AddRange(days);
-                    }
+                    row.AddRange(viewModel.MonthlyPlans[month]);
                 }
-
                 tableData.Add(row);
             }
 
