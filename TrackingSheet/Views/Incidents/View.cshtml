@@ -3,134 +3,150 @@
 @{
 }
 
-<form method="post" action="View">
-    <h1>Описание и редактирование инцидента</h1>
-    <div class="newcontainer">
+<!DOCTYPE html>
+<html lang="en">
 
-        <div class="left">
-
-            <div class="mb-3">
-                <label for="" class="form-label">Дата и время инцидента</label>
-                <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
-            </div>
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="~/js/new_incident.js" defer></script>
+</head>
 
 
-            <div class="mb-3">
-                <label for="" class="form-label">Смена</label>
-                <div class="col-sm-12">
-                    <select class="form-select" asp-for="Shift">
-                        <option value="Day">День</option>
-                        <option value="Night">Ночь</option>
-                    </select>
+<body>
+    <form method="post" action="View">
+        <h2>
+            Описание и редактирование инцидента
+        </h2>
+
+        <div class="container-new-incident">
+    
+            <div class="left">
+    
+                <div class="input-field">
+                    <label for="" class="form-label">Дата и время инцидента</label>
+                    <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
+                </div>
+    
+    
+    
+                <div class="input-field">
+                    <label for="" class="form-label">Смена</label>
+                    <div class="col-sm-12">
+                        <select class="form-select" asp-for="Shift">
+                            <option value="Day">День</option>
+                            <option value="Night">Ночь</option>
+                        </select>
+                    </div>
+                </div>
+    
+    
+                <div class="input-field">
+                    <label for="" class="form-label">431</label>
+                    <input type="text" class="form-control form-control-sm" asp-for="Reporter" /> 
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">VSAT</label>
+                    <input type="number" class="form-control form-control-sm" asp-for="VSAT" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Скважина</label>
+                    <input type="text" class="form-control form-control-sm" asp-for="Well" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Рейс</label>
+                    <input type="number" class="form-control form-control-sm" asp-for="Run" />
+                </div>
+               <div class="input-field">
+                    <label for="" class="form-label">Сохраненное НПВ, ч</label>
+                    <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" />
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Тип проблемы</label>
+                    <div class="col-sm-12">
+                        <select class="form-select form-select-sm" asp-for="ProblemType">
+                            <option value="Advantage">Advantage</option>
+                            <option value="ATK issue">ATK issue</option>
+                            <option value="APS">APS</option>
+                            <option value="BCPM II">BCPM II</option>
+                            <option value="Cadence">Cadence</option>
+                            <option value="Computer">Computer</option>
+                            <option value="Curve Failure">Curve Failure</option>
+                            <option value="Decoding">Decoding</option>
+                            <option value="Desync">Desync</option>
+                            <option value="Downlink">Downlink</option>
+                            <option value="LTK">LTK</option>
+                            <option value="M30">M30</option>
+                            <option value="Memfix">Memfix</option>
+                            <option value="Organization">Organisation</option>
+                            <option value="OTK">OTK</option>
+                            <option value="Pressure">Pressure</option>
+                            <option value="Procedures">Procedures</option>
+                            <option value="Programming | Tip">Programming | Tip</option>
+                            <option value="Pulser issue">Pulser issue</option>
+                            <option value="Service delivery">Service delivery</option>
+                            <option value="Surface issue">Surface issue</option>
+                            <option value="Survey issue">Survey issue</option>
+                            <option value="UsMPR">UsMPR</option>
+                            <option value="WellArchitect">WellArchitect</option>
+                            <option value="Win10">Win10</option>
+                            <option value="WITS">WITS</option>
+                            <option value="Other">Other</option>
+    
+                        </select>
+                    </div>
+                </div>
+    
+                <div class="input-field">
+                    <label for="" class="form-label">Отметка</label>
+                    <div class="col-sm-12">
+                        <select class="form-select form-select-sm" asp-for="HighLight">
+                            <option value=""></option>
+                            <option value="🚩">🚩</option>
+    
+                        </select>
+                    </div>
+                </div>
+                <div class="input-field">
+                    <label for="" class="form-label">Статус</label>
+                    <div class="col-sm-12">
+                        <select class="form-select form-select-sm" asp-for="Status">
+                            <option value="Success" style="background-color: lawngreen">Success</option>
+                            <option value="Process" style="background-color: yellow">Process</option>
+                            <option value="Fail" style="background-color: orangered">Fail</option>
+                            <option value="None" style="background-color: darkgrey">None</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-
-
-            <div class="mb-3">
-                <label for="" class="form-label">431</label>
-                <input type="text" class="form-control form-control-sm" asp-for="Reporter" /> 
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">VSAT</label>
-                <input type="number" class="form-control form-control-sm" asp-for="VSAT" />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Скважина</label>
-                <input type="text" class="form-control form-control-sm" asp-for="Well" />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Рейс</label>
-                <input type="number" class="form-control form-control-sm" asp-for="Run" />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Сохраненное НПВ, ч</label>
-                <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" />
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Тип проблемы</label>
-                <div class="col-sm-12">
-                    <select class="form-select form-select-sm" asp-for="ProblemType">
-                        <option value="Advantage">Advantage</option>
-                        <option value="ATK issue">ATK issue</option>
-                        <option value="APS">APS</option>
-                        <option value="BCPM II">BCPM II</option>
-                        <option value="Cadence">Cadence</option>
-                        <option value="Computer">Computer</option>
-                        <option value="Curve Failure">Curve Failure</option>
-                        <option value="Decoding">Decoding</option>
-                        <option value="Desync">Desync</option>
-                        <option value="Downlink">Downlink</option>
-                        <option value="LTK">LTK</option>
-                        <option value="M30">M30</option>
-                        <option value="Memfix">Memfix</option>
-                        <option value="Organization">Organisation</option>
-                        <option value="OTK">OTK</option>
-                        <option value="Pressure">Pressure</option>
-                        <option value="Procedures">Procedures</option>
-                        <option value="Programming | Tip">Programming | Tip</option>
-                        <option value="Pulser issue">Pulser issue</option>
-                        <option value="Service delivery">Service delivery</option>
-                        <option value="Surface issue">Surface issue</option>
-                        <option value="Survey issue">Survey issue</option>
-                        <option value="UsMPR">UsMPR</option>
-                        <option value="WellArchitect">WellArchitect</option>
-                        <option value="Win10">Win10</option>
-                        <option value="WITS">WITS</option>
-                        <option value="Other">Other</option>
-
-                    </select>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Отметка</label>
-                <div class="col-sm-12">
-                    <select class="form-select form-select-sm" asp-for="HighLight">
-                        <option value=""></option>
-                        <option value="🚩">🚩</option>
-
-                    </select>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label for="" class="form-label">Статус</label>
-                <div class="col-sm-12">
-                    <select class="form-select form-select-sm" asp-for="Status">
-                        <option value="Success" style="background-color: lawngreen">Success</option>
-                        <option value="Process" style="background-color: yellow">Process</option>
-                        <option value="Fail" style="background-color: orangered">Fail</option>
-                        <option value="None" style="background-color: darkgrey">None</option>
-                    </select>
+    
+            <div class="right">
+                <div class="input-field">
+                    <label for="" class="form-label">Описание инцидента:</label>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="36" asp-for="Solution"></textarea>
                 </div>
             </div>
         </div>
 
-        <div class="right">
-            <div class="right2">
 
-                <div class="mb-3">
-                    <label for="" class="form-label">ID</label>
-                    <input type="text" class="form-control" asp-for="ID" readonly />
-                </div>
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary btn-lg">Submit
+                <svg class="icon_plus" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 15L8 17L12.5 12.5M8 8V5.2C8 4.0799 8 3.51984 8.21799 3.09202C8.40973 2.71569 8.71569 2.40973 9.09202 2.21799C9.51984 2 10.0799 2 11.2 2H18.8C19.9201 2 20.4802 2 20.908 2.21799C21.2843 2.40973 21.5903 2.71569 21.782 3.09202C22 3.51984 22 4.0799 22 5.2V12.8C22 13.9201 22 14.4802 21.782 14.908C21.5903 15.2843 21.2843 15.5903 20.908 15.782C20.4802 16 19.9201 16 18.8 16H16M5.2 22H12.8C13.9201 22 14.4802 22 14.908 21.782C15.2843 21.5903 15.5903 21.2843 15.782 20.908C16 20.4802 16 19.9201 16 18.8V11.2C16 10.0799 16 9.51984 15.782 9.09202C15.5903 8.71569 15.2843 8.40973 14.908 8.21799C14.4802 8 13.9201 8 12.8 8H5.2C4.0799 8 3.51984 8 3.09202 8.21799C2.71569 8.40973 2.40973 8.71569 2.21799 9.09202C2 9.51984 2 10.0799 2 11.2V18.8C2 19.9201 2 20.4802 2.21799 20.908C2.40973 21.2843 2.71569 21.5903 3.09202 21.782C3.51984 22 4.07989 22 5.2 22Z"></path>
+                </svg>
+            </button>
 
-                <label for="" class="form-label">Описание и решение</label>
-                <textarea class="form-control" id="exampleFormControlTextarea1" rows="22" asp-for="Solution"></textarea>
-
-            </div>
-            <p></p>
-            <div class="d-grid gap-2 col-6 mx-auto">
-                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
-                <button type="submit" class="btn btn-danger btn-lg"
-                        asp-action="Delete"
-                        asp-controller="Incidents" onclick="return confirm('Вы уверены что хотите удалить запись?')">Delete</button>
-            </div>
-
+            <button type="submit" class="btn btn-danger btn-lg"
+                 asp-action="Delete"
+                 asp-controller="Incidents" onclick="return confirm('Вы уверены что хотите удалить запись?')">Delete
+            </button>
         </div>
-    </div>
-</form>
-
-
+    
+          
+    </form>
+</body>
+</html>
 
 
 

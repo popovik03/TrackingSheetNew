@@ -38,6 +38,7 @@ namespace TrackingSheet.Controllers
         [HttpGet]
         public IActionResult SelectIPAddress()
         {
+            ViewData["CurrentPage"] = "vsat_bha";
             return View();
         }
 
@@ -71,6 +72,7 @@ namespace TrackingSheet.Controllers
                     return NotFound();
                 }
 
+                ViewData["CurrentPage"] = "vsat_bha";
                 return View(vsatInfo);
             }
             catch (Exception ex)

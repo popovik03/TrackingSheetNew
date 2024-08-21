@@ -23,7 +23,7 @@ namespace TrackingSheet.Controllers
         public async Task<IActionResult> Index()
         {
             var incidents = await mvcDbContext.IncidentList.OrderByDescending(p=> p.Date).ToListAsync();
-
+            ViewData["CurrentPage"] = "journal";
             return View(incidents);
         }
 
@@ -31,10 +31,13 @@ namespace TrackingSheet.Controllers
         [HttpGet]
         public IActionResult Add()
         {
+            ViewData["CurrentPage"] = "new_incident";
+
             return View();
         }
         [Authorize]
         [HttpPost]
+
         public async Task<IActionResult> Add(AddIncidentViewModel addIncidentRequest)
         {
             var incident = new Incidents()

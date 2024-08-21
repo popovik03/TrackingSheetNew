@@ -3,31 +3,76 @@
 @{
     ViewData["Title"] = "Информация по VSAT";
 }
-<h2>Выбор VSAT</h2>
 
-<form asp-action="SetIpAddress" method="post">
-    <div class="form-group">
-        <label for="ipPart"></label>
-        <select id="ipPart" name="ipPart" class="form-control">
-            @for (int i = 1; i <= 200; i++)
-            {
-                <option value="@i">@i</option>
-                
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        /* Стили для кнопки, имитирующей btn-info из Bootstrap */
+        .btn-info {
+            background-color: #17a2b8; /* Цвет фона Bootstrap btn-info */
+            color: #fff; /* Цвет текста */
+            border: 1px solid transparent; /* Граница с прозрачным цветом */
+            border-radius: 0.25rem; /* Радиус скругления углов */
+            padding: 0.60rem 1.125rem; /* Отступы внутри кнопки */
+            font-size: 1rem; /* Размер шрифта */
+            font-weight: 400; /* Толщина шрифта */
+            text-align: center; /* Выравнивание текста */
+            text-decoration: none; /* Убирает подчеркивание текста */
+            display: inline-block; /* Отображение в виде строки */
+            cursor: pointer; /* Курсор указателя */
+            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out; /* Плавный переход цвета фона и границы */
+        }
+
+            /* Стили для кнопки при наведении */
+            .btn-info:hover {
+                background-color: #138496; /* Цвет фона при наведении */
+                border-color: #117a8b; /* Цвет границы при наведении */
             }
-        </select>
-    </div>
-    <p></p>
-    <button type="submit" class="btn btn-primary">Принять</button>
-</form>
 
-<h2>Информация по VSAT @TempData.Peek("ipPart")</h2>
+            /* Стили для кнопки при нажатии */
+            .btn-info:active {
+                background-color: #117a8b; /* Цвет фона при нажатии */
+                border-color: #10707f; /* Цвет границы при нажатии */
+                box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125); /* Тень для кнопки при нажатии */
+            }
+    </style>
+</head>
 
-<div class="BHA" style="display: flex">
-    <div class="BHA tab" style="flex: 1; border: 1px solid black; padding: 10px;">
+<body>
+    <h1>Выбор VSAT</h1>
+    <p style="margin-bottom: 20px;"></p>
+
+    <form asp-action="SetIpAddress" method="post">
+        <div class="form-group" style="margin-bottom: 15px; margin-left: 40px;">
+            <label for="ipPart"></label>
+            <select id="ipPart" name="ipPart" class="form-control" style="width: 220px;">
+                @for (int i = 1; i <= 200; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
+
+            <button type="submit" class="btn btn-info" style="margin-left: 10px">
+                Принять
+            </button>
+        </div>
+    </form>
+</body>
+
+
+
+<div class="BHA" style="display: flex; margin: 30px; height: 500px;">
+    <div class="BHA tab" style="flex: 1; border: 1px solid rgba(200, 200, 200, 0.5); border-radius: 15px; padding: 10px; box-sizing: border-box; height: 120%; font-size: 20px; background-color: #f9f9f9;">
         @if (Model != null)
         {
-            <div>
-                <h4>Общая информация</h4>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <h2 style="font-size: 22px; margin: 25px">Информация по VSAT @TempData.Peek("ipPart")</h2>
+            </div>
+            
+            <div style="margin-left: 30px;">
+                
                 <p><strong>Номер скважины:</strong> @Model.WELL_NAME</p>
                 <p><strong>Номер куста:</strong> @Model.FCTY_NAME</p>
                 <p><strong>Заказчик:</strong> @Model.CPNM_NAME</p>
@@ -37,6 +82,7 @@
                 <p><strong>Рейс:</strong> @Model.MWRU_NUMBER</p>
                 <p><strong>Секция:</strong> @Model.MWRU_HOLE_DIAMETER</p>
             </div>
+
         }
         else
         {
@@ -44,37 +90,39 @@
         }
     </div>
 
-    <div class="BHA passports" style="flex: 1.5; border: 1px solid black; display: flex; padding: 10px; overflow-x: auto;">
-        <div>
-            <h4>Текущая КНБК</h4>
-            <table class="table table-striped" style="font-size: 12px; width: 350px; align-content: center; width: 50%">
-                <thead class="thead-dark">
+    <div class="BHA passports" style="flex: 1.5; border: 1px solid rgba(200, 200, 200, 0.5); border-radius: 15px; display: flex; padding: 30px; overflow-x: auto; box-sizing: border-box; height: 120%; background-color: #f9f9f9; justify-content: center;">
+        <div style="width: 100%; max-width: 1000px;">
+            <div style="display: flex; justify-content: center;">
+                <h2>Текущая КНБК</h2>
+            </div>
+
+            <table class="table table-striped" style="font-size: 18px; width: 100%; border-collapse: collapse;">
+                <thead class="thead-dark" style="line-height: 1.2; padding: 0.2em;">
                     <tr>
                         <th>N</th>
                         <th>Расстояние от низа</th>
                         <th>Элемент КНБК</th>
                         <th>С/Н</th>
                         <th>Паспорт</th>
-                        
                     </tr>
                 </thead>
-                <tbody style="font-size: 16px; width: 350px;">
+                <tbody style="font-size: 18px; line-height: 1.2;">
                     @foreach (var position in Model.MWRC_POSITION.OrderBy(kv => kv.Value))
                     {
                         <tr>
-                            <td>@position.Value</td>
-                            <td>@(Model.MWRC_OFFSET_FROM_BIT.ContainsKey(position.Key) ? Model.MWRC_OFFSET_FROM_BIT[position.Key] : "")</td>
-                            <td>@Html.DisplayFor(model => Model.NEW_REAL_NAME[position.Key])</td>
-                            <td>@Html.DisplayFor(model => Model.MWCO_SN[position.Key])</td>
-
-                            <td>
+                            <td style="padding: 0.3em;">@position.Value</td>
+                            <td style="padding: 0.3em;">@(Model.MWRC_OFFSET_FROM_BIT.ContainsKey(position.Key) ? Model.MWRC_OFFSET_FROM_BIT[position.Key] : "")</td>
+                            <td style="padding: 0.3em;">@Html.DisplayFor(model => Model.NEW_REAL_NAME[position.Key])</td>
+                            <td style="padding: 0.3em;">@Html.DisplayFor(model => Model.MWCO_SN[position.Key])</td>
+                            <td style="padding: 0.3em;">
                                 <a href="@Url.Action("SearchAndOpenFolders", "VsatInfo", new { folderName = Model.MWCO_SN[position.Key] })" target="_blank" class="btn btn-primary btn-sm">Паспорт</a>
                             </td>
-
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
     </div>
+
 </div>
+

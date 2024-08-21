@@ -7,75 +7,55 @@
 }
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <title>Разметка страницы</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            
-            margin: 0;
-            width: 100%;
+        /* Стили для кнопки, имитирующей btn-info из Bootstrap */
+        .btn-info {
+            background-color: #17a2b8; /* Цвет фона Bootstrap btn-info */
+            color: #fff; /* Цвет текста */
+            border: 1px solid transparent; /* Граница с прозрачным цветом */
+            border-radius: 0.25rem; /* Радиус скругления углов */
+            padding: 0.60rem 1.125rem; /* Отступы внутри кнопки */
+            font-size: 1rem; /* Размер шрифта */
+            font-weight: 400; /* Толщина шрифта */
+            text-align: center; /* Выравнивание текста */
+            text-decoration: none; /* Убирает подчеркивание текста */
+            display: inline-block; /* Отображение в виде строки */
+            cursor: pointer; /* Курсор указателя */
+            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out; /* Плавный переход цвета фона и границы */
         }
 
-        .top-block {
-            background-color: white;
-            padding: 20px;
-            text-align: center;
-            flex: 1;
-        }
+            /* Стили для кнопки при наведении */
+            .btn-info:hover {
+                background-color: #138496; /* Цвет фона при наведении */
+                border-color: #117a8b; /* Цвет границы при наведении */
+            }
 
-        .bottom-blocks {
-            display: flex;
-           
-            width: 100%;
-            
-            
-        }
-
-        .bottom-block {
-            background-color: #F1F1F1;
-            padding: 20px;
-            text-align: center;
-            width: 55%;
-            display: flex;
-            
-            
-           
-        }
-
-        .bottom-block:nth-child(2) {
-            background-color: #F1F1F1;
-            width: 45%;
-            
-        }
-
-        .table-striped tbody td {
-            padding: 2px; /* Уменьшение внутреннего отступа */
-            line-height: 1.2; /* Настройка межстрочного интервала */
-        }
-
-        .card {
-            width: 100%;
-            justify-content: center;
-        }
-        
-
+            /* Стили для кнопки при нажатии */
+            .btn-info:active {
+                background-color: #117a8b; /* Цвет фона при нажатии */
+                border-color: #10707f; /* Цвет границы при нажатии */
+                box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125); /* Тень для кнопки при нажатии */
+            }
     </style>
 </head>
+
 <body>
+    <h1>Главная</h1>
+    <p style="margin-bottom: 20px;"></p>
     <div class="top-block">
         <div class="border rounded border-dark p-3">
-           
+
             <h2>Суточная сводка</h2>
-            <div class="border rounded shadow-sm p-3">
-                <table class="table table-striped" style="font-size: 12px; width: 100%; margin-left: 15px; margin-right: 15px; line-height: 1.5;">
+            <div class="border rounded shadow-sm p-3" style="margin-top: 10px; margin-left:20px">
+                <table class="table table-striped" style="font-size: 14px; width: 95%; margin-left: 15px; margin-right: 15px; line-height: 1.5;">
                     <thead>
                         <tr>
-                            <th scope="col">Дата и время</th>
+                            <th scope="col">Дата/время</th>
                             <th scope="col">Смена</th>
                             <th scope="col">431</th>
                             <th scope="col">VSAT</th>
@@ -91,7 +71,7 @@
                         @foreach (var incident in Model.RecentIncidents)
                         {
                             <tr>
-                                <td>@incident.Date</td>
+                                <td style="margin-left: 10px">@incident.Date</td>
                                 <td>@incident.Shift</td>
                                 <td>@incident.Reporter</td>
                                 <td>@incident.VSAT</td>
@@ -110,234 +90,6 @@
         </div>
     </div>
 
-    <!-- ---------------------------------------------------Ниже код Таблицы статистики за первый квартал--------------------------------------------------- -->
-    <div class="bottom-blocks">
-        <div class="bottom-block">
-            <div class="border rounded border-dark p-3" style="width: 50%; height: 70%">
-                <h3>Сводная статистика за Q1</h3>
-                <div class="border rounded shadow-lg p-3">
-                    <table class="table table-striped" style="font-size: 12px; width:70%; max-height: 50%; margin-left: 15px; margin-right: 15px">
-                        <thead>
-                            <tr>
-                                <th scope="col">Тип Проблемы</th>
-                                <th scope="col">Количество обращений, шт</th>
-                                <th scope="col">Количество закрытых обращений, шт</th>
-                                <th scope="col">Сохраненное НПВ, ч</th>
-
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var stat in Model.FirstQuarterStatistics)
-                            {
-                                <tr> 
-                                    <td>@stat.ProblemType</td>
-                                    <td>@stat.Count</td>
-                                    <td>@stat.TotalSuccessFailCount</td>
-                                    <td>@stat.SavedNPTCount</td>
-                                </tr>
-                            }
-                            <tr>
-                                <td>Суммарно</td>
-                                <td>@Model.FirstQuarterSTotalProblemTypes</td>
-                                <td>@Model.FirstQuarterSTotalClosedCount</td>
-                                <td>@Model.FirstQuarterSTotalSavedNPT</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-            <div class="border rounded border-dark p-3" style="width: 50%; height: 70%">
-                <h3>Сводная статистика за Q2</h3>
-                <div class="border rounded shadow-lg p-3">
-                    <table class="table table-striped" style="font-size: 12px; width:70%; max-height: 50%; margin-left: 15px; margin-right: 15px">
-                        <thead>
-                            <tr>
-                                <th scope="col">Тип Проблемы</th>
-                                <th scope="col">Количество обращений, шт</th>
-                                <th scope="col">Количество закрытых обращений, шт</th>
-                                <th scope="col">Сохраненное НПВ, ч</th>
-
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var stat in Model.SecondQuarterStatistics)
-                            {
-                                <tr>
-                                    <td>@stat.ProblemType</td>
-                                    <td>@stat.Count</td>
-                                    <td>@stat.TotalSuccessFailCount</td>
-                                    <td>@stat.SavedNPTCount</td>
-                                </tr>
-                            }
-                            <tr>
-                                <td>Суммарно</td>
-                                <td>@Model.SecondQuarterSTotalProblemTypes</td>
-                                <td>@Model.SecondQuarterSTotalClosedCount</td>
-                                <td>@Model.SecondQuarterSTotalSavedNPT</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-        </div>
-        
-        <!-- ---------------------------------------------------Ниже код java Script c графиками за Q1 --------------------------------------------------- -->
-
-        
-        <div class="bottom-block">
-            <div class="border rounded border-dark p-3" style="width: 100%">
-                <h2>График статистики за Q1</h2>
-                <div class="card">
-                    <div class="card-header">
-                        Bar Chart
-                    </div>
-                    <div class="card-body" style="width: 90%; display: flex; justify-content: center; align-items: center; margin: 0 auto;">
-                        <canvas id="barChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        Pie Chart
-                    </div>
-                    <div class="card-body" style="width: 70%; display: flex; justify-content: center; align-items: center; margin: 0 auto;">
-                        <canvas id="pieChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            fetch('/Home/GetFirstQuarterStatistics')
-                .then(response => response.json())
-                .then(data => {
-                    const labels = data.map(stat => stat.problemType);
-                    const countData = data.map(stat => stat.count);
-                    const successFailData = data.map(stat => stat.totalSuccessFailCount);
-                    const savedNPTData = data.map(stat => stat.savedNPTCount);
-
-                    const barCtx = document.getElementById('barChart').getContext('2d');
-                    new Chart(barCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Количество обращений, шт',
-                                    data: countData,
-                                    backgroundColor: 'rgba(153, 102, 255, 0.6)',
-                                    borderColor: 'rgba(0, 0, 0, 1)',
-                                    borderWidth: 1
-                                },
-                                {
-                                    label: 'Количество закрытых обращений, шт',
-                                    data: successFailData,
-                                    backgroundColor: 'rgba(0, 0, 128, 0.6)',
-                                    borderColor: 'rgba(0, 0, 0, 1)',
-                                    borderWidth: 1
-                                },
-                                {
-                                    label: 'Сохраненное НПВ, ч',
-                                    data: savedNPTData,
-                                    backgroundColor: 'rgba(0, 255, 0, 0.6)',
-                                    borderColor: 'rgba(0, 0, 0, 1)',
-                                    borderWidth: 1
-                                }
-                            ]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }
-                    });
-
-                    const pieCtx = document.getElementById('pieChart').getContext('2d');
-                    new Chart(pieCtx, {
-                        type: 'pie',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    data: countData,
-                                        backgroundColor: [
-                                            'rgba(255, 0, 0, 0.6)',        // Красный
-                                            'rgba(0, 255, 0, 0.6)',        // Зелёный
-                                            'rgba(0, 0, 255, 0.6)',        // Синий
-                                            'rgba(255, 255, 0, 0.6)',      // Жёлтый
-                                            'rgba(255, 0, 255, 0.6)',      // Фиолетовый
-                                            'rgba(0, 255, 255, 0.6)',      // Бирюзовый
-                                            'rgba(128, 0, 0, 0.6)',        // Тёмно-красный
-                                            'rgba(0, 128, 0, 0.6)',        // Тёмно-зелёный
-                                            'rgba(0, 0, 128, 0.6)',        // Тёмно-синий
-                                            'rgba(128, 128, 0, 0.6)',      // Тёмно-жёлтый
-                                            'rgba(128, 0, 128, 0.6)',      // Тёмно-фиолетовый
-                                            'rgba(0, 128, 128, 0.6)',      // Тёмно-бирюзовый
-                                            'rgba(255, 128, 0, 0.6)',      // Оранжевый
-                                            'rgba(255, 0, 128, 0.6)',      // Розовый
-                                            'rgba(128, 255, 0, 0.6)',      // Лаймовый
-                                            'rgba(0, 255, 128, 0.6)',      // Зелёный кадмия
-                                            'rgba(128, 0, 255, 0.6)',      // Лаванда
-                                            'rgba(0, 128, 255, 0.6)',      // Синий Клейна
-                                            'rgba(192, 192, 192, 0.6)',    // Серый
-                                            'rgba(128, 128, 128, 0.6)',    // Тёмно-серый
-                                            'rgba(64, 64, 64, 0.6)',       // Тёмно-тёмно-серый
-                                            'rgba(255, 192, 203, 0.6)',    // Розовый кварц
-                                            'rgba(210, 180, 140, 0.6)',    // Хаки
-                                            'rgba(0, 255, 127, 0.6)',      // Зелёный Хомут
-                                        ],
-                                        borderColor: [
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                            'rgba(0, 0, 0, 0, 1)',         // Чёрный
-                                        ],
-
-                                    borderWidth: 1
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Количество обращений по типам проблем'
-                                }
-                            }
-                        }
-                    });
-                });
-        });
-    </script>
-    </div>
 </body>
 </html>
+

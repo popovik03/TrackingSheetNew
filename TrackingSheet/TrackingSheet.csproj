@@ -26,6 +26,15 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="Models\VIewModels\" />
+    <Folder Include="wwwroot\img\" />
+    <Folder Include="wwwroot\vendor\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\js\journal_incident.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
