@@ -19,5 +19,7 @@ namespace TrackingSheet.Models
         public string? HighLight { get; set; }
         public string? Status { get; set; }
         public string? Solution { get; set;}
+
+        public int IpPart { get; set; } // Новое свойство для получения значения из формы
     }
 }

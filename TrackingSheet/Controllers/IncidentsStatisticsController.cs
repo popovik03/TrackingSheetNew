@@ -25,6 +25,14 @@ namespace TrackingSheet.Controllers
         }
 
         [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> IncidentsStatisticsJson(int year, int quarter)
+        {
+            var incidentsStatisticsJson = await _quarterYearStatisticsService.GetIncidentStatisticsASync(year, quarter);
+            return Json(incidentsStatisticsJson);
+        }
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> IncidentsStatistics(int year, int quarter)
         {
@@ -33,13 +41,7 @@ namespace TrackingSheet.Controllers
             return View(incidentsStatistics);
         }
 
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> IncidentsStatisticsJson(int year, int quarter)
-        {
-            var incidentsStatisticsJson = await _quarterYearStatisticsService.GetIncidentStatisticsASync(year, quarter);
-            return Json(incidentsStatisticsJson);
-        }
+        
 
     }
 }

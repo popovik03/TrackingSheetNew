@@ -1,8 +1,25 @@
 ﻿$(document).ready(function () {
-    // Инициализация DataTables
+    console.log('Initializing DataTables with order:', [[0, 'desc']]);
+
+    // Инициализация DataTables с сортировкой по первому столбцу (по дате) по убыванию
     var table = $('#journal_table').DataTable({
+        pageLength: 50, // Устанавливаем количество записей на странице по умолчанию
+        order: [[0, 'desc']], // Сортировка по первому столбцу (дата) по убыванию по умолчанию
+        columnDefs: [
+            {
+                targets: 0,        // Применение к первому столбцу
+                type: 'datetime',  // Указываем тип данных для сортировки как дата-время
+                render: function (data, type, row) {
+                    // Приводим дату к нужному формату, если требуется
+                    if (type === 'sort' || type === 'type') {
+                        return data; // Используем значение из data-order для сортировки
+                    }
+                    return row[0]; // Отображаем оригинальное значение
+                }
+            }
+        ],
         language: {
-            search: "Поиск:",
+            search: "Поиск",
             lengthMenu: "Показать _MENU_ записей на странице",
             zeroRecords: "Ничего не найдено",
             info: "Показаны записи с _START_ по _END_ из _TOTAL_",
@@ -16,6 +33,8 @@
             }
         }
     });
+
+    console.log('Current order settings:', table.settings().init().order); // Проверка текущих настроек сортировки
 
     // Функция для фильтрации по диапазону дат
     $.fn.dataTable.ext.search.push(

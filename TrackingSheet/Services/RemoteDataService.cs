@@ -98,7 +98,7 @@ namespace TrackingSheet.Services
                     }
                 }
                 //получение номера последнего рейса
-                string queryMWRU_NUMBER = "SELECT TOP 1 MWRU_NUMBER FROM MWD_RUN ORDER BY MWRU_DATETIME_START DESC";
+                string queryMWRU_NUMBER = "SELECT TOP 1 MWRU_NUMBER FROM MWD_RUN ORDER BY ROWTIMESTAMP DESC";
                 using (var command = new SqlCommand(queryMWRU_NUMBER, connection))
                 {
                     using (var reader = await command.ExecuteReaderAsync())

@@ -1,40 +1,80 @@
 ﻿@using static TrackingSheet.Models.AddIncidentViewModel
 @model TrackingSheet.Models.AddIncidentViewModel
 
-
-
 @{
-    ViewData["Title"] = "1";
+
+    ViewData["Title"] = "Новая запись";
     var reporter = TempData.Peek("Login") as string ?? string.Empty;
+    var well = ViewBag.VsatInfo != null ? ViewBag.VsatInfo.WELL_NAME : string.Empty;
+    var run = ViewBag.VsatInfo != null ? (int?)ViewBag.VsatInfo.MWRU_NUMBER : (int?)null;
+    var customer = ViewBag.VsatInfo != null ? ViewBag.VsatInfo.CPNM_NAME : string.Empty;
+
+    var pad = ViewBag.VsatInfo != null ? ViewBag.VsatInfo.FCTY_NAME : string.Empty;
+    var field = ViewBag.VsatInfo != null ? ViewBag.VsatInfo.OOIN_NAME : string.Empty;
+    var wellDisplay = $"{field} - {pad} - {well}".Trim(' ', '-');
+
+    // Извлечение данных из ViewBag.VsatInfo
+    var vsatInfo = ViewBag.VsatInfo as TrackingSheet.Models.VSATdata.VsatInfo;
+    string bha = string.Empty;
+
+    if (vsatInfo != null)
+    {
+        var positions = vsatInfo.MWRC_POSITION; // Словарь с позициями компонентов
+        var sns = vsatInfo.MWCO_SN; // Словарь с серийными номерами
+        var components = vsatInfo.NEW_REAL_NAME; // Словарь с именами компонентов
+
+        // Создание строки bha, сортируя по позициям и объединяя нужные данные
+        bha = string.Join("", positions.OrderBy(kv => kv.Value).Select(position =>
+        {
+            var key = position.Key;
+            var pos = position.Value;
+            var component = components.ContainsKey(key) ? components[key] : "N/A";
+            var sn = sns.ContainsKey(key) ? sns[key] : "N/A";
+            return $"{pos}: {component} {sn}; ";
+        }));
+    }
+    else
+    {
+        bha = "";
+    }
 
 }
 
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="~/js/new_incident.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
 <body>
-    <form method="post" action="Add">
-            <h1>
-                <label>Новый инцидент</label>
-            </h1>
-            <h2>
-                <label>Добавьте новый инцидент</label>
-            </h2>
+    <!-- Объединенная форма для добавления инцидента и получения данных VSAT -->
+    <form method="post" action="/Incidents/Add" id="mainForm">
+        <h1><label>Новый инцидент</label></h1>
+        <h2><label>Добавьте новый инцидент</label></h2>
 
         <div class="container-new-incident">
             <div class="left">
+                <!-- Поле для IP-адреса -->
+                <div class="input-field" style="display: flex; flex-direction: column; align-items: flex-start; width: 100%;">
+                    <label for="vsatInput" class="form-label" style="margin-bottom: 5px;">VSAT</label>
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <input type="number" id="vsatInput" name="ipPart" class="form-control form-control-sm" min="0" asp-for="VSAT"
+                               style="flex: 1; width: 70%; margin-right: 10px;" />
+                        <button type="button" id="getDataButton" class="btn-icon" style="background: none; border: none; padding: 0; cursor: pointer; font-size: 1.5em; color: #03BE93;">
+                            <i class="fas fa-database"></i> <!-- Иконка для кнопки -->
+                        </button>
+                    </div>
+                </div>
+
                 <div class="input-field">
                     <label for="" class="form-label">Дата инцидента</label>
-                    <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
+                    <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
                 </div>
+
                 <div class="input-field">
                     <label for="" class="form-label">Смена</label>
                     <select class="form-select" asp-for="Shift">
@@ -42,30 +82,29 @@
                         <option value="Night">Ночь</option>
                     </select>
                 </div>
+
                 <div class="input-field">
                     <label for="reporter" class="form-label">431</label>
                     <input type="text" class="form-control form-control-sm" asp-for="Reporter" value="@reporter" />
                 </div>
-                <div class="input-field">
-                    <label for="" class="form-label">VSAT</label>
-                    <input type="number" class="form-control form-control-sm" asp-for="VSAT" />
-                </div>
+
                 <div class="input-field">
                     <label for="" class="form-label">Скважина</label>
-                    <input type="text" class="form-control form-control-sm" asp-for="Well" />
+                    <input type="text" class="form-control form-control-sm" asp-for="Well" value="@wellDisplay" />
                 </div>
                 <div class="input-field">
                     <label for="" class="form-label">Рейс</label>
-                    <input type="number" class="form-control form-control-sm" asp-for="Run" />
+                    <input type="number" class="form-control form-control-sm" asp-for="Run" min="0" value="@run" />
                 </div>
                 <div class="input-field">
                     <label for="" class="form-label">Сохраненное НПВ, ч.</label>
-                    <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" />
+                    <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" min="0" />
                 </div>
                 <div class="input-field">
                     <label for="" class="form-label">Тип проблемы</label>
                     <div class="col-sm-12">
                         <select class="form-select form-select-sm" asp-for="ProblemType">
+                            <!-- Опции -->
                             <option value="Advantage">Advantage</option>
                             <option value="ATK issue">ATK issue</option>
                             <option value="APS">APS</option>
@@ -93,18 +132,15 @@
                             <option value="Win10">Win10</option>
                             <option value="WITS">WITS</option>
                             <option value="Other">Other</option>
-
                         </select>
                     </div>
                 </div>
-
                 <div class="input-field">
                     <label for="" class="form-label">Отметка</label>
                     <div class="col-sm-12">
                         <select class="form-select form-select-sm" asp-for="HighLight">
                             <option value=""></option>
                             <option value="🚩">🚩</option>
-
                         </select>
                     </div>
                 </div>
@@ -124,7 +160,9 @@
             <div class="right">
                 <div class="input-field">
                     <label for="" class="form-label">Описание инцидента:</label>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="36" asp-for="Solution"></textarea>
+                    <textarea class="form-control" id="descriptionTextarea" rows="36" asp-for="Solution">
+                        @Html.Raw(bha)
+                    </textarea>
                 </div>
             </div>
         </div>
@@ -138,6 +176,50 @@
             </button>
         </div>
     </form>
+
+    <form method="post" action="/Incidents/SetIpAddressAndGetLatestVsatInfo" id="vsatForm" style="display: none">
+        <div class="input-field">
+            <label for="vsatInput" class="form-label">IP-адрес</label>
+            <input type="number" id="vsatInputHidden" name="ipPart" class="form-control form-control-sm" min="0" />
+        </div>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var getDataButton = document.querySelector('#getDataButton');
+            var vsatInput = document.querySelector('#vsatInput');
+            var vsatForm = document.querySelector('#vsatForm');
+            var vsatInputHidden = document.querySelector('#vsatInputHidden');
+            var descriptionTextarea = document.querySelector('#descriptionTextarea');
+
+            // Загрузка сохраненного значения из localStorage при загрузке страницы
+            var savedVsatValue = localStorage.getItem('vsatValue');
+            if (savedVsatValue) {
+                vsatInput.value = savedVsatValue;
+            }
+
+            if (getDataButton && vsatInput && vsatForm && vsatInputHidden) {
+                // Сохранение значения в localStorage и отправка формы при нажатии кнопки
+                getDataButton.addEventListener('click', function () {
+                    var ipPart = vsatInput.value;
+                    if (ipPart) {
+                        localStorage.setItem('vsatValue', ipPart); // Сохраняем значение в localStorage
+                        vsatInputHidden.value = ipPart; // Обновляем скрытое поле
+                        vsatForm.submit(); // Отправляем форму для получения данных
+                    } else {
+                        console.error('IP-адрес не введен');
+                    }
+                });
+            } else {
+                console.error('Не удалось найти элементы кнопки или формы.');
+            }
+
+            // Установка значения в поле textarea
+            var bha = `@Html.Raw(bha)`;
+            if (descriptionTextarea) {
+                descriptionTextarea.value = bha;
+            }
+        });
+    </script>
 </body>
 </html>
-

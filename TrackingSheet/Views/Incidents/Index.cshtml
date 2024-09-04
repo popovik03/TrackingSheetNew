@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@{
+    ViewData["Title"] = "Журнал инцидентов";
+
+}
+
+
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -7,13 +14,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <!-- Подключаем библиотеки -->
-    <script src="@Url.Content("~/vendor/jquery/dist/jquery.js")" defer></script>
-    <script src="@Url.Content("~/vendor/datatables.net/js/dataTables.js")" defer></script>
-    <script src="@Url.Content("~/vendor/datatables.net-buttons/js/dataTables.buttons.js")" defer></script>
-    <script src="@Url.Content("~/vendor/datatables.net-buttons-dt/js/buttons.dataTables.js")" defer></script>
-    <script src="@Url.Content("~/vendor/datatables.net-select/js/dataTables.select.js")" defer></script>
-    <script src="@Url.Content("~/vendor/datatables.net-select-dt/js/select.dataTables.js")" defer></script>
-    <script src="@Url.Content("~/vendor/datatables.net-datetime/dist/dataTables.dateTime.min.js")" defer></script>
+
+    <script src="@Url.Content("~/vendor/jquery/dist/jquery.js")"></script>
+    <script src="@Url.Content("~/vendor/datatables.net/js/dataTables.js")"></script>
+    <script src="@Url.Content("~/vendor/datatables.net-buttons/js/dataTables.buttons.js")"></script>
+    <script src="@Url.Content("~/vendor/datatables.net-buttons-dt/js/buttons.dataTables.js")"></script>
+    <script src="@Url.Content("~/vendor/datatables.net-select/js/dataTables.select.js")"></script>
+    <script src="@Url.Content("~/vendor/datatables.net-select-dt/js/select.dataTables.js")"></script>
+    <script src="@Url.Content("~/vendor/datatables.net-datetime/dist/dataTables.dateTime.min.js")"></script>
     <link rel="stylesheet" href="@Url.Content("~/vendor/datatables.net-buttons-dt/css/buttons.dataTables.css")">
     <link rel="stylesheet" href="@Url.Content("~/vendor/datatables.net-select-dt/css/select.dataTables.css")">
     <link rel="stylesheet" href="@Url.Content("~/vendor/datatables.net-datetime/dist/dataTables.dateTime.min.css")">
@@ -24,7 +32,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <!-- Подключаем JavaScript файл с логикой -->
-    <script src="@Url.Content("~/js/journal_incident.js")" defer></script>
+    <script src="@Url.Content("~/js/journal_incident1.js")"></script>
 
     <!-- Стиль для кнопки экспорта -->
     <style>
@@ -106,7 +114,12 @@
                     @foreach (var incidents in Model)
                     {
                         <tr>
-                            <td>@incidents.Date.ToString("dd-MM-yyyy hh:mm")</td>
+                            <td data-order="@incidents.Date.ToString("yyyy-MM-ddTHH:mm:ss")">
+                                @incidents.Date.ToString("dd-MM-yyyy HH:mm")
+                            </td>
+
+
+
                             <td>@incidents.Shift</td>
                             <td>@incidents.Reporter</td>
                             <td>@incidents.VSAT</td>

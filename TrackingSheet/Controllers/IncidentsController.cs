@@ -1,31 +1,46 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using TrackingSheet.Models.VSATdata;
 using TrackingSheet.Data;
 using TrackingSheet.Models;
 using TrackingSheet.Models.Domain;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using TrackingSheet.Services;
+using System.Text.Json;
+using NuGet.Packaging.Signing;
+
+
 
 namespace TrackingSheet.Controllers
 {
     public class IncidentsController : Controller
     {
         private readonly MVCDbContext mvcDbContext;
+        private readonly RemoteDataService _remoteDataService;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
 
-        public IncidentsController(MVCDbContext mvcDbContext) 
+        public IncidentsController(MVCDbContext mvcDbContext, RemoteDataService remoteDataService, IConfiguration configuration, ILogger<IncidentsController> logger)
         {
             this.mvcDbContext = mvcDbContext;
+            _remoteDataService = remoteDataService;
+            _configuration = configuration;
+            _logger = logger;
         }
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var incidents = await mvcDbContext.IncidentList.OrderByDescending(p=> p.Date).ToListAsync();
+            var incidents = await mvcDbContext.IncidentList.OrderByDescending(p => p.Date).ToListAsync();
             ViewData["CurrentPage"] = "journal";
             return View(incidents);
         }
+
+
+
+
+
 
         [Authorize]
         [HttpGet]
@@ -33,13 +48,69 @@ namespace TrackingSheet.Controllers
         {
             ViewData["CurrentPage"] = "new_incident";
 
-            return View();
+            // Получение данных VSAT из TempData
+            var vsatInfoJson = TempData["VsatInfo"] as string;
+            VsatInfo vsatInfo = string.IsNullOrEmpty(vsatInfoJson) ? null : JsonSerializer.Deserialize<VsatInfo>(vsatInfoJson);
+
+            // Если данные VSAT получены, заполнить модель
+            var model = new AddIncidentViewModel
+            {
+                Well = vsatInfo?.WELL_NAME ?? "Test",
+                Run = vsatInfo?.MWRU_NUMBER ?? 100
+            };
+
+            return View(model);
         }
+
+
+        [HttpPost]
+        public async Task <IActionResult> SetIpAddressAndGetLatestVsatInfo(int ipPart)
+        {
+            string connectionStringTemplate = _configuration.GetConnectionString("RemoteDatabase");
+            string connectionString = connectionStringTemplate.Replace("${IPAddress}", ipPart.ToString());
+
+            // Сохранение строки подключения в сессии
+            HttpContext.Session.SetString("RemoteDbConnectionString", connectionString);
+            TempData["ipPart"] = ipPart;
+
+            try
+            {
+                // Получение строки подключения из сессии
+                string connectionStringNew = HttpContext.Session.GetString("RemoteDbConnectionString");
+                _remoteDataService.SetConnectionString(connectionStringNew);
+
+                // Получение данных VSAT
+                VsatInfo vsatInfo = await _remoteDataService.GetLatestVsatInfoAsync();
+
+                if (vsatInfo == null)
+                {
+                    return NotFound();
+                }
+
+                ViewBag.CurrentPage = "new_incident";
+                ViewBag.VsatInfo = vsatInfo;  // Передача данных в ViewBag
+                return View("Add");  // Отображение представления
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while getting latest VSAT info.");
+                string status_message = string.Format("Получение данных по адресу {0}", HttpContext.Session.GetString("RemoteDbConnectionString"));
+                ViewBag.ErrorMessage = status_message;  // Передача сообщения об ошибке
+                return View("ErrorView");  // Отображение представления ошибки
+            }
+            
+        }
+
+
+
         [Authorize]
         [HttpPost]
 
         public async Task<IActionResult> Add(AddIncidentViewModel addIncidentRequest)
         {
+            
+            addIncidentRequest.VSAT = addIncidentRequest.IpPart; //Присваиваем значение ip-part и номер VSAT
+
             var incident = new Incidents()
             {
                 ID = Guid.NewGuid(),
@@ -59,9 +130,11 @@ namespace TrackingSheet.Controllers
 
             await mvcDbContext.IncidentList.AddAsync(incident);
             await mvcDbContext.SaveChangesAsync();
-            //return RedirectToAction("Add");
+            
             return RedirectToAction("Index", "Home");
         }
+
+
 
         [Authorize]
         [HttpGet]
@@ -69,7 +142,7 @@ namespace TrackingSheet.Controllers
         {
             var incidents = await mvcDbContext.IncidentList.FirstOrDefaultAsync(x => x.ID == id);
 
-            if (incidents !=null)
+            if (incidents != null)
             {
                 var ViewModel = new UpdateIncidentViewModel()
                 {
@@ -86,10 +159,10 @@ namespace TrackingSheet.Controllers
                     Status = incidents.Status,
                     Solution = incidents.Solution
                 };
-                return await Task.Run(() =>View("View", ViewModel));
+                return await Task.Run(() => View("View", ViewModel));
 
             }
-            
+
             return RedirectToAction("Index");
         }
 
@@ -119,25 +192,36 @@ namespace TrackingSheet.Controllers
             return RedirectToAction("Index");
         }
 
+
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> Delete(UpdateIncidentViewModel model)
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var incident = await mvcDbContext.IncidentList.FindAsync(model.ID);
-            
+            if (id == Guid.Empty)
+            {
+                _logger.LogWarning("Удаление записи с пустым идентификатором.");
+                TempData["AlertMessage"] = "Некорректный идентификатор.";
+                return RedirectToAction("Index");
+            }
+
+            var incident = await mvcDbContext.IncidentList.FindAsync(id);
+
             if (incident != null)
             {
-               
                 mvcDbContext.IncidentList.Remove(incident);
                 await mvcDbContext.SaveChangesAsync();
                 TempData["AlertMessage"] = "Инцидент удален";
-                return RedirectToAction("Index");
-
+                _logger.LogInformation("Инцидент успешно удален.");
+            }
+            else
+            {
+                _logger.LogWarning($"Инцидент с ID {id} не найден для удаления.");
+                TempData["AlertMessage"] = "Инцидент не найден";
             }
 
             return RedirectToAction("Index");
-
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetIncidents(int page = 1, int pageSize = 50)

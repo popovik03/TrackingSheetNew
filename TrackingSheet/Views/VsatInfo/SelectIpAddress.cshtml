@@ -8,7 +8,7 @@
     <style>
         /* Стили для кнопки, имитирующей btn-info из Bootstrap */
         .btn-info {
-            background-color: #17a2b8; /* Цвет фона Bootstrap btn-info */
+            background-color: #03BE93; /* Цвет фона Bootstrap btn-info */
             color: #fff; /* Цвет текста */
             border: 1px solid transparent; /* Граница с прозрачным цветом */
             border-radius: 0.25rem; /* Радиус скругления углов */
@@ -24,13 +24,13 @@
 
             /* Стили для кнопки при наведении */
             .btn-info:hover {
-                background-color: #138496; /* Цвет фона при наведении */
+                background-color: #03BE93; /* Цвет фона при наведении */
                 border-color: #117a8b; /* Цвет границы при наведении */
             }
 
             /* Стили для кнопки при нажатии */
             .btn-info:active {
-                background-color: #117a8b; /* Цвет фона при нажатии */
+                background-color: #03BE93; /* Цвет фона при нажатии */
                 border-color: #10707f; /* Цвет границы при нажатии */
                 box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125); /* Тень для кнопки при нажатии */
             }
@@ -44,7 +44,7 @@
     <form asp-action="SetIpAddress" method="post">
         <div class="form-group" style="margin-bottom: 15px; margin-left: 40px;">
             <label for="ipPart"></label>
-            <select id="ipPart" name="ipPart" class="form-control" style="width: 220px;">
+            <select id="ipPart" name="ipPart" class="form-control" style="width: 210px;">
                 @for (int i = 1; i <= 200; i++)
                 {
                     <option value="@i">@i</option>

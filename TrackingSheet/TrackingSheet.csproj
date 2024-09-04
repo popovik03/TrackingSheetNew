@@ -21,17 +21,19 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
     <PackageReference Include="SciChart.ExternalDependencies" Version="8.5.0.28148" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.5" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="Models\VIewModels\" />
     <Folder Include="wwwroot\img\" />
+    <Folder Include="wwwroot\NewFolder\" />
     <Folder Include="wwwroot\vendor\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="wwwroot\js\journal_incident.js">
+    <Content Update="wwwroot\js\journal_incident1.js">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

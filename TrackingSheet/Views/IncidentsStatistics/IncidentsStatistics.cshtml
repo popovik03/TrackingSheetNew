@@ -160,13 +160,13 @@
                     row.style.lineHeight = '1.2';
 
                     row.innerHTML = `
-                        <td style="padding: 4px; font-weight: bold;">${item.problemType}</td>
-                        <td style="padding: 4px;">${item.count}</td>
-                        <td style="padding: 4px;">${item.successCount + item.failCount}</td>
-                        <td style="padding: 4px;"><p class="status success">${item.successCount}</p></td>
-                        <td style="padding: 4px;"><p class="status failed">${item.failCount}</p></td>
-                        <td style="padding: 4px;">${item.savedNPTCount}</td>
-                    `;
+                            <td style="padding: 4px; font-weight: bold;">${item.problemType}</td>
+                            <td style="padding: 4px;">${item.count}</td>
+                            <td style="padding: 4px;">${item.successCount + item.failCount}</td>
+                            <td style="padding: 4px;"><p class="status success">${item.successCount}</p></td>
+                            <td style="padding: 4px;"><p class="status failed">${item.failCount}</p></td>
+                            <td style="padding: 4px;">${item.savedNPTCount}</td>
+                        `;
 
                     tableBody.appendChild(row);
                 });
@@ -182,13 +182,13 @@
                 totalRow.style.lineHeight = '1.2';
 
                 totalRow.innerHTML = `
-                    <td><strong>Итого</strong></td>
-                    <td><strong>${totalCount}</strong></td>
-                    <td><strong>${totalSuccessFailCount}</strong></td>
-                    <td><p class="status success"><strong>${totalSuccessCount}</strong></p></td>
-                    <td><p class="status failed"><strong>${totalFailCount}</strong></p></td>
-                    <td><strong>${totalSavedNPTCount}</strong></td>
-                `;
+                        <td><strong>Итого</strong></td>
+                        <td><strong>${totalCount}</strong></td>
+                        <td><strong>${totalSuccessFailCount}</strong></td>
+                        <td><p class="status success"><strong>${totalSuccessCount}</strong></p></td>
+                        <td><p class="status failed"><strong>${totalFailCount}</strong></p></td>
+                        <td><strong>${totalSavedNPTCount}</strong></td>
+                    `;
 
                 tableBody.appendChild(totalRow);
             }
@@ -199,7 +199,15 @@
                 const successFailData = data.map(stat => stat.successCount + stat.failCount);
                 const savedNPTData = data.map(stat => stat.savedNPTCount);
 
-                // Создаем графики
+                // Уничтожаем предыдущие экземпляры графиков, если они существуют
+                if (barChartInstance) {
+                    barChartInstance.destroy();
+                }
+                if (pieChartInstance) {
+                    pieChartInstance.destroy();
+                }
+
+                // Создаем новый график "barChart"
                 const barCtx = document.getElementById('barChart').getContext('2d');
                 barChartInstance = new Chart(barCtx, {
                     type: 'bar',
@@ -238,6 +246,7 @@
                     }
                 });
 
+                // Создаем новый график "pieChart"
                 const pieCtx = document.getElementById('pieChart').getContext('2d');
                 pieChartInstance = new Chart(pieCtx, {
                     type: 'pie',
@@ -279,22 +288,15 @@
                 });
             }
 
-            function updateCharts(data) {
-                // Уничтожаем предыдущие экземпляры графиков, если они существуют
-                if (barChartInstance) {
-                    barChartInstance.destroy();
+            async function fetchData(url) {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                if (pieChartInstance) {
-                    pieChartInstance.destroy();
-                }
-
-                // Создаем новые графики только если данные есть
-                if (data && data.length > 0) {
-                    createCharts(data);
-                }
+                return await response.json();
             }
 
-            function fetchData() {
+            async function updateCharts(attempt = 1) {
                 const year = yearInput.value;
                 const quarter = getSelectedQuarter();
 
@@ -303,28 +305,37 @@
                     return;
                 }
 
-                fetch(`/IncidentsStatistics/IncidentsStatisticsJson?year=${year}&quarter=${quarter}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Обновляем таблицу
-                        updateTable(data);
-                        // Обновляем графики
-                        updateCharts(data);
-                    })
-                    .catch(error => console.error('Error fetching data:', error));
+                try {
+                    // Добавляем временную метку к URL, чтобы предотвратить кэширование
+                    const url = `/IncidentsStatistics/IncidentsStatisticsJson?year=${year}&quarter=${quarter}&timestamp=${new Date().getTime()}`;
+                    const data = await fetchData(url);
+
+                    if (data.length === 0) {
+                        console.warn(`No data received for year ${year}, quarter ${quarter}`);
+                    }
+
+                    updateTable(data);
+                    createCharts(data);
+
+                    // Если данных нет и это первая попытка, пробуем снова
+                    if (data.length === 0 && attempt < 2) {
+                        console.log(`Retrying... Attempt ${attempt + 1}`);
+                        setTimeout(() => updateCharts(attempt + 1), 1000); // Повторить через 1 секунду
+                    }
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
             }
 
             form.addEventListener('submit', function (event) {
                 event.preventDefault();  // Предотвращаем стандартную отправку формы
-                fetchData();  // Обновляем таблицу и графики через AJAX
+                updateCharts();  // Обновляем таблицу и графики через AJAX
             });
-
-            // Инициализация графиков с пустыми данными при загрузке страницы
-            createCharts([]); // Создаем графики с пустыми данными при первой загрузке
         });
-
-
     </script>
+
+
+
 
    
 </body>
