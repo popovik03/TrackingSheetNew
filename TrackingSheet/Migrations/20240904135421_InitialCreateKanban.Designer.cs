@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrackingSheet.Data;
 
@@ -11,9 +12,11 @@ using TrackingSheet.Data;
 namespace TrackingSheet.Migrations
 {
     [DbContext(typeof(MVCDbContext))]
-    partial class MVCDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240904135421_InitialCreateKanban")]
+    partial class InitialCreateKanban
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,7 +66,7 @@ namespace TrackingSheet.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("IncidentList", (string)null);
+                    b.ToTable("IncidentList");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanComment", b =>
@@ -90,7 +93,7 @@ namespace TrackingSheet.Migrations
 
                     b.HasIndex("KanbanTaskId");
 
-                    b.ToTable("KanbanComments", (string)null);
+                    b.ToTable("KanbanComments");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanMember", b =>
@@ -105,7 +108,7 @@ namespace TrackingSheet.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("KanbanMembers", (string)null);
+                    b.ToTable("KanbanMembers");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanSubtask", b =>
@@ -128,7 +131,7 @@ namespace TrackingSheet.Migrations
 
                     b.HasIndex("KanbanTaskId");
 
-                    b.ToTable("KanbanSubtasks", (string)null);
+                    b.ToTable("KanbanSubtasks");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanTask", b =>
@@ -165,7 +168,7 @@ namespace TrackingSheet.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("KanbanTasks", (string)null);
+                    b.ToTable("KanbanTasks");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanTaskMember", b =>
@@ -180,7 +183,7 @@ namespace TrackingSheet.Migrations
 
                     b.HasIndex("KanbanMemberId");
 
-                    b.ToTable("KanbanTaskMembers", (string)null);
+                    b.ToTable("KanbanTaskMembers");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.RO_Planer.EmployeePlaner2024", b =>
@@ -249,7 +252,7 @@ namespace TrackingSheet.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("EmployeePlaner2024", (string)null);
+                    b.ToTable("EmployeePlaner2024");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.RO_Planer.ROemployees", b =>
@@ -269,7 +272,7 @@ namespace TrackingSheet.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ROemployees", (string)null);
+                    b.ToTable("ROemployees");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanComment", b =>

@@ -13,10 +13,12 @@
 <body>
     <form method="post" action="@Url.Action("View", "Incidents")">
         <h2>
-            Описание и редактирование инцидента <!-- Ссылка для удаления с кнопкой крестика -->
+            <h1><label>Редактирование инцидента</label></h1>
+            <h2><label>Внесите изменения или удалите инцидент</label></h2>
+            <!-- Ссылка для удаления с кнопкой крестика -->
             <a href="@Url.Action("Delete", "Incidents", new { id = Model.ID })"
                class="btn btn-danger btn-lg delete-button"
-               style="margin-top: 50px; margin-right: 70px"
+               style="margin-top: 70px; margin-right: 70px"
                onclick="return confirm('Вы уверены что хотите удалить запись?')">
                 <svg class="icon_delete" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
