@@ -70,4 +70,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Access}/{action=Login}/{id?}");
 
+app.MapControllers(); // Это нужно для маршрутизации API
+
 app.Run();

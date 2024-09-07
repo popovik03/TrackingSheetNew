@@ -27,12 +27,17 @@
     <link rel="stylesheet" href="@Url.Content("~/vendor/datatables.net-datetime/dist/dataTables.dateTime.min.css")">
     <link rel="stylesheet" href="@Url.Content("~/vendor/datatables.net-dt/css/dataTables.dataTables.css")">
 
+    <!-- Подключаем библиотеки для сортировки по времени -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.13.6/sorting/datetime-moment.js"></script>
+
+
     <!-- Подключаем библиотеки для работы с Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <!-- Подключаем JavaScript файл с логикой -->
-    <script src="@Url.Content("~/js/journal_incident1.js")"></script>
+    <script src="@Url.Content("~/js/journal_incident.js")"></script>
 
     <!-- Стиль для кнопки экспорта -->
     <style>
@@ -85,10 +90,10 @@
     </h1>
 
     <div id="date-range-filter" style="margin-bottom: 10px; justify-content: center; align-items:center; display: flex">
-        <label for="min-date">С </label>
-        <input type="date" id="min-date">
-        <label for="max-date"> По </label>
-        <input type="date" id="max-date">
+        <label for="min-date">Сортириовка по дате</label>
+        <span style="margin: 0 5px;"></span> <input type="date" id="min-date">
+        <label for="max-date">-</label>
+        <span style="margin: 0 5px;"></span> <input type="date" id="max-date">
     </div>
 
     <div class="table_container">
@@ -96,58 +101,22 @@
             <table id="journal_table" class="display">
                 <thead>
                     <tr>
-                        <th>Дата</th>
-                        <th>Смена</th>
-                        <th>431</th>
-                        <th>VSAT</th>
-                        <th>Скважина</th>
-                        <th>Рейс</th>
-                        <th>Сохр. НПВ</th>
-                        <th>Тип проблемы</th>
-                        <th>Статус</th>
-                        <th>Описание/Решение</th>
-                        <th>Отметка</th>
-                        <th>Обзор</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var incidents in Model)
-                    {
-                        <tr>
-                            <td data-order="@incidents.Date.ToString("yyyy-MM-ddTHH:mm:ss")">
-                                @incidents.Date.ToString("dd-MM-yyyy HH:mm")
-                            </td>
-
-
-
-                            <td>@incidents.Shift</td>
-                            <td>@incidents.Reporter</td>
-                            <td>@incidents.VSAT</td>
-                            <td>@incidents.Well</td>
-                            <td>@incidents.Run</td>
-                            <td>@incidents.SavedNPT</td>
-                            <td>@incidents.ProblemType</td>
-                            @if (@incidents.Status?.IndexOf("Success", StringComparison.OrdinalIgnoreCase) >= 0)
-                            {
-                                <td style="background-color: lawngreen">@incidents.Status</td>
-                            }
-                            else if (@incidents.Status?.IndexOf("Process", StringComparison.OrdinalIgnoreCase) >= 0)
-                            {
-                                <td style="background-color: yellow">@incidents.Status</td>
-                            }
-                            else if (@incidents.Status?.IndexOf("Fail", StringComparison.OrdinalIgnoreCase) >= 0)
-                            {
-                                <td style="background-color: orangered">@incidents.Status</td>
-                            }
-                            else
-                            {
-                                <td style="background-color: darkgrey">None</td>
-                            }
-                            <td>@incidents.Solution</td>
-                            <td>@incidents.HighLight</td>
-                            <td><a href="View/@incidents.ID">Обзор</a></td>
-                        </tr>
-                    }
+                    
                 </tbody>
             </table>
         </section>

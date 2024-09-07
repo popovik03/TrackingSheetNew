@@ -64,7 +64,7 @@ namespace TrackingSheet.Controllers
 
 
         [HttpPost]
-        public async Task <IActionResult> SetIpAddressAndGetLatestVsatInfo(int ipPart)
+        public async Task<IActionResult> SetIpAddressAndGetLatestVsatInfo(int ipPart)
         {
             string connectionStringTemplate = _configuration.GetConnectionString("RemoteDatabase");
             string connectionString = connectionStringTemplate.Replace("${IPAddress}", ipPart.ToString());
@@ -98,7 +98,7 @@ namespace TrackingSheet.Controllers
                 ViewBag.ErrorMessage = status_message;  // Передача сообщения об ошибке
                 return View("ErrorView");  // Отображение представления ошибки
             }
-            
+
         }
 
 
@@ -108,7 +108,7 @@ namespace TrackingSheet.Controllers
 
         public async Task<IActionResult> Add(AddIncidentViewModel addIncidentRequest)
         {
-            
+
             addIncidentRequest.VSAT = addIncidentRequest.IpPart; //Присваиваем значение ip-part и номер VSAT
 
             var incident = new Incidents()
@@ -130,7 +130,7 @@ namespace TrackingSheet.Controllers
 
             await mvcDbContext.IncidentList.AddAsync(incident);
             await mvcDbContext.SaveChangesAsync();
-            
+
             return RedirectToAction("Index", "Home");
         }
 
@@ -223,17 +223,23 @@ namespace TrackingSheet.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<IActionResult> GetIncidents(int page = 1, int pageSize = 50)
+        [Authorize]
+        [HttpGet("api/incidents/all")]
+        public async Task<IActionResult> GetAllIncidents()
         {
-            var incidents = await mvcDbContext.IncidentList
-                .OrderByDescending(p => p.Date)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var data = await mvcDbContext.IncidentList.ToListAsync();
+            var totalRecords = data.Count;
 
-            return Json(incidents);
+            return Json(new
+            {
+                draw = 1,
+                recordsTotal = totalRecords,
+                recordsFiltered = totalRecords,
+                data = data
+            });
         }
+
+
 
 
 

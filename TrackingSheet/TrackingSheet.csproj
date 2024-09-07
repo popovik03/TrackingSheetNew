@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="wwwroot\js\journal_incident1.js">
+    <Content Update="wwwroot\js\journal_incident.js">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
