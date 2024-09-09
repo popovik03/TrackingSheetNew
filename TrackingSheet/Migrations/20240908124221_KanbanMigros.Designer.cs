@@ -12,8 +12,8 @@ using TrackingSheet.Data;
 namespace TrackingSheet.Migrations
 {
     [DbContext(typeof(MVCDbContext))]
-    [Migration("20240904135421_InitialCreateKanban")]
-    partial class InitialCreateKanban
+    [Migration("20240908124221_KanbanMigros")]
+    partial class KanbanMigros
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,13 +69,62 @@ namespace TrackingSheet.Migrations
                     b.ToTable("IncidentList");
                 });
 
+            modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanBoard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Board")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("KanbanBoards");
+                });
+
+            modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanColumn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Column")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ColumnColor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("KanbanBoardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KanbanBoardId");
+
+                    b.ToTable("KanbanColumns");
+                });
+
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanComment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Author")
+                    b.Property<string>("CommentAuthor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CommentText")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -84,10 +133,6 @@ namespace TrackingSheet.Migrations
 
                     b.Property<Guid>("KanbanTaskId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -123,7 +168,7 @@ namespace TrackingSheet.Migrations
                     b.Property<Guid>("KanbanTaskId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("SubtaskDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -140,33 +185,46 @@ namespace TrackingSheet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Board")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Creator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("KanbanColumnId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Priority")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaskAuthor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Task")
+                    b.Property<string>("TaskColor")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaskDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaskName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaskType")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("KanbanColumnId");
 
                     b.ToTable("KanbanTasks");
                 });
@@ -275,6 +333,17 @@ namespace TrackingSheet.Migrations
                     b.ToTable("ROemployees");
                 });
 
+            modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanColumn", b =>
+                {
+                    b.HasOne("TrackingSheet.Models.Kanban.KanbanBoard", "KanbanBoard")
+                        .WithMany("Columns")
+                        .HasForeignKey("KanbanBoardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("KanbanBoard");
+                });
+
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanComment", b =>
                 {
                     b.HasOne("TrackingSheet.Models.Kanban.KanbanTask", "KanbanTask")
@@ -295,6 +364,15 @@ namespace TrackingSheet.Migrations
                         .IsRequired();
 
                     b.Navigation("KanbanTask");
+                });
+
+            modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanTask", b =>
+                {
+                    b.HasOne("TrackingSheet.Models.Kanban.KanbanColumn", null)
+                        .WithMany("Tasks")
+                        .HasForeignKey("KanbanColumnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanTaskMember", b =>
@@ -325,6 +403,16 @@ namespace TrackingSheet.Migrations
                         .IsRequired();
 
                     b.Navigation("ROemployees");
+                });
+
+            modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanBoard", b =>
+                {
+                    b.Navigation("Columns");
+                });
+
+            modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanColumn", b =>
+                {
+                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanMember", b =>

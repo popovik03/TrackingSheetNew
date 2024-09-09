@@ -1,0 +1,95 @@
+﻿.kanban-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.kanban-tabs {
+    display: flex;
+    height: 5%;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+    .kanban-tabs .tab-item {
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+    }
+
+        .kanban-tabs .tab-item .board-name {
+            cursor: pointer;
+        }
+
+.kanban-content {
+    height: 95%;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.board-content {
+    display: none;
+}
+
+    .board-content.show {
+        display: block;
+    }
+
+
+.kanban-form {
+    height: 100%;
+}
+
+.plus-button {
+    font-size: 24px;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kanban-columns {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: stretch;
+    height: 100%;
+    overflow-x: auto;
+}
+
+.kanban-column {
+    flex: 0 0 20%;
+    border: 1px solid #ccc;
+    margin-right: 10px;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.kanban-tasks {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.kanban-task {
+    background-color: #ffffff;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+

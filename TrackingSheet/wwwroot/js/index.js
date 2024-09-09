@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         new_incident: 'new_incident.html',
         vsat_bha: 'vsat_bha.html',
         statistics: 'statistics.html',
-        ro_planer: 'ro_planer.html',
+        kanban: 'KanbanView.cshtml',
         about: 'about.html'
     };
 

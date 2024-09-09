@@ -6,11 +6,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TrackingSheet.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateKanban : Migration
+    public partial class KanbanMigros : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "KanbanBoards",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Board = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KanbanBoards", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "KanbanMembers",
                 columns: table => new
@@ -24,21 +37,52 @@ namespace TrackingSheet.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "KanbanColumns",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    KanbanBoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Column = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ColumnColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KanbanColumns", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KanbanColumns_KanbanBoards_KanbanBoardId",
+                        column: x => x.KanbanBoardId,
+                        principalTable: "KanbanBoards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "KanbanTasks",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Creator = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Board = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Task = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Color = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    KanbanColumnId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TaskAuthor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TaskName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TaskDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TaskColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Order = table.Column<int>(type: "int", nullable: false),
+                    Priority = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TaskType = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_KanbanTasks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KanbanTasks_KanbanColumns_KanbanColumnId",
+                        column: x => x.KanbanColumnId,
+                        principalTable: "KanbanColumns",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -47,8 +91,8 @@ namespace TrackingSheet.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     KanbanTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Author = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommentAuthor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommentText = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -68,7 +112,7 @@ namespace TrackingSheet.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     KanbanTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SubtaskDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsCompleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -107,6 +151,11 @@ namespace TrackingSheet.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_KanbanColumns_KanbanBoardId",
+                table: "KanbanColumns",
+                column: "KanbanBoardId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_KanbanComments_KanbanTaskId",
                 table: "KanbanComments",
                 column: "KanbanTaskId");
@@ -120,6 +169,11 @@ namespace TrackingSheet.Migrations
                 name: "IX_KanbanTaskMembers_KanbanMemberId",
                 table: "KanbanTaskMembers",
                 column: "KanbanMemberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_KanbanTasks_KanbanColumnId",
+                table: "KanbanTasks",
+                column: "KanbanColumnId");
         }
 
         /// <inheritdoc />
@@ -139,6 +193,12 @@ namespace TrackingSheet.Migrations
 
             migrationBuilder.DropTable(
                 name: "KanbanTasks");
+
+            migrationBuilder.DropTable(
+                name: "KanbanColumns");
+
+            migrationBuilder.DropTable(
+                name: "KanbanBoards");
         }
     }
 }

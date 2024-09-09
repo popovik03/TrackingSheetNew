@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrackingSheet.Data;
 
@@ -11,9 +12,11 @@ using TrackingSheet.Data;
 namespace TrackingSheet.Migrations
 {
     [DbContext(typeof(MVCDbContext))]
-    partial class MVCDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240908130903_KanbanMigrosBoardCreating")]
+    partial class KanbanMigrosBoardCreating
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,9 +82,6 @@ namespace TrackingSheet.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
                     b.ToTable("KanbanBoards");
@@ -89,10 +89,9 @@ namespace TrackingSheet.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("2b2c642c-0ec6-4962-99ea-27097ea6c6fe"),
+                            Id = new Guid("d6b8e802-6fc0-4765-a1b9-2ee559cd1500"),
                             Board = "Default Board",
-                            CreatedAt = new DateTime(2024, 9, 9, 4, 21, 37, 978, DateTimeKind.Utc).AddTicks(3041),
-                            IsProtected = true
+                            CreatedAt = new DateTime(2024, 9, 8, 13, 9, 1, 290, DateTimeKind.Utc).AddTicks(8740)
                         });
                 });
 

@@ -1,0 +1,137 @@
+﻿@model List<TrackingSheet.Models.Kanban.KanbanBoard>
+
+@{
+    ViewData["Title"] = "Kanban Board";
+    var selectedBoard = Model.FirstOrDefault(); // По умолчанию выбираем первую доску
+}
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="~/css/kanban.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="~/js/Kanban.js"></script>
+</head>
+
+
+<div class="kanban-container">
+    <!-- Верхняя область для вкладок -->
+    <div class="kanban-tabs nav nav-tabs d-flex align-items-center">
+        @foreach (var board in Model)
+        {
+            <div class="nav-item tab-item d-flex align-items-center">
+                <a class="nav-link @(board.Id == selectedBoard?.Id ? "active" : "")" onclick="showBoard('@board.Id')" style="border: 1px solid #ccc; padding: 5px; background-color: #f8f9fa; border-radius: 4px; margin-right: 5px; ">
+                    <span class="board-name" id="board-name-@board.Id">@board.Board</span>
+                    <button type="button" class="btn btn-sm btn-link" onclick="editBoardName('@board.Id')">✎</button>
+                    @if (!board.IsProtected)
+                    {
+                        <button type="button" class="close" aria-label="Close" onclick="deleteBoard('@board.Id')">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    }
+                </a>
+            </div>
+
+        }
+        <form class="d-flex align-items-center">
+            <button type="button" class="btn btn-link" style="font-size: 24px; line-height: 0;" data-toggle="modal" data-target="#createBoardModal">
+                <i class="fas fa-plus"></i>
+            </button>
+        </form>
+        <!-- Модальное окно для создания новой доски -->
+        <div class="modal fade" id="createBoardModal" tabindex="-1" role="dialog" aria-labelledby="createBoardModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createBoardModalLabel">Создать новую доску</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" asp-action="CreateBoard" asp-controller="Kanban">
+                            <div class="form-group">
+                                <label for="boardName">Название новой доски:</label>
+                                <input type="text" name="boardName" class="form-control" id="boardName" placeholder="Введите название доски" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary">Создать доску</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Нижняя область для содержимого доски -->
+    <div class="kanban-content tab-content">
+        @foreach (var board in Model)
+        {
+            <div class="board-content tab-pane fade @(board.Id == selectedBoard?.Id ? "show active" : "")" id="board-content-@board.Id" style="border: 1px solid #ccc; padding: 10px; background-color: #ffffff; border-radius: 4px; height: 97% ">
+                <h3 class="d-flex justify-content-between align-items-center">
+                    @board.Board
+                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#addColumnModal-@board.Id">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </h3>
+
+                <!-- Отображение колонок -->
+                <div id="kanban-columns-@board.Id" class="kanban-columns d-flex">
+                    @foreach (var column in board.Columns)
+                    {
+                        <div class="kanban-column" data-id="@column.Id" style="flex: 0 0 20%; border: 1px solid #ccc; padding: 10px; background-color: #f8f8f8; border-radius: 4px; margin-right: 10px; height: 94%">
+                            <div class="column-header d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0">@column.Column</h4>
+                                <div class="column-actions">
+                                    <button type="button" class="btn btn-sm btn-link" onclick="editColumnName('@column.Id')">✎</button>
+                                    <button type="button" class="btn btn-sm btn-link text-danger" onclick="deleteColumn('@column.Id')">🗑️</button>
+                                </div>
+                            </div>
+                            <div class="kanban-tasks" style="margin-top: 10px;">
+                                <!-- Здесь можно добавить отображение задач внутри колонки -->
+                                @foreach (var task in column.Tasks)
+                                {
+                                    <div class="kanban-task" style="background-color: #ffffff; padding: 5px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px;">
+                                        @task.TaskName
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Модальное окно для добавления новой колонки -->
+                <div class="modal fade" id="addColumnModal-@board.Id" tabindex="-1" role="dialog" aria-labelledby="addColumnModalLabel-@board.Id" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addColumnModalLabel-@board.Id">Добавить новую колонку</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" asp-action="AddColumn" asp-controller="Kanban">
+                                    <input type="hidden" name="boardId" value="@board.Id" />
+                                    <div class="form-group">
+                                        <label for="columnName">Название новой колонки:</label>
+                                        <input type="text" name="columnName" class="form-control" id="columnName" placeholder="Введите название колонки" required />
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Добавить колонку</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

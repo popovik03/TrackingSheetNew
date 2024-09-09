@@ -12,6 +12,8 @@ builder.Services.AddControllersWithViews();
 //Мои сервисы
 builder.Services.AddScoped<RemoteDataService>();
 builder.Services.AddScoped<QuarterYearStatisticsService>();
+builder.Services.AddScoped<IKanbanService, KanbanService>();
+
 
 
 string rootPath = builder.Configuration.GetValue<string>("FolderIndexing:RootPath");
