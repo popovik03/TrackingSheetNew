@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TrackingSheet.Migrations
 {
     /// <inheritdoc />
-    public partial class KanbanMigros : Migration
+    public partial class KanbanNew : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,8 @@ namespace TrackingSheet.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Board = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsProtected = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,7 +55,7 @@ namespace TrackingSheet.Migrations
                         column: x => x.KanbanBoardId,
                         principalTable: "KanbanBoards",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -149,6 +150,11 @@ namespace TrackingSheet.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "KanbanBoards",
+                columns: new[] { "Id", "Board", "CreatedAt", "IsProtected" },
+                values: new object[] { new Guid("12711015-7a9c-4563-910c-60eccae8696a"), "Главная", new DateTime(2024, 9, 10, 8, 59, 23, 237, DateTimeKind.Utc).AddTicks(4159), true });
 
             migrationBuilder.CreateIndex(
                 name: "IX_KanbanColumns_KanbanBoardId",

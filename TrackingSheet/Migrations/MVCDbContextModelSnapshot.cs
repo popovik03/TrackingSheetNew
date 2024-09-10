@@ -89,9 +89,9 @@ namespace TrackingSheet.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("2b2c642c-0ec6-4962-99ea-27097ea6c6fe"),
-                            Board = "Default Board",
-                            CreatedAt = new DateTime(2024, 9, 9, 4, 21, 37, 978, DateTimeKind.Utc).AddTicks(3041),
+                            Id = new Guid("48d1fed4-21a2-4ec8-8ff0-6f33308da710"),
+                            Board = "Главная",
+                            CreatedAt = new DateTime(2024, 9, 10, 17, 45, 46, 522, DateTimeKind.Utc).AddTicks(2124),
                             IsProtected = true
                         });
                 });
@@ -347,7 +347,7 @@ namespace TrackingSheet.Migrations
                     b.HasOne("TrackingSheet.Models.Kanban.KanbanBoard", "KanbanBoard")
                         .WithMany("Columns")
                         .HasForeignKey("KanbanBoardId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("KanbanBoard");

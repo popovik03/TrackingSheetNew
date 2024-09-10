@@ -12,8 +12,8 @@ using TrackingSheet.Data;
 namespace TrackingSheet.Migrations
 {
     [DbContext(typeof(MVCDbContext))]
-    [Migration("20240908124221_KanbanMigros")]
-    partial class KanbanMigros
+    [Migration("20240910085925_KanbanNew")]
+    partial class KanbanNew
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,9 +82,21 @@ namespace TrackingSheet.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("KanbanBoards");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("12711015-7a9c-4563-910c-60eccae8696a"),
+                            Board = "Главная",
+                            CreatedAt = new DateTime(2024, 9, 10, 8, 59, 23, 237, DateTimeKind.Utc).AddTicks(4159),
+                            IsProtected = true
+                        });
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanColumn", b =>
@@ -338,7 +350,7 @@ namespace TrackingSheet.Migrations
                     b.HasOne("TrackingSheet.Models.Kanban.KanbanBoard", "KanbanBoard")
                         .WithMany("Columns")
                         .HasForeignKey("KanbanBoardId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("KanbanBoard");
