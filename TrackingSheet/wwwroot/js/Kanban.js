@@ -59,28 +59,53 @@ function deleteBoard(boardId) {
     }
 }
 
-// Функция для редактирования названия колонки
+// Открыть модальное окно для редактирования колонки
 function editColumnName(columnId) {
-    var columnElement = document.querySelector('[data-id="' + columnId + '"] .column-header h4');
-    var currentName = columnElement.textContent;
-    var newName = prompt("Введите новое название колонки:", currentName);
+    var columnElement = document.querySelector('[data-id="' + columnId + '"]');
+    var currentName = columnElement.querySelector('.column-header h4').textContent;
+    var currentOrder = parseInt(columnElement.getAttribute('data-order')) + 1; // Начинаем с 1
+    var currentColor = columnElement.style.backgroundColor;
 
-    if (newName && newName.trim() !== "") {
+    // Преобразуем цвет из RGB в HEX
+    var rgb = currentColor.match(/\d+/g);
+    var hexColor = rgb && rgb.length === 3 ?
+        '#' + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1) : "#ffffff";
+
+    document.getElementById('editColumnId').value = columnId;
+    document.getElementById('editColumnName').value = currentName;
+    document.getElementById('editColumnOrder').value = currentOrder;
+    document.getElementById('editColumnColor').value = hexColor;
+
+    $('#editColumnModal').modal('show');
+}
+
+// Сохранить изменения колонки
+function saveColumnChanges() {
+    var columnId = document.getElementById('editColumnId').value;
+    var newName = document.getElementById('editColumnName').value;
+    var newOrder = parseInt(document.getElementById('editColumnOrder').value) - 1; // Преобразуем обратно к 0-индексации
+    var newColor = document.getElementById('editColumnColor').value;
+
+    if (newName && newOrder >= 0) {
         $.ajax({
-            url: '/Kanban/RenameColumn',
+            url: '/Kanban/RenameReorderAndRecolorColumn',
             method: 'POST',
             data: {
                 columnId: columnId,
-                newName: newName
+                newName: newName,
+                newOrder: newOrder,
+                newColor: newColor
             },
             success: function () {
-                columnElement.textContent = newName;
-                alert('Название колонки обновлено успешно');
+                $('#editColumnModal').modal('hide'); // Закрываем модальное окно
+                location.reload(); // Обновляем страницу после успешного обновления
             },
             error: function () {
-                alert('Ошибка при обновлении названия колонки');
+                alert('Ошибка при обновлении колонки');
             }
         });
+    } else {
+        alert('Пожалуйста, введите корректные данные.');
     }
 }
 

@@ -59,16 +59,22 @@ namespace TrackingSheet.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RenameBoard(Guid id, string newName)
+        public async Task<IActionResult> RenameReorderAndRecolorColumn(Guid columnId, string newName, int newOrder, string newColor)
         {
-            var board = await _kanbanService.GetBoardByIdAsync(id);
-            if (board != null)
+            if (!string.IsNullOrWhiteSpace(newName))
             {
-                board.Board = newName;
-                await _kanbanService.UpdateBoardAsync(board);
+                var column = await _kanbanService.GetColumnByIdAsync(columnId);
+                if (column != null)
+                {
+                    column.Column = newName;
+                    column.Order = newOrder;
+                    column.ColumnColor = newColor;
+                    await _kanbanService.UpdateColumnAsync(column);
+                }
             }
-            return RedirectToAction(nameof(KanbanView));
+            return RedirectToAction("KanbanView");
         }
+
 
         //Методы для работы с колонками
 
@@ -109,6 +115,8 @@ namespace TrackingSheet.Controllers
             }
             return RedirectToAction("KanbanView");
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> DeleteColumn(Guid columnId)

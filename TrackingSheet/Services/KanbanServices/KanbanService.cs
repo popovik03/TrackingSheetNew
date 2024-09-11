@@ -32,11 +32,10 @@ namespace TrackingSheet.Services
                 .OrderBy(b => b.CreatedAt)
                 .ToListAsync();
         }
-
         public async Task<KanbanBoard> GetBoardByIdAsync(Guid id)
         {
             return await _context.KanbanBoards
-                .Include(b => b.Columns)
+                .Include(b => b.Columns.OrderBy(c => c.Order)) // Сортировка колонок по Order
                     .ThenInclude(c => c.Tasks)
                         .ThenInclude(t => t.Subtasks)
                 .Include(b => b.Columns)
@@ -44,6 +43,7 @@ namespace TrackingSheet.Services
                         .ThenInclude(t => t.Comments)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
+
 
         public async Task<KanbanBoard> CreateBoardAsync(KanbanBoard board)
         {
@@ -72,6 +72,7 @@ namespace TrackingSheet.Services
         {
             var column = await _context.KanbanColumns
                 .Include(c => c.KanbanBoard)
+                .ThenInclude(b => b.Columns.OrderBy(c => c.Order))  // Сортируем колонки по Order
                 .FirstOrDefaultAsync(c => c.Id == columnId);
 
             return column?.KanbanBoard;
@@ -94,20 +95,30 @@ namespace TrackingSheet.Services
 
         public async Task AddColumnToBoardAsync(Guid boardId, KanbanColumn column)
         {
-            var board = await GetBoardByIdAsync(boardId);
+            var board = await _context.KanbanBoards
+                .Include(b => b.Columns)
+                .FirstOrDefaultAsync(b => b.Id == boardId);
+
             if (board != null)
             {
-                column.KanbanBoardId = boardId;
-                _context.KanbanColumns.Add(column);
+                // Определяем максимальный Order среди существующих колонок
+                var maxOrder = board.Columns.Any() ? board.Columns.Max(c => c.Order) : 0;
+
+                // Устанавливаем Order для новой колонки
+                column.Order = maxOrder + 1;
+
+                board.Columns.Add(column);
                 await _context.SaveChangesAsync();
             }
         }
+
 
         public async Task UpdateColumnAsync(KanbanColumn column)
         {
             _context.KanbanColumns.Update(column);
             await _context.SaveChangesAsync();
         }
+
 
         public async Task DeleteColumnAsync(Guid id)
         {

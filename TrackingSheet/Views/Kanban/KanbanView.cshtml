@@ -20,14 +20,13 @@
     <script src="~/js/Kanban.js"></script>
 </head>
 
-
 <div class="kanban-container">
     <!-- Верхняя область для вкладок -->
     <div class="kanban-tabs nav nav-tabs d-flex align-items-center">
         @foreach (var board in Model)
         {
             <div class="nav-item tab-item d-flex align-items-center">
-                <a class="nav-link @(board.Id == selectedBoard?.Id ? "active" : "")" onclick="showBoard('@board.Id')" style="border: 1px solid #ccc; padding: 5px; background-color: #f8f9fa; border-radius: 4px; margin-right: 5px; ">
+                <a class="nav-link @(board.Id == selectedBoard?.Id ? "active" : "")" onclick="showBoard('@board.Id')" style="border: 1px solid #ccc; padding: 5px; background-color: #f8f9fa; border-radius: 4px; margin-right: 5px;">
                     <span class="board-name" id="board-name-@board.Id">@board.Board</span>
                     <button type="button" class="btn btn-sm btn-link" onclick="editBoardName('@board.Id')">✎</button>
                     @if (!board.IsProtected)
@@ -38,7 +37,6 @@
                     }
                 </a>
             </div>
-
         }
         <form class="d-flex align-items-center">
             <button type="button" class="btn btn-link" style="font-size: 24px; line-height: 0;" data-toggle="modal" data-target="#createBoardModal">
@@ -63,19 +61,17 @@
                             </div>
                             <button type="submit" class="btn btn-primary">Создать доску</button>
                         </form>
-
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Нижняя область для содержимого доски -->
     <div class="kanban-content tab-content">
         @foreach (var board in Model)
         {
-            <div class="board-content tab-pane fade @(board.Id == selectedBoard?.Id ? "show active" : "")" id="board-content-@board.Id" style="border: 1px solid #ccc; padding: 10px; background-color: #ffffff; border-radius: 4px; height: 97% ">
+            <div class="board-content tab-pane fade @(board.Id == selectedBoard?.Id ? "show active" : "")" id="board-content-@board.Id" style="border: 1px solid #ccc; padding: 10px; background-color: #ffffff; border-radius: 4px; height: 97%">
                 <h3 class="d-flex justify-content-between align-items-center">
                     @board.Board
                     <button type="button" class="btn btn-link" data-toggle="modal" data-target="#addColumnModal-@board.Id">
@@ -84,10 +80,10 @@
                 </h3>
 
                 <!-- Отображение колонок -->
-                <div id="kanban-columns-@board.Id" class="kanban-columns d-flex">
-                    @foreach (var column in board.Columns)
+                <div class="kanban-columns d-flex">
+                    @foreach (var column in board.Columns.OrderBy(c => c.Order))
                     {
-                        <div class="kanban-column" data-id="@column.Id" style="flex: 0 0 20%; border: 1px solid #ccc; padding: 10px; background-color: #f8f8f8; border-radius: 4px; margin-right: 10px; height: 94%">
+                        <div class="kanban-column" data-id="@column.Id" data-order="@column.Order" style="flex: 0 0 20%; border: 1px solid #ccc; padding: 10px; background-color: @column.ColumnColor; border-radius: 4px; margin-right: 10px; height: 94%">
                             <div class="column-header d-flex justify-content-between align-items-center">
                                 <h4 class="mb-0">@column.Column</h4>
                                 <div class="column-actions">
@@ -96,7 +92,7 @@
                                 </div>
                             </div>
                             <div class="kanban-tasks" style="margin-top: 10px;">
-                                <!-- Здесь можно добавить отображение задач внутри колонки -->
+                                <!-- Здесь отображаются задачи внутри колонки -->
                                 @foreach (var task in column.Tasks)
                                 {
                                     <div class="kanban-task" style="background-color: #ffffff; padding: 5px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px;">
@@ -107,6 +103,7 @@
                         </div>
                     }
                 </div>
+
 
                 <!-- Модальное окно для добавления новой колонки -->
                 <div class="modal fade" id="addColumnModal-@board.Id" tabindex="-1" role="dialog" aria-labelledby="addColumnModalLabel-@board.Id" aria-hidden="true">
@@ -135,3 +132,49 @@
         }
     </div>
 </div>
+
+<!-- Модальное окно для редактирования колонки -->
+<div class="modal fade" id="editColumnModal" tabindex="-1" role="dialog" aria-labelledby="editColumnModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editColumnModalLabel">Редактировать колонку</h5>
+                <!-- Крестик удален -->
+            </div>
+            <div class="modal-body">
+                <form id="editColumnForm">
+                    <input type="hidden" id="editColumnId" />
+
+                    <div class="form-group">
+                        <label for="editColumnName">Название колонки:</label>
+                        <input type="text" class="form-control" id="editColumnName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editColumnOrder">Порядок колонки:</label>
+                        <input type="number" class="form-control" id="editColumnOrder" min="1" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editColumnColor">Цвет колонки:</label>
+                        <input type="color" class="form-control" id="editColumnColor" />
+                    </div>
+
+                    <!-- Кнопки "Отмена" и "OK" -->
+                    <div class="form-group text-right">
+                        <button type="button" id="cancelButton" class="btn btn-secondary">Отмена</button>
+                        <button type="button" class="btn btn-primary" onclick="saveColumnChanges()">OK</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Привязка события к кнопке "Отмена"
+    document.getElementById('cancelButton').addEventListener('click', function () {
+        $('#editColumnModal').modal('hide'); // Закрытие модального окна
+    });
+</script>
+
