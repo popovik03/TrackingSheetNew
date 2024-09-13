@@ -21,12 +21,16 @@ namespace TrackingSheet.Services
         Task UpdateColumnAsync(KanbanColumn column);
         Task DeleteColumnAsync(Guid id);
         Task RenameColumnAsync(Guid columnId, string newName);
+        Task AddColumnAsync(KanbanColumn column);
+
 
         // Методы для работы с задачами
         Task<KanbanTask> GetTaskByIdAsync(Guid id);
         Task AddTaskToColumnAsync(Guid columnId, KanbanTask task);
         Task UpdateTaskAsync(KanbanTask task);
         Task DeleteTaskAsync(Guid id);
+        Task<Guid> GetBoardIdByColumnIdAsync(Guid columnId);
+
 
         // Новый метод для получения доски по идентификатору колонки
         Task<KanbanBoard> GetBoardByColumnIdAsync(Guid columnId);
@@ -34,6 +38,8 @@ namespace TrackingSheet.Services
         //Метод для сортировки колонок
         Task UpdateColumnOrderAsync(List<ColumnOrderUpdateModel> updatedOrder);
 
+        //Метод для сортировки задач
+        Task MoveTaskAsync(Guid taskId, Guid oldColumnId, Guid newColumnId, int newIndex);
 
     }
 }

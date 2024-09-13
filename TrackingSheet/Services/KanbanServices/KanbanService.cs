@@ -101,15 +101,27 @@ namespace TrackingSheet.Services
 
             if (board != null)
             {
-                // Определяем максимальный Order среди существующих колонок
                 var maxOrder = board.Columns.Any() ? board.Columns.Max(c => c.Order) : 0;
-
-                // Устанавливаем Order для новой колонки
                 column.Order = maxOrder + 1;
 
                 board.Columns.Add(column);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task AddColumnAsync(KanbanColumn column)
+        {
+            // Определяем максимальный Order среди существующих колонок для данной доски
+            var maxOrder = await _context.KanbanColumns
+                .Where(c => c.KanbanBoardId == column.KanbanBoardId)
+                .Select(c => (int?)c.Order)
+                .MaxAsync() ?? 0;
+
+            column.Order = maxOrder + 1;
+
+            // Добавляем колонку непосредственно в контекст
+            _context.KanbanColumns.Add(column);
+            await _context.SaveChangesAsync();
         }
 
 
@@ -172,20 +184,39 @@ namespace TrackingSheet.Services
 
         public async Task AddTaskToColumnAsync(Guid columnId, KanbanTask task)
         {
-            var column = await GetColumnByIdAsync(columnId);
-            if (column != null)
-            {
-                task.KanbanColumnId = columnId;
-                _context.KanbanTasks.Add(task);
-                await _context.SaveChangesAsync();
-            }
+            // Определяем максимальный Order среди задач в колонке
+            var maxOrder = await _context.KanbanTasks
+                .Where(t => t.KanbanColumnId == columnId)
+                .Select(t => (int?)t.Order)
+                .MaxAsync() ?? 0;
+
+            task.Order = maxOrder + 1;
+            task.KanbanColumnId = columnId;
+
+            // Добавляем задачу непосредственно в контекст
+            _context.KanbanTasks.Add(task);
+            await _context.SaveChangesAsync();
         }
+
+
 
         public async Task UpdateTaskAsync(KanbanTask task)
         {
-            _context.KanbanTasks.Update(task);
-            await _context.SaveChangesAsync();
+            // Проверяем, отслеживается ли сущность контекстом
+            var existingTask = await _context.KanbanTasks.FindAsync(task.Id);
+            if (existingTask != null)
+            {
+                // Обновляем свойства существующей задачи
+                _context.Entry(existingTask).CurrentValues.SetValues(task);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                // Если задача не найдена, можно выбросить исключение или добавить новую
+                throw new Exception("Задача не найдена.");
+            }
         }
+
 
         public async Task DeleteTaskAsync(Guid id)
         {
@@ -195,7 +226,22 @@ namespace TrackingSheet.Services
                 _context.KanbanTasks.Remove(task);
                 await _context.SaveChangesAsync();
             }
+            else
+            {
+                // Можно добавить обработку случая, когда задача не найдена
+                // Например, выбросить исключение или просто игнорировать
+            }
         }
+
+
+        public async Task<Guid> GetBoardIdByColumnIdAsync(Guid columnId)
+        {
+            var column = await _context.KanbanColumns
+                .FirstOrDefaultAsync(c => c.Id == columnId);
+
+            return column?.KanbanBoardId ?? Guid.Empty;
+        }
+
 
         #endregion
 
@@ -204,6 +250,49 @@ namespace TrackingSheet.Services
         {
             public Guid Id { get; set; }
             public int Order { get; set; }
+        }
+
+        //Метод обновления порядка задач
+        public async Task MoveTaskAsync(Guid taskId, Guid oldColumnId, Guid newColumnId, int newIndex)
+        {
+            var task = await _context.KanbanTasks.FindAsync(taskId);
+
+            if (task != null)
+            {
+                // Если колонка задачи изменилась
+                if (task.KanbanColumnId != newColumnId)
+                {
+                    // Удаляем задачу из старой колонки и обновляем порядок задач в старой колонке
+                    var oldColumnTasks = await _context.KanbanTasks
+                        .Where(t => t.KanbanColumnId == oldColumnId)
+                        .OrderBy(t => t.Order)
+                        .ToListAsync();
+
+                    oldColumnTasks.Remove(task);
+                    for (int i = 0; i < oldColumnTasks.Count; i++)
+                    {
+                        oldColumnTasks[i].Order = i;
+                    }
+
+                    // Обновляем колонку задачи
+                    task.KanbanColumnId = newColumnId;
+                }
+
+                // Обновляем порядок задач в новой колонке
+                var newColumnTasks = await _context.KanbanTasks
+                    .Where(t => t.KanbanColumnId == newColumnId)
+                    .OrderBy(t => t.Order)
+                    .ToListAsync();
+
+                newColumnTasks.Insert(newIndex, task);
+
+                for (int i = 0; i < newColumnTasks.Count; i++)
+                {
+                    newColumnTasks[i].Order = i;
+                }
+
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

@@ -1,4 +1,114 @@
-﻿// Функция для отображения выбранной доски
+﻿document.addEventListener('DOMContentLoaded', function () {
+    console.log('Initializing SortableJS');
+
+    // Инициализация SortableJS для всех контейнеров задач внутри колонок
+    document.querySelectorAll('.kanban-column').forEach(function (column) {
+        var tasksContainer = column.querySelector('.kanban-tasks');
+        if (tasksContainer) {
+            new Sortable(tasksContainer, {
+                group: 'kanban', // Позволяет перемещать задачи между колонками с той же группой
+                draggable: '.kanban-task', // Определяет, какие элементы можно перетаскивать
+                animation: 150, // Плавная анимация при перетаскивании
+                ghostClass: 'sortable-ghost', // Класс для стилизации "призрачного" элемента при перетаскивании
+                onEnd: function (evt) {
+                    // Получаем идентификаторы задачи и колонок
+                    var taskId = evt.item.getAttribute('data-id');
+                    var newColumnId = evt.to.closest('.kanban-column').getAttribute('data-id');
+                    var oldColumnId = evt.from.closest('.kanban-column').getAttribute('data-id');
+                    var newIndex = evt.newIndex;
+
+                    console.log(`Task ID: ${taskId}`);
+                    console.log(`Old Column ID: ${oldColumnId}`);
+                    console.log(`New Column ID: ${newColumnId}`);
+                    console.log(`New Index: ${newIndex}`);
+
+                    // Проверяем, изменилась ли колонка или позиция задачи
+                    if (newColumnId !== oldColumnId || evt.oldIndex !== newIndex) {
+                        // Отправляем AJAX-запрос для обновления позиции задачи
+                        $.ajax({
+                            url: '/Kanban/MoveTask',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                taskId: taskId,
+                                newColumnId: newColumnId,
+                                oldColumnId: oldColumnId,
+                                newIndex: newIndex
+                            }),
+                            success: function () {
+                                console.log('Task moved successfully');
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Error moving task:', error);
+                                alert('Ошибка при перемещении задачи. Пожалуйста, попробуйте снова.');
+
+                                // Возвращаем задачу на исходное место
+                                location.reload();
+                            }
+                        });
+                    }
+                }
+            });
+        } else {
+            console.warn(`.kanban-tasks контейнер не найден в колонке с ID: ${column.getAttribute('data-id')}`);
+        }
+    });
+
+    // Валидация форм добавления задач
+    var addTaskForms = document.querySelectorAll('form[id^="addTaskForm-"]');
+
+    addTaskForms.forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            // Извлекаем columnId из ID формы
+            var columnId = form.id.replace('addTaskForm-', '');
+
+            // Получаем элементы полей ввода
+            var taskNameInput = document.getElementById('taskName-' + columnId);
+            var taskDescriptionInput = document.getElementById('taskDescription-' + columnId);
+            var validationMessage = document.getElementById('validationMessage-' + columnId);
+
+            // Получаем значения полей
+            var taskName = taskNameInput.value.trim();
+            var taskDescription = taskDescriptionInput.value.trim();
+
+            var isValid = true;
+            var errorMessages = [];
+
+            // Проверка названия задачи
+            if (!taskName) {
+                isValid = false;
+                errorMessages.push('Пожалуйста, заполните название задачи.');
+                taskNameInput.classList.add('is-invalid');
+            } else {
+                taskNameInput.classList.remove('is-invalid');
+            }
+
+            // Проверка описания задачи
+            if (!taskDescription) {
+                isValid = false;
+                errorMessages.push('Пожалуйста, заполните описание задачи.');
+                taskDescriptionInput.classList.add('is-invalid');
+            } else {
+                taskDescriptionInput.classList.remove('is-invalid');
+            }
+
+            if (!isValid) {
+                event.preventDefault(); // Отменяем отправку формы
+                event.stopPropagation();
+
+                // Объединяем сообщения об ошибках
+                validationMessage.innerHTML = errorMessages.join('<br>');
+                validationMessage.style.display = 'block';
+            } else {
+                // Скрываем сообщение об ошибке, если форма валидна
+                validationMessage.style.display = 'none';
+                validationMessage.innerHTML = '';
+            }
+        });
+    });
+});
+
+// Функция для отображения выбранной доски
 function showBoard(boardId) {
     // Скрываем все доски
     document.querySelectorAll('.board-content').forEach(function (element) {
@@ -6,13 +116,19 @@ function showBoard(boardId) {
     });
 
     // Отображаем выбранную доску
-    document.getElementById('board-content-' + boardId).classList.add('show', 'active');
+    var selectedBoard = document.getElementById('board-content-' + boardId);
+    if (selectedBoard) {
+        selectedBoard.classList.add('show', 'active');
+    }
 
     // Обновляем активную вкладку
     document.querySelectorAll('.nav-link').forEach(function (element) {
         element.classList.remove('active');
     });
-    document.querySelector('.nav-link[onclick="showBoard(\'' + boardId + '\')"]').classList.add('active');
+    var activeNavLink = document.querySelector('.nav-link[onclick="showBoard(\'' + boardId + '\')"]');
+    if (activeNavLink) {
+        activeNavLink.classList.add('active');
+    }
 }
 
 // Функция для редактирования названия доски
@@ -127,35 +243,3 @@ function deleteColumn(columnId) {
         });
     }
 }
-
-// Инициализация сортировки для задач в колонках с использованием SortableJS
-document.querySelectorAll('.kanban-columns').forEach(function (columnsContainer) {
-    new Sortable(columnsContainer, {
-        group: 'kanban',
-        draggable: '.kanban-task',
-        animation: 150,
-        onEnd: function (evt) {
-            // Логика для обработки изменений порядка задач (например, сохранение нового порядка на сервере)
-            var columnId = evt.to.closest('.kanban-column').getAttribute('data-id');
-            var taskId = evt.item.getAttribute('data-id');
-            var newIndex = evt.newIndex;
-
-            $.ajax({
-                url: '/Kanban/UpdateColumnOrder',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    columnId: columnId,
-                    taskId: taskId,
-                    newIndex: newIndex
-                }),
-                success: function () {
-                    alert('Порядок задач обновлен успешно');
-                },
-                error: function () {
-                    alert('Ошибка при обновлении порядка задач');
-                }
-            });
-        }
-    });
-});

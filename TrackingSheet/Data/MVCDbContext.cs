@@ -44,10 +44,10 @@ namespace TrackingSheet.Data
 
             // Настройка связи один-ко-многим между KanbanBoard и KanbanColumn
             modelBuilder.Entity<KanbanColumn>()
-    .HasOne(c => c.KanbanBoard)
-    .WithMany(b => b.Columns)
-    .HasForeignKey(c => c.KanbanBoardId)
-    .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(c => c.KanbanBoard)
+                .WithMany(b => b.Columns)
+                .HasForeignKey(c => c.KanbanBoardId)
+                .OnDelete(DeleteBehavior.Cascade);
 
 
             // Настройка связи один-ко-многим между KanbanColumn и KanbanTask
