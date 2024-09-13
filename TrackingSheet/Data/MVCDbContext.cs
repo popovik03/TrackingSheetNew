@@ -11,8 +11,12 @@ namespace TrackingSheet.Data
         {
         }
 
+
         // Основная база с инцидентами
         public DbSet<Incidents> IncidentList { get; set; }
+        // Основная база с инцидентами
+        public DbSet<IncidentUpdate> IncidentUpdates { get; set; }
+
 
         // Таблицы для канбан доски
         public DbSet<KanbanBoard> KanbanBoards { get; set; }
@@ -83,16 +87,16 @@ namespace TrackingSheet.Data
                 .HasForeignKey(tm => tm.KanbanMemberId)
                 .OnDelete(DeleteBehavior.Cascade); // Удаление участника также удаляет связи с задачами
 
-            // Создание начального KanbanBoard
-            modelBuilder.Entity<KanbanBoard>().HasData(
-            new KanbanBoard
-                {
-                     Id = Guid.NewGuid(),
-                     Board = "Главная",
-                     CreatedAt = DateTime.UtcNow,
-                     IsProtected = true // Указываем, что доска защищена
-                }
-            );
+            //// Создание начального KanbanBoard
+            //modelBuilder.Entity<KanbanBoard>().HasData(
+            //new KanbanBoard
+            //    {
+            //         Id = Guid.NewGuid(),
+            //         Board = "Главная",
+            //         CreatedAt = DateTime.UtcNow,
+            //         IsProtected = true // Указываем, что доска защищена
+            //    }
+            //);
         }
 
         // Переопределение SaveChanges для защиты KanbanBoard

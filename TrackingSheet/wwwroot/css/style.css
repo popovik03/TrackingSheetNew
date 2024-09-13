@@ -267,6 +267,7 @@ main.collapsed {
 
 .right {
     flex-direction: column;
+
 }
 
 .right .input-field-id {

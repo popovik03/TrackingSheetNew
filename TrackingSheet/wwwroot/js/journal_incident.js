@@ -20,7 +20,7 @@
                     }
                 },
                 { title: "Смена", data: "shift" },
-                { title: "431", data: "vsat" },
+                { title: "431", data: "reporter" },
                 { title: "VSAT", data: "vsat" },
                 { title: "Скважина", data: "well" },
                 { title: "Рейс", data: "run" },

@@ -38,6 +38,11 @@
         bha = "";
     }
 
+    // Определение текущей смены на сервере
+    var currentTime = DateTime.Now.TimeOfDay;
+    var shift = (currentTime >= new TimeSpan(20, 0, 0) || currentTime < new TimeSpan(8, 0, 0)) ? "Night" : "Day";
+
+
 }
 
 <!DOCTYPE html>
@@ -58,6 +63,7 @@
 
         <div class="container-new-incident">
             <div class="left">
+
                 <!-- Поле для IP-адреса -->
                 <div class="input-field" style="display: flex; flex-direction: column; align-items: flex-start; width: 100%;">
                     <label for="vsatInput" class="form-label" style="margin-bottom: 5px;">VSAT</label>
@@ -78,8 +84,8 @@
                 <div class="input-field">
                     <label for="" class="form-label">Смена</label>
                     <select class="form-select" asp-for="Shift">
-                        <option value="Day">День</option>
-                        <option value="Night">Ночь</option>
+                        <option value="Day" selected="@(shift == "Day" ? "selected" : "")">День</option>
+                        <option value="Night" selected="@(shift == "Night" ? "selected" : "")">Ночь</option>
                     </select>
                 </div>
 

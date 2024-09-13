@@ -28,6 +28,7 @@
     <Folder Include="Migrations\" />
     <Folder Include="Models\VIewModels\" />
     <Folder Include="wwwroot\img\" />
+    <Folder Include="wwwroot\uploads\" />
     <Folder Include="wwwroot\NewFolder\" />
     <Folder Include="wwwroot\vendor\" />
   </ItemGroup>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrackingSheet.Data;
 
@@ -11,9 +12,11 @@ using TrackingSheet.Data;
 namespace TrackingSheet.Migrations
 {
     [DbContext(typeof(MVCDbContext))]
-    partial class MVCDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240911095156_IncidentsWithFilesDateUpdateMigration")]
+    partial class IncidentsWithFilesDateUpdateMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,34 +24,6 @@ namespace TrackingSheet.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("TrackingSheet.Models.Domain.IncidentUpdate", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("IncidentID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Run")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UpdateReporter")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UpdateSolution")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("IncidentID");
-
-                    b.ToTable("IncidentUpdates");
-                });
 
             modelBuilder.Entity("TrackingSheet.Models.Domain.Incidents", b =>
                 {
@@ -368,17 +343,6 @@ namespace TrackingSheet.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ROemployees");
-                });
-
-            modelBuilder.Entity("TrackingSheet.Models.Domain.IncidentUpdate", b =>
-                {
-                    b.HasOne("TrackingSheet.Models.Domain.Incidents", "Incident")
-                        .WithMany()
-                        .HasForeignKey("IncidentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Incident");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanColumn", b =>

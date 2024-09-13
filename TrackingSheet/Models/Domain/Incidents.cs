@@ -18,9 +18,22 @@
 
         public string? Solution { get; set;}
 
+        public int File { get; set; } //добавил для хранения файлов (просьба)
+        public DateTime? DateEnd { get; set; } //добавил для даты окончания (просьба)
+        public string? Update { get; set; }
+
     }
 
-
-
-    
+    public class IncidentUpdate
+    {
+        public Guid ID { get; set; }
+        public Guid IncidentID { get; set; } //Внешний ключ на инцидент из основной таблицы
+        public DateTime Date { get; set; }
+        public string? UpdateReporter { get; set; }
+        public string? UpdateSolution { get; set; }
+        public int Run { get; set; }
+        //Навигационное свойство для связи с инцидентом из основной таблицы
+        public Incidents Incident { get; set; }
+    }
+ 
 }

@@ -157,7 +157,10 @@ namespace TrackingSheet.Controllers
                     ProblemType = incidents.ProblemType,
                     HighLight = incidents.HighLight,
                     Status = incidents.Status,
-                    Solution = incidents.Solution
+                    Solution = incidents.Solution,
+                    File = incidents.File
+                   
+
                 };
                 return await Task.Run(() => View("View", ViewModel));
 
@@ -166,13 +169,14 @@ namespace TrackingSheet.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize]
+
         [HttpPost]
-        public async Task<IActionResult> View(UpdateIncidentViewModel model)
+        public async Task<IActionResult> View(UpdateIncidentViewModel model, IFormFile uploadedFile)
         {
             var incident = await mvcDbContext.IncidentList.FindAsync(model.ID);
             if (incident != null)
             {
+                // Обновление свойств инцидента
                 incident.Date = model.Date;
                 incident.Shift = model.Shift;
                 incident.Reporter = model.Reporter;
@@ -184,13 +188,89 @@ namespace TrackingSheet.Controllers
                 incident.HighLight = model.HighLight;
                 incident.Status = model.Status;
                 incident.Solution = model.Solution;
+                incident.File = model.File;
+
+                // Обработка загруженного файла
+                if (uploadedFile != null && uploadedFile.Length > 0)
+                {
+                    try
+                    {
+                        var fileName = Path.GetFileName(uploadedFile.FileName);
+
+                        // Путь для сохранения файла
+                        var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incident.ID.ToString());
+                        if (!Directory.Exists(incidentFolder))
+                        {
+                            Directory.CreateDirectory(incidentFolder);
+                        }
+
+                        // Проверка, существует ли файл с таким же именем
+                        var filePath = Path.Combine(incidentFolder, fileName);
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            // Добавляем суффикс, чтобы избежать перезаписи
+                            fileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{Guid.NewGuid()}{Path.GetExtension(fileName)}";
+                            filePath = Path.Combine(incidentFolder, fileName);
+                        }
+
+                        // Сохранение файла
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await uploadedFile.CopyToAsync(stream);
+                        }
+
+                        // Обновление значения поля File в базе данных
+                        incident.File = 1;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Логирование ошибки и возвращение сообщения об ошибке пользователю
+                        // Например, можно передать ошибку в TempData и перенаправить пользователя обратно на страницу редактирования
+                        TempData["ErrorMessage"] = "Произошла ошибка при загрузке файла. Попробуйте еще раз.";
+                        return RedirectToAction("View", new { id = model.ID });
+                    }
+                }
+
                 await mvcDbContext.SaveChangesAsync();
 
-                return RedirectToAction("Index");
+                // Возврат к виду View для данного инцидента
+                return RedirectToAction("View", new { id = model.ID });
             }
 
             return RedirectToAction("Index");
         }
+
+        [IgnoreAntiforgeryToken]
+        [HttpPost]
+        public IActionResult DeleteFile(string fileName, Guid incidentId)
+        {
+            try
+            {
+                // Путь к папке с файлами инцидента
+                var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incidentId.ToString());
+
+                // Полный путь к файлу
+                var filePath = Path.Combine(incidentFolder, fileName);
+
+                // Удаляем файл, если он существует
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Файл не найден." });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Логирование ошибки (если необходимо)
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
 
 
         [Authorize]

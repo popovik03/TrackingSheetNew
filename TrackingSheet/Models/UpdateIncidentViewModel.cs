@@ -17,5 +17,6 @@
         public string? Status { get; set; }
 
         public string? Solution { get; set; }
+        public int File { get; set; }
     }
 }
