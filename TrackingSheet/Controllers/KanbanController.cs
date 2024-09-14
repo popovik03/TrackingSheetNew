@@ -3,7 +3,6 @@ using System;
 using System.Threading.Tasks;
 using TrackingSheet.Services;
 using TrackingSheet.Models.Kanban;
-using Microsoft.EntityFrameworkCore;
 using static TrackingSheet.Services.KanbanService;
 
 namespace TrackingSheet.Controllers
@@ -17,32 +16,26 @@ namespace TrackingSheet.Controllers
             _kanbanService = kanbanService;
         }
 
+        // Основной метод для отображения доски Kanban
         public async Task<IActionResult> KanbanView(Guid? selectedBoardId = null)
         {
             var boards = await _kanbanService.GetAllBoardsAsync();
-
-            // Если selectedBoardId не указан, выбираем первую доску
             var selectedBoard = selectedBoardId.HasValue
                 ? boards.FirstOrDefault(b => b.Id == selectedBoardId.Value)
                 : boards.FirstOrDefault();
 
-            // Передаём идентификатор выбранной доски в представление через ViewBag
             ViewBag.SelectedBoardId = selectedBoard?.Id;
-
             return View(boards);
         }
 
-
-
-
-        //Методы для работы с досками 
+        #region Методы для работы с досками
 
         [HttpPost]
         public async Task<IActionResult> CreateBoard(string boardName)
         {
             if (string.IsNullOrWhiteSpace(boardName))
             {
-                boardName = "Новая доска"; // Название по умолчанию, если ничего не указано
+                boardName = "Новая доска";
             }
 
             var newBoard = new KanbanBoard
@@ -90,25 +83,9 @@ namespace TrackingSheet.Controllers
             return RedirectToAction(nameof(KanbanView));
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RenameReorderAndRecolorColumn(Guid columnId, string newName, int newOrder, string newColor)
-        {
-            if (!string.IsNullOrWhiteSpace(newName))
-            {
-                var column = await _kanbanService.GetColumnByIdAsync(columnId);
-                if (column != null)
-                {
-                    column.Column = newName;
-                    column.Order = newOrder;
-                    column.ColumnColor = newColor;
-                    await _kanbanService.UpdateColumnAsync(column);
-                }
-            }
-            return RedirectToAction("KanbanView");
-        }
+        #endregion
 
-
-        //Методы для работы с колонками
+        #region Методы для работы с колонками
 
         [HttpPost]
         public async Task<IActionResult> AddColumn(Guid boardId, string columnName)
@@ -130,15 +107,6 @@ namespace TrackingSheet.Controllers
             return RedirectToAction("KanbanView", new { selectedBoardId = boardId });
         }
 
-
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateColumnOrder([FromBody] List<ColumnOrderUpdateModel> updatedOrder)
-        {
-            await _kanbanService.UpdateColumnOrderAsync(updatedOrder);
-            return Ok();
-        }
-
         [HttpPost]
         public async Task<IActionResult> RenameColumn(Guid columnId, string newName)
         {
@@ -149,8 +117,6 @@ namespace TrackingSheet.Controllers
             return RedirectToAction("KanbanView");
         }
 
-
-
         [HttpPost]
         public async Task<IActionResult> DeleteColumn(Guid columnId)
         {
@@ -158,7 +124,34 @@ namespace TrackingSheet.Controllers
             return RedirectToAction("KanbanView");
         }
 
-        //Методы для работы с задачами
+        [HttpPost]
+        public async Task<IActionResult> RenameReorderAndRecolorColumn(Guid columnId, string newName, int newOrder, string newColor)
+        {
+            if (!string.IsNullOrWhiteSpace(newName))
+            {
+                var column = await _kanbanService.GetColumnByIdAsync(columnId);
+                if (column != null)
+                {
+                    column.Column = newName;
+                    column.Order = newOrder;
+                    column.ColumnColor = newColor;
+                    await _kanbanService.UpdateColumnAsync(column);
+                }
+            }
+            return RedirectToAction("KanbanView");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateColumnOrder([FromBody] List<ColumnOrderUpdateModel> updatedOrder)
+        {
+            await _kanbanService.UpdateColumnOrderAsync(updatedOrder);
+            return Ok();
+        }
+
+        #endregion
+
+        #region Методы для работы с задачами
+
         [HttpPost]
         public async Task<IActionResult> AddTask(Guid columnId, string taskName, string taskDescription, string taskColor, DateTime? dueDate, string priority)
         {
@@ -176,7 +169,6 @@ namespace TrackingSheet.Controllers
                 TaskColor = taskColor,
                 DueDate = dueDate,
                 Priority = priority,
-                // Установите другие свойства по необходимости
             };
 
             await _kanbanService.AddTaskToColumnAsync(columnId, newTask);
@@ -191,11 +183,35 @@ namespace TrackingSheet.Controllers
                 return BadRequest("Invalid task move request.");
             }
 
-            // Перемещение задачи
             await _kanbanService.MoveTaskAsync(model.TaskId, model.OldColumnId, model.NewColumnId, model.NewIndex);
-
             return Ok();
         }
+
+        [HttpPost]
+        public async Task<IActionResult> EditTask([FromForm] EditTaskModel model)
+        {
+            if (model == null || model.TaskId == Guid.Empty)
+            {
+                return BadRequest("Invalid task edit request.");
+            }
+
+            await _kanbanService.EditTaskAsync(model.TaskId, model.TaskName, model.TaskDescription, model.TaskColor, model.DueDate, model.Priority);
+            return RedirectToAction("KanbanView"); // Возвращаемся на KanbanView после редактирования задачи
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteTask([FromForm] Guid taskId)
+        {
+            if (taskId == Guid.Empty)
+            {
+                return BadRequest("Invalid task ID.");
+            }
+
+            await _kanbanService.DeleteTaskAsync(taskId);
+            return Ok();
+        }
+
+        #endregion
 
         // Модель для получения данных о перемещении задачи
         public class TaskMoveModel
@@ -206,5 +222,16 @@ namespace TrackingSheet.Controllers
             public int NewIndex { get; set; }
         }
 
+        // Модель для редактирования задачи
+        public class EditTaskModel
+        {
+            public Guid TaskId { get; set; }
+            public Guid ColumnId { get; set; }
+            public string TaskName { get; set; }
+            public string TaskDescription { get; set; }
+            public string TaskColor { get; set; }
+            public DateTime? DueDate { get; set; }
+            public string Priority { get; set; }
+        }
     }
 }

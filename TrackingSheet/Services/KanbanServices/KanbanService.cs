@@ -17,8 +17,7 @@ namespace TrackingSheet.Services
             _context = context;
         }
 
-        // Методы для работы с досками
-        #region Board Methods
+        #region Методы для работы с досками
 
         public async Task<List<KanbanBoard>> GetAllBoardsAsync()
         {
@@ -32,6 +31,7 @@ namespace TrackingSheet.Services
                 .OrderBy(b => b.CreatedAt)
                 .ToListAsync();
         }
+
         public async Task<KanbanBoard> GetBoardByIdAsync(Guid id)
         {
             return await _context.KanbanBoards
@@ -43,7 +43,6 @@ namespace TrackingSheet.Services
                         .ThenInclude(t => t.Comments)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
-
 
         public async Task<KanbanBoard> CreateBoardAsync(KanbanBoard board)
         {
@@ -72,7 +71,7 @@ namespace TrackingSheet.Services
         {
             var column = await _context.KanbanColumns
                 .Include(c => c.KanbanBoard)
-                .ThenInclude(b => b.Columns.OrderBy(c => c.Order))  // Сортируем колонки по Order
+                .ThenInclude(b => b.Columns.OrderBy(c => c.Order))  // Сортировка колонок по Order
                 .FirstOrDefaultAsync(c => c.Id == columnId);
 
             return column?.KanbanBoard;
@@ -80,8 +79,7 @@ namespace TrackingSheet.Services
 
         #endregion
 
-        // Методы для работы с колонками
-        #region Column Methods
+        #region Методы для работы с колонками
 
         public async Task<KanbanColumn> GetColumnByIdAsync(Guid id)
         {
@@ -124,13 +122,11 @@ namespace TrackingSheet.Services
             await _context.SaveChangesAsync();
         }
 
-
         public async Task UpdateColumnAsync(KanbanColumn column)
         {
             _context.KanbanColumns.Update(column);
             await _context.SaveChangesAsync();
         }
-
 
         public async Task DeleteColumnAsync(Guid id)
         {
@@ -168,9 +164,7 @@ namespace TrackingSheet.Services
 
         #endregion
 
-
-        // Методы для работы с задачами
-        #region Task Methods
+        #region Методы для работы с задачами
 
         public async Task<KanbanTask> GetTaskByIdAsync(Guid id)
         {
@@ -198,8 +192,6 @@ namespace TrackingSheet.Services
             await _context.SaveChangesAsync();
         }
 
-
-
         public async Task UpdateTaskAsync(KanbanTask task)
         {
             // Проверяем, отслеживается ли сущность контекстом
@@ -217,42 +209,31 @@ namespace TrackingSheet.Services
             }
         }
 
-
-        public async Task DeleteTaskAsync(Guid id)
+        public async Task EditTaskAsync(Guid taskId, string taskName, string taskDescription, string taskColor, DateTime? dueDate, string priority)
         {
-            var task = await _context.KanbanTasks.FindAsync(id);
+            var task = await _context.KanbanTasks.FindAsync(taskId);
+            if (task != null)
+            {
+                task.TaskName = taskName;
+                task.TaskDescription = taskDescription;
+                task.TaskColor = taskColor;
+                task.DueDate = dueDate;
+                task.Priority = priority;
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeleteTaskAsync(Guid taskId)
+        {
+            var task = await _context.KanbanTasks.FindAsync(taskId);
             if (task != null)
             {
                 _context.KanbanTasks.Remove(task);
                 await _context.SaveChangesAsync();
             }
-            else
-            {
-                // Можно добавить обработку случая, когда задача не найдена
-                // Например, выбросить исключение или просто игнорировать
-            }
         }
 
-
-        public async Task<Guid> GetBoardIdByColumnIdAsync(Guid columnId)
-        {
-            var column = await _context.KanbanColumns
-                .FirstOrDefaultAsync(c => c.Id == columnId);
-
-            return column?.KanbanBoardId ?? Guid.Empty;
-        }
-
-
-        #endregion
-
-        // Модель для обновления порядка колонок
-        public class ColumnOrderUpdateModel
-        {
-            public Guid Id { get; set; }
-            public int Order { get; set; }
-        }
-
-        //Метод обновления порядка задач
         public async Task MoveTaskAsync(Guid taskId, Guid oldColumnId, Guid newColumnId, int newIndex)
         {
             var task = await _context.KanbanTasks.FindAsync(taskId);
@@ -293,6 +274,23 @@ namespace TrackingSheet.Services
 
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<Guid> GetBoardIdByColumnIdAsync(Guid columnId)
+        {
+            var column = await _context.KanbanColumns
+                .FirstOrDefaultAsync(c => c.Id == columnId);
+
+            return column?.KanbanBoardId ?? Guid.Empty;
+        }
+
+        #endregion
+
+        // Модель для обновления порядка колонок
+        public class ColumnOrderUpdateModel
+        {
+            public Guid Id { get; set; }
+            public int Order { get; set; }
         }
     }
 }
