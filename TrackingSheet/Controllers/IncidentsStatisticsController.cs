@@ -5,7 +5,6 @@ using TrackingSheet.Models;
 
 namespace TrackingSheet.Controllers
 {
-
     public class IncidentsStatisticsController : Controller
     {
         private readonly QuarterYearStatisticsService _quarterYearStatisticsService;
@@ -17,11 +16,21 @@ namespace TrackingSheet.Controllers
 
         [Authorize]
         [HttpGet]
-        public IActionResult SelectPeriod()
+        public IActionResult IncidentsStatistics()
         {
             ViewData["CurrentPage"] = "statistics";
             return View();
-            
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> IncidentsStatistics(int year, int quarter)
+        {
+            var incidentsStatistics = await _quarterYearStatisticsService.GetIncidentStatisticsASync(year, quarter);
+            ViewData["CurrentPage"] = "statistics";
+            ViewData["SelectedYear"] = year;
+            ViewData["SelectedQuarter"] = quarter;
+            return View(incidentsStatistics); // Передаём список напрямую
         }
 
         [Authorize]
@@ -31,17 +40,5 @@ namespace TrackingSheet.Controllers
             var incidentsStatisticsJson = await _quarterYearStatisticsService.GetIncidentStatisticsASync(year, quarter);
             return Json(incidentsStatisticsJson);
         }
-
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> IncidentsStatistics(int year, int quarter)
-        {
-            var incidentsStatistics = await _quarterYearStatisticsService.GetIncidentStatisticsASync(year, quarter);
-            ViewData["CurrentPage"] = "statistics";
-            return View(incidentsStatistics);
-        }
-
-        
-
     }
 }
