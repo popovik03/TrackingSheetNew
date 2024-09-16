@@ -12,8 +12,211 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="~/js/new_incident.js" defer></script>
+    <style>
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .file-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+
+            .file-item a {
+                text-decoration: none;
+                color: #555;
+            }
+
+            .file-item .fas {
+                font-size: 2em;
+                color: #555;
+                margin-bottom: 5px;
+            }
+
+            .file-item .file-name {
+                font-size: 0.8em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 80px;
+            }
+
+            
+
+        /* Стили для модального окна */
+        .modal {
+            display: none; /* Скрыто по умолчанию */
+            position: fixed; /* Остаётся на месте */
+            z-index: 1000; /* Располагается поверх других элементов */
+            left: 0;
+            top: 0;
+            width: 100%; /* Полная ширина */
+            height: 100%; /* Полная высота */
+            overflow: auto; /* Включает прокрутку, если необходимо */
+            background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+        }
+
+        /* Стили для содержимого модального окна */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* 10% сверху и по центру */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Ширина модального окна */
+            max-width: 500px; /* Максимальная ширина */
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        /* Стили для заголовка модального окна */
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        /* Стили для закрывающего крестика */
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+            .close-modal:hover,
+            .close-modal:focus {
+                color: black;
+                text-decoration: none;
+            }
+
+        /* Стили для тела модального окна */
+        .modal-body {
+            margin-top: 20px;
+        }
+
+        /* Стили для футера модального окна */
+        .modal-footer {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        /* Стили для кнопок */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background-color: #0069d9;
+            }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+            .btn-secondary:hover {
+                background-color: #5a6268;
+            }
+
+        /* Стили для полей формы */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .right {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .description {
+            flex: 8; /* 80% */
+            overflow: auto;
+        }
+
+        .attachments {
+            flex: 2; /* 20% */
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .delete-icon {
+            position: absolute;
+            top: 4px;
+            right: 2px;
+            width: 12px; /* Увеличьте размер, чтобы иконка была лучше видна */
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 6px; /* Увеличьте размер шрифта, чтобы иконка была лучше видна */
+            color: red;
+            border: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+            .delete-icon i {
+                color: inherit; /* Убедитесь, что иконка наследует цвет от родительского элемента */
+            }
+
+            .delete-icon:hover {
+                background-color: red;
+                color: white;
+            }
+
+                .delete-icon:hover i {
+                    color: inherit; /* Иконка будет белой при наведении, так как наследует цвет от родительского элемента */
+                }
+
+
+    </style>
 </head>
 
 <body>
@@ -171,22 +374,21 @@
                     @if (filesExist)
                     {
                         <h4>Вложенные файлы:</h4>
-                        <div style="font-size: 12px">
-                            @{
-                                var files = System.IO.Directory.GetFiles(incidentFolder);
+                        <div class="file-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            @foreach (var file in System.IO.Directory.GetFiles(incidentFolder))
+                            {
+                                var fileName = System.IO.Path.GetFileName(file);
+                                var fileUrl = Url.Content($"~/uploads/{Model.ID}/{fileName}");
 
-                                foreach (var file in files)
-                                {
-                                    var fileName = System.IO.Path.GetFileName(file);
-                                    var fileUrl = Url.Content($"~/uploads/{Model.ID}/{fileName}");
-
-                                    <div style="display: flex; align-items: center;">
-                                        <a href="@fileUrl" target="_blank">@fileName</a>
-                                        <button type="button" onclick="deleteFile('@fileName', '@Model.ID')" style="margin-left: 10px; cursor: pointer; background-color: transparent; border: none;">
-                                            <img src="~/icons/delete.png" alt="Удалить" style="width: 16px; height: 16px;">
-                                        </button>
-                                    </div>
-                                }
+                                <div class="file-item" style="position: relative; width: 100px; height: 100px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <a href="@fileUrl" target="_blank" title="@fileName" style="text-align: center;">
+                                        <i class="fas fa-file-alt" style="font-size: 2em; color: #555;"></i>
+                                    </a>
+                                    <span class="file-name" style="font-size: 12px; text-align: center; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">@fileName</span>
+                                    <button type="button" class="delete-icon" onclick="deleteFile('@fileName', '@Model.ID')" >
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             }
                         </div>
                     }
@@ -194,9 +396,9 @@
                     {
                         <p>Файлы не найдены.</p>
                     }
-
-
                 </div>
+
+
             </div>
 
             
@@ -337,25 +539,34 @@
                 </div>
                 <div class="modal-body">
                     <form id="incidentUpdateForm">
-                        <label for="updateDate">Дата и время</label>
-                        <input type="datetime-local" id="updateDate" name="Date" readonly />
+                        <div class="form-group">
+                            <label for="updateDate">Дата и время</label>
+                            <input type="datetime-local" id="updateDate" name="Date" class="form-control" required />
+                        </div>
 
-                        <label for="updateReporter">Reporter</label>
-                        <input type="text" id="updateReporter" name="UpdateReporter" readonly />
+                        <div class="form-group">
+                            <label for="updateReporter">Reporter</label>
+                            <input type="text" id="updateReporter" name="UpdateReporter" class="form-control" required />
+                        </div>
 
-                        <label for="updateRun">Рейс</label>
-                        <input type="number" id="updateRun" name="Run" readonly />
+                        <div class="form-group">
+                            <label for="updateRun">Рейс</label>
+                            <input type="number" id="updateRun" name="Run" class="form-control" required />
+                        </div>
 
-                        <label for="updateSolution">Описание</label>
-                        <textarea id="updateSolution" name="UpdateSolution" rows="4" required></textarea>
+                        <div class="form-group">
+                            <label for="updateSolution">Описание</label>
+                            <textarea id="updateSolution" name="UpdateSolution" rows="4" class="form-control" required></textarea>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="cancelUpdateButton">Отмена</button>
-                    <button type="button" id="saveUpdateButton">Сохранить</button>
+                    <button type="button" id="cancelUpdateButton" class="btn btn-secondary">Отмена</button>
+                    <button type="button" id="saveUpdateButton" class="btn btn-primary">Сохранить</button>
                 </div>
             </div>
         </div>
+
     </form>
 </body>
 
