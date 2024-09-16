@@ -1,6 +1,62 @@
-﻿.left, .right {
+﻿.left {
     width: 48%;
+
 }
+
+.right {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.description {
+    flex: 8; /* 80% */
+    overflow: auto;
+}
+
+.attachments {
+    flex: 2; /* 20% */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.file-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+}
+
+    .file-item .fa-file-alt {
+        font-size: 2em;
+        color: #555;
+    }
+
+    .file-item .delete-icon {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        color: red;
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        padding: 2px;
+        cursor: pointer;
+        font-size: 0.8em;
+    }
+
+        .file-item .delete-icon:hover {
+            background-color: rgba(255, 0, 0, 0.8);
+            color: white;
+        }
 
 .form-label {
     display: block;

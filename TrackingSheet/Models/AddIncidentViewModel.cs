@@ -5,6 +5,7 @@ namespace TrackingSheet.Models
 {
     public class AddIncidentViewModel
     {
+
         public DateTime Date { get; set; }
 
         public string? Shift { get; set; }
@@ -19,6 +20,9 @@ namespace TrackingSheet.Models
         public string? HighLight { get; set; }
         public string? Status { get; set; }
         public string? Solution { get; set;}
+
+        public Guid ID { get; set; }
+        public List<IFormFile> UploadedFiles { get; set; } //Новое свойство для загрузки файлов 
 
         public int IpPart { get; set; } // Новое свойство для получения значения из формы
     }

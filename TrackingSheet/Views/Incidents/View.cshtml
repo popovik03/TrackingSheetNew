@@ -1,6 +1,7 @@
 ﻿@model TrackingSheet.Models.UpdateIncidentViewModel
 
 @{
+    ViewData["Title"] = "Редактирование инцидента";
     var reporter = TempData.Peek("Login") as string ?? string.Empty;
 }
 
@@ -11,62 +12,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <style>
-        /* Стили для модального окна */
-        .modal {
-            display: none; /* Скрыть модальное окно по умолчанию */
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5); /* Черный фон с прозрачностью */
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-            .close:hover,
-            .close:focus {
-                color: black;
-                text-decoration: none;
-                cursor: pointer;
-            }
-
-        .file-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .delete-icon {
-            cursor: pointer;
-            color: red;
-            margin-left: 10px;
-        }
-    </style>
+    
     <script src="~/js/new_incident.js" defer></script>
 </head>
 
 <body>
     <form method="post" action="@Url.Action("View", "Incidents")" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <h1><label>Редактирование инцидента</label></h1>
@@ -83,7 +35,7 @@
                     <!-- Скрытое поле для выбора файла -->
                     <input type="file" id="fileInput" name="uploadedFile" style="display: none;" onchange="handleFileSelect(event)">
 
-                    <!-- Кнопка для открытия модального окна для добавления новых инцидентов -->
+                    <!-- Кнопка открытия модального окна для добавления IncidentUpdate -->
                     <a href="#" id="openModalButton" style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px;">
                         <img src="~/icons/add.png" alt="Добавить" style="width: 48px; height: 48px; transform: scale(1.1);">
                     </a>
@@ -102,9 +54,15 @@
             <!-- Поля ввода данных инцидента -->
             <!-- Левый блок -->
             <div class="left">
-                <div class="input-field">
-                    <label for="Date" class="form-label">Дата и время инцидента</label>
-                    <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
+                <div class="input-field" style="display: flex; gap: 10px; ">
+                    <div style="flex: 1;">
+                        <label for="Date" class="form-label">Дата начала</label>
+                        <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
+                    </div>
+                    <div style="flex: 1; max-width: 40%;">
+                        <label for="DateEnd" class="form-label">Дата окончания</label>
+                        <input type="datetime-local" class="form-control form-control-sm" asp-for="DateEnd" />
+                    </div>
                 </div>
                 <div class="input-field">
                     <label for="Shift" class="form-label">Смена</label>
@@ -120,7 +78,7 @@
                     <input type="text" class="form-control form-control-sm" asp-for="Reporter" />
                 </div>
                 <div class="input-field">
-                    <label for="VSAT" class="form-label">VSAT</label>
+                    <label for="VSAT" class="form-label" min="0">VSAT</label>
                     <input type="number" class="form-control form-control-sm" asp-for="VSAT" />
                 </div>
                 <div class="input-field">
@@ -129,7 +87,7 @@
                 </div>
                 <div class="input-field">
                     <label for="Run" class="form-label">Рейс</label>
-                    <input type="number" class="form-control form-control-sm" asp-for="Run" />
+                    <input type="number" class="form-control form-control-sm" min="0" asp-for="Run" />
                 </div>
                 <div class="input-field">
                     <label for="SavedNPT" class="form-label">Сохраненное НПВ, ч</label>
@@ -205,50 +163,48 @@
                     <div id="filePreview"></div>
 
                     <!-- Отображение загруженных файлов -->
-                    @if (Model.File == 1)
+                    @{
+                        var incidentFolder = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", Model.ID.ToString());
+                        var filesExist = System.IO.Directory.Exists(incidentFolder) && System.IO.Directory.GetFiles(incidentFolder).Length > 0;
+                    }
+
+                    @if (filesExist)
                     {
                         <h4>Вложенные файлы:</h4>
                         <div style="font-size: 12px">
                             @{
-                                var incidentFolder = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", Model.ID.ToString());
+                                var files = System.IO.Directory.GetFiles(incidentFolder);
 
-                                if (System.IO.Directory.Exists(incidentFolder))
+                                foreach (var file in files)
                                 {
-                                    var files = System.IO.Directory.GetFiles(incidentFolder);
+                                    var fileName = System.IO.Path.GetFileName(file);
+                                    var fileUrl = Url.Content($"~/uploads/{Model.ID}/{fileName}");
 
-                                    if (files.Length > 0)
-                                    {
-                                        foreach (var file in files)
-                                        {
-                                            var fileName = System.IO.Path.GetFileName(file);
-                                            var fileUrl = Url.Content($"~/uploads/{Model.ID}/{fileName}");
-
-                                            <div style="display: flex; align-items: center;">
-                                                <a href="@fileUrl" target="_blank">@fileName</a>
-                                                <button type="button" onclick="deleteFile('@fileName', '@Model.ID')" style="margin-left: 10px; cursor: pointer; background-color: transparent; border: none;">
-                                                    <img src="~/icons/delete.png" alt="Удалить" style="width: 16px; height: 16px;">
-                                                </button>
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <p>Файлы не найдены в папке @Url.Content($"~/uploads/{Model.ID}").</p>
-                                    }
-                                }
-                                else
-                                {
-                                    <p>Папка для вложенных файлов не найдена: @Url.Content($"~/uploads/{Model.ID}").</p>
+                                    <div style="display: flex; align-items: center;">
+                                        <a href="@fileUrl" target="_blank">@fileName</a>
+                                        <button type="button" onclick="deleteFile('@fileName', '@Model.ID')" style="margin-left: 10px; cursor: pointer; background-color: transparent; border: none;">
+                                            <img src="~/icons/delete.png" alt="Удалить" style="width: 16px; height: 16px;">
+                                        </button>
+                                    </div>
                                 }
                             }
                         </div>
                     }
+                    else
+                    {
+                        <p>Файлы не найдены.</p>
+                    }
+
 
                 </div>
             </div>
+
+            
         </div>
 
+
         <script>
+
             function deleteFile(fileName, incidentId) {
                 if (confirm('Вы уверены, что хотите удалить этот файл?')) {
                     fetch(`/Incidents/DeleteFile?fileName=${encodeURIComponent(fileName)}&incidentId=${incidentId}`, {
@@ -257,6 +213,7 @@
                             'Content-Type': 'application/json'
                         }
                     })
+
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
@@ -274,11 +231,91 @@
             }
 
             function handleFileSelect(event) {
+                console.log('handleFileSelect called');
+                console.log('Selected file:', event.target.files[0]);
+
                 // Используем setTimeout для отсрочки нажатия кнопки "Сохранить"
                 setTimeout(function () {
-                    document.querySelector('button[type="submit"]').click();
+                    var submitButton = document.querySelector('button[type="submit"]');
+                    if (submitButton) {
+                        console.log('Submitting form...');
+                        submitButton.click();
+                    } else {
+                        console.error('Submit button not found');
+                    }
                 }, 100); // Задержка в 100 мс для уверенности, что файл выбран
             }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var modal = document.getElementById("incidentUpdateModal");
+                var btn = document.getElementById("openModalButton");
+                var span = document.getElementsByClassName("close-modal")[0];
+
+                var updateForm = document.getElementById("incidentUpdateForm");
+                var updateDate = document.getElementById("updateDate");
+                var updateReporter = document.getElementById("updateReporter");
+                var updateRun = document.getElementById("updateRun");
+                var updateSolution = document.getElementById("updateSolution");
+
+                btn.onclick = function (event) {
+                    event.preventDefault();
+                    updateDate.value = new Date().toISOString().slice(0, 16);
+                    updateReporter.value = "@reporter";
+                    updateRun.value = "@Model.Run";
+                    updateSolution.value = "";
+                    modal.style.display = "block";
+                }
+
+                span.onclick = function () {
+                    modal.style.display = "none";
+                }
+
+                window.onclick = function (event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+
+                updateForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    var formData = {
+                        ID: "@Model.ID",
+                        Date: updateDate.value,
+                        UpdateReporter: updateReporter.value,
+                        Run: updateRun.value,
+                        UpdateSolution: updateSolution.value
+                    };
+
+                    fetch('@Url.Action("AddUpdate", "Incidents")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getAntiForgeryToken()
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Инцидент успешно обновлен.');
+                                modal.style.display = "none";
+                                location.reload();
+                            } else {
+                                alert('Ошибка при обновлении инцидента: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                            alert('Произошла ошибка при обновлении инцидента.');
+                        });
+                });
+
+                function getAntiForgeryToken() {
+                    var tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                    return tokenElement ? tokenElement.value : '';
+                }
+            });
 
         </script>
 
@@ -289,6 +326,35 @@
                     <path d="M6 15L8 17L12.5 12.5M8 8V5.2C8 4.0799 8 3.51984 8.21799 3.09202C8.40973 2.71569 8.71569 2.40973 9.09202 2.21799C9.51984 2 10.0799 2 11.2 2H18.8C19.9201 2 20.4802 2 20.908 2.21799C21.2843 2.40973 21.5903 2.71569 21.782 3.09202C22 3.51984 22 4.0799 22 5.2V12.8C22 13.9201 22 14.4802 21.782 14.908C21.5903 15.2843 21.2843 15.5903 20.908 15.782C20.4802 16 19.9201 16 18.8 16H16M5.2 22H12.8C13.9201 22 14.4802 22 14.908 21.782C15.2843 21.5903 15.5903 21.2843 15.782 20.908C16 20.4802 16 19.9201 16 18.8V11.2C16 10.0799 16 9.51984 15.782 9.09202C15.5903 8.71569 15.2843 8.40973 14.908 8.21799C14.4802 8 13.9201 8 12.8 8H5.2C4.0799 8 3.51984 8 3.09202 8.21799C2.71569 8.40973 2.40973 8.71569 2.21799 9.09202C2 9.51984 2 10.0799 2 11.2V18.8C2 19.9201 2 20.4802 2.21799 20.908C2.40973 21.2843 2.71569 21.5903 3.09202 21.782C3.51984 22 4.07989 22 5.2 22Z"></path>
                 </svg>
             </button>
+        </div>
+
+        <!-- Модальное окно для добавления IncidentUpdate -->
+        <div id="incidentUpdateModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div class="modal-header">
+                    <h2>Добавить обновление инцидента</h2>
+                </div>
+                <div class="modal-body">
+                    <form id="incidentUpdateForm">
+                        <label for="updateDate">Дата и время</label>
+                        <input type="datetime-local" id="updateDate" name="Date" readonly />
+
+                        <label for="updateReporter">Reporter</label>
+                        <input type="text" id="updateReporter" name="UpdateReporter" readonly />
+
+                        <label for="updateRun">Рейс</label>
+                        <input type="number" id="updateRun" name="Run" readonly />
+
+                        <label for="updateSolution">Описание</label>
+                        <textarea id="updateSolution" name="UpdateSolution" rows="4" required></textarea>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="cancelUpdateButton">Отмена</button>
+                    <button type="button" id="saveUpdateButton">Сохранить</button>
+                </div>
+            </div>
         </div>
     </form>
 </body>

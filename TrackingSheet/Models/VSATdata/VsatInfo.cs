@@ -151,7 +151,5 @@ namespace TrackingSheet.Models.VSATdata
 
         }
 
-
-
     }
 }

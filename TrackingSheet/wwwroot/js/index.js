@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContainer = document.querySelector('main');
     const menuList = document.getElementById('menuList');
 
+    // Очищаем активное состояние всех элементов меню при загрузке страницы
+    menuItems.forEach(item => item.classList.remove('active'));
+
     // Получаем текущую страницу из window.currentPage
     const currentPage = window.currentPage;
 
@@ -12,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         new_incident: 'new_incident.html',
         vsat_bha: 'vsat_bha.html',
         statistics: 'statistics.html',
-        kanban: 'KanbanView.cshtml',
+        kanban: 'kanban.html',
         about: 'about.html'
     };
 
@@ -24,26 +27,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (url) {
                 try {
-                    mainContainer.innerHTML = ''; // Clear existing content
+                    mainContainer.innerHTML = ''; // Очистка существующего контента
 
                     const response = await fetch(url);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.text();
 
-                    // Temporary container for the fetched content
+                    // Временный контейнер для загруженного контента
                     const tempContainer = document.createElement('div');
                     tempContainer.innerHTML = data;
 
-                    // Move content to the main container
+                    // Перемещение контента в основной контейнер
                     mainContainer.appendChild(tempContainer);
 
-                    // Update active state of menu items
-                    menuItems.forEach(item => item.classList.remove('active'));
-                    target.classList.add('active');
-
-                    // Process scripts
+                    // Обработка скриптов
                     const scripts = mainContainer.querySelectorAll('script');
                     await loadAndExecuteScripts(scripts);
+
+                    // Устанавливаем активное меню после полной загрузки контента
+                    window.currentPage = selectedId;
+                    setTimeout(() => {
+                        menuItems.forEach(item => item.classList.remove('active'));
+                        target.classList.add('active');
+                    }, 0); // Задержка в 0 мс помогает убедиться, что это произойдет после основной задачи
 
                 } catch (error) {
                     console.error('Error loading content:', error);
@@ -53,11 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Подсвечиваем активную страницу при загрузке
-    menuItems.forEach(item => {
-        if (item.id === currentPage) {
-            item.classList.add('active');
-        }
-    });
+    if (currentPage) {
+        setTimeout(() => {
+            menuItems.forEach(item => {
+                if (item.id === currentPage) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }, 0); // Задержка в 0 мс помогает убедиться, что это произойдет после основной задачи
+    }
 
     async function loadAndExecuteScripts(scripts) {
         for (let script of scripts) {

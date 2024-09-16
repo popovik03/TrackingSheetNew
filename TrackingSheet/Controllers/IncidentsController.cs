@@ -7,9 +7,6 @@ using TrackingSheet.Models;
 using TrackingSheet.Models.Domain;
 using TrackingSheet.Services;
 using System.Text.Json;
-using NuGet.Packaging.Signing;
-
-
 
 namespace TrackingSheet.Controllers
 {
@@ -37,31 +34,38 @@ namespace TrackingSheet.Controllers
             return View(incidents);
         }
 
-
-
-
-
-
         [Authorize]
         [HttpGet]
         public IActionResult Add()
         {
             ViewData["CurrentPage"] = "new_incident";
 
-            // Получение данных VSAT из TempData
+            // Generate a new ID for the incident
+            var newIncidentId = Guid.NewGuid();
+
+            // Retrieve VSAT data from TempData
             var vsatInfoJson = TempData["VsatInfo"] as string;
             VsatInfo vsatInfo = string.IsNullOrEmpty(vsatInfoJson) ? null : JsonSerializer.Deserialize<VsatInfo>(vsatInfoJson);
 
-            // Если данные VSAT получены, заполнить модель
+            // Create the model and pass the generated ID
             var model = new AddIncidentViewModel
             {
+                ID = newIncidentId,
                 Well = vsatInfo?.WELL_NAME ?? "Test",
-                Run = vsatInfo?.MWRU_NUMBER ?? 100
+                Run = vsatInfo?.MWRU_NUMBER ?? 100,
+                Date = DateTime.Now,
+                Shift = DateTime.Now.Hour >= 20 || DateTime.Now.Hour < 8 ? "Night" : "Day",
+                Reporter = TempData.Peek("Login") as string ?? string.Empty,
+                //VSAT = vsatInfo?.IP_PART ?? 0, // Use the correct property from VsatInfo
+                //IpPart = vsatInfo?.IP_PART ?? 0,
+                // Initialize other properties as needed
             };
+
+            // Pass VSAT data through ViewBag
+            ViewBag.VsatInfo = vsatInfo;
 
             return View(model);
         }
-
 
         [HttpPost]
         public async Task<IActionResult> SetIpAddressAndGetLatestVsatInfo(int ipPart)
@@ -69,17 +73,17 @@ namespace TrackingSheet.Controllers
             string connectionStringTemplate = _configuration.GetConnectionString("RemoteDatabase");
             string connectionString = connectionStringTemplate.Replace("${IPAddress}", ipPart.ToString());
 
-            // Сохранение строки подключения в сессии
+            // Save the connection string in session
             HttpContext.Session.SetString("RemoteDbConnectionString", connectionString);
             TempData["ipPart"] = ipPart;
 
             try
             {
-                // Получение строки подключения из сессии
+                // Retrieve the connection string from session
                 string connectionStringNew = HttpContext.Session.GetString("RemoteDbConnectionString");
                 _remoteDataService.SetConnectionString(connectionStringNew);
 
-                // Получение данных VSAT
+                // Get VSAT data
                 VsatInfo vsatInfo = await _remoteDataService.GetLatestVsatInfoAsync();
 
                 if (vsatInfo == null)
@@ -87,33 +91,44 @@ namespace TrackingSheet.Controllers
                     return NotFound();
                 }
 
+                // Create the model and pass data
+                var model = new AddIncidentViewModel
+                {
+                    
+                    VSAT = ipPart,
+                    Well = vsatInfo.WELL_NAME,
+                    Run = vsatInfo.MWRU_NUMBER,
+                    Date = DateTime.Now,
+                    Shift = DateTime.Now.Hour >= 20 || DateTime.Now.Hour < 8 ? "Night" : "Day",
+                    Reporter = TempData.Peek("Login") as string ?? string.Empty,
+                    IpPart = ipPart,
+                    // Initialize other properties as needed
+                };
+
+                // Pass VSAT data through ViewBag
                 ViewBag.CurrentPage = "new_incident";
-                ViewBag.VsatInfo = vsatInfo;  // Передача данных в ViewBag
-                return View("Add");  // Отображение представления
+                ViewBag.VsatInfo = vsatInfo;
+
+                return View("Add", model); // Pass the model to the view
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while getting latest VSAT info.");
-                string status_message = string.Format("Получение данных по адресу {0}", HttpContext.Session.GetString("RemoteDbConnectionString"));
-                ViewBag.ErrorMessage = status_message;  // Передача сообщения об ошибке
-                return View("ErrorView");  // Отображение представления ошибки
+                string status_message = $"Error retrieving data from {HttpContext.Session.GetString("RemoteDbConnectionString")}";
+                return View("Add");
+                
             }
-
         }
-
-
 
         [Authorize]
         [HttpPost]
-
         public async Task<IActionResult> Add(AddIncidentViewModel addIncidentRequest)
         {
-
-            addIncidentRequest.VSAT = addIncidentRequest.IpPart; //Присваиваем значение ip-part и номер VSAT
+            addIncidentRequest.VSAT = addIncidentRequest.IpPart; // Assign IpPart to VSAT
 
             var incident = new Incidents()
             {
-                ID = Guid.NewGuid(),
+                ID = addIncidentRequest.ID, // Use the ID from the model
                 Date = addIncidentRequest.Date,
                 Shift = addIncidentRequest.Shift,
                 Reporter = addIncidentRequest.Reporter,
@@ -125,13 +140,77 @@ namespace TrackingSheet.Controllers
                 HighLight = addIncidentRequest.HighLight,
                 Status = addIncidentRequest.Status,
                 Solution = addIncidentRequest.Solution,
-
             };
 
+            // Save the incident to the database
             await mvcDbContext.IncidentList.AddAsync(incident);
             await mvcDbContext.SaveChangesAsync();
 
-            return RedirectToAction("Index", "Home");
+            // Handle uploaded files
+            if (addIncidentRequest.UploadedFiles != null && addIncidentRequest.UploadedFiles.Count > 0)
+            {
+                var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incident.ID.ToString());
+                if (!Directory.Exists(incidentFolder))
+                {
+                    Directory.CreateDirectory(incidentFolder);
+                }
+
+                foreach (var file in addIncidentRequest.UploadedFiles)
+                {
+                    if (file != null && file.Length > 0)
+                    {
+                        var fileName = Path.GetFileName(file.FileName);
+                        var filePath = Path.Combine(incidentFolder, fileName);
+
+                        // Ensure unique file names
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            fileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{Guid.NewGuid()}{Path.GetExtension(fileName)}";
+                            filePath = Path.Combine(incidentFolder, fileName);
+                        }
+
+                        // Save the file
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                    }
+                }
+
+                // Update the incident to indicate that files are attached
+                incident.File = 1;
+                await mvcDbContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index", "Incidents");
+        }
+
+
+
+        // Method to delete temporary files when creating an incident
+        [IgnoreAntiforgeryToken]
+        [HttpPost]
+        public IActionResult DeleteTempFile(string fileName, Guid incidentId)
+        {
+            try
+            {
+                var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incidentId.ToString());
+                var filePath = Path.Combine(incidentFolder, fileName);
+
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "File not found." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
 
@@ -158,16 +237,16 @@ namespace TrackingSheet.Controllers
                     HighLight = incidents.HighLight,
                     Status = incidents.Status,
                     Solution = incidents.Solution,
-                    File = incidents.File
-                   
-
+                    File = incidents.File,
+                    DateEnd = incidents.DateEnd
                 };
-                return await Task.Run(() => View("View", ViewModel));
-
+                ViewData["CurrentPage"] = "journal";
+                return View("View", ViewModel);
             }
 
             return RedirectToAction("Index");
         }
+
 
 
         [HttpPost]
@@ -176,8 +255,9 @@ namespace TrackingSheet.Controllers
             var incident = await mvcDbContext.IncidentList.FindAsync(model.ID);
             if (incident != null)
             {
-                // Обновление свойств инцидента
+                // Update incident properties
                 incident.Date = model.Date;
+                incident.DateEnd = model.DateEnd;
                 incident.Shift = model.Shift;
                 incident.Reporter = model.Reporter;
                 incident.VSAT = model.VSAT;
@@ -188,57 +268,59 @@ namespace TrackingSheet.Controllers
                 incident.HighLight = model.HighLight;
                 incident.Status = model.Status;
                 incident.Solution = model.Solution;
-                incident.File = model.File;
+                // Do not assign incident.File here; it will be updated after file upload
 
-                // Обработка загруженного файла
+                // Handle uploaded file
                 if (uploadedFile != null && uploadedFile.Length > 0)
                 {
                     try
                     {
                         var fileName = Path.GetFileName(uploadedFile.FileName);
 
-                        // Путь для сохранения файла
+                        // Path to save the file
                         var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incident.ID.ToString());
                         if (!Directory.Exists(incidentFolder))
                         {
                             Directory.CreateDirectory(incidentFolder);
                         }
 
-                        // Проверка, существует ли файл с таким же именем
+                        // Check if a file with the same name exists
                         var filePath = Path.Combine(incidentFolder, fileName);
                         if (System.IO.File.Exists(filePath))
                         {
-                            // Добавляем суффикс, чтобы избежать перезаписи
+                            // Add a suffix to avoid overwriting
                             fileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{Guid.NewGuid()}{Path.GetExtension(fileName)}";
                             filePath = Path.Combine(incidentFolder, fileName);
                         }
 
-                        // Сохранение файла
+                        // Save the file
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {
                             await uploadedFile.CopyToAsync(stream);
                         }
 
-                        // Обновление значения поля File в базе данных
+                        // Update the File field in the database
                         incident.File = 1;
                     }
                     catch (Exception ex)
                     {
-                        // Логирование ошибки и возвращение сообщения об ошибке пользователю
-                        // Например, можно передать ошибку в TempData и перенаправить пользователя обратно на страницу редактирования
-                        TempData["ErrorMessage"] = "Произошла ошибка при загрузке файла. Попробуйте еще раз.";
+                        // Log the error and return an error message to the user
+                        TempData["ErrorMessage"] = "An error occurred while uploading the file. Please try again.";
                         return RedirectToAction("View", new { id = model.ID });
                     }
                 }
 
                 await mvcDbContext.SaveChangesAsync();
 
-                // Возврат к виду View для данного инцидента
+                // Return to the View for this incident
+                ViewData["CurrentPage"] = "journal";
                 return RedirectToAction("View", new { id = model.ID });
             }
-
+            ViewData["CurrentPage"] = "journal";
             return RedirectToAction("Index");
         }
+
+
 
         [IgnoreAntiforgeryToken]
         [HttpPost]
@@ -246,13 +328,13 @@ namespace TrackingSheet.Controllers
         {
             try
             {
-                // Путь к папке с файлами инцидента
+                // Path to the incident's file folder
                 var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incidentId.ToString());
 
-                // Полный путь к файлу
+                // Full path to the file
                 var filePath = Path.Combine(incidentFolder, fileName);
 
-                // Удаляем файл, если он существует
+                // Delete the file if it exists
                 if (System.IO.File.Exists(filePath))
                 {
                     System.IO.File.Delete(filePath);
@@ -260,16 +342,15 @@ namespace TrackingSheet.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Файл не найден." });
+                    return Json(new { success = false, message = "File not found." });
                 }
             }
             catch (Exception ex)
             {
-                // Логирование ошибки (если необходимо)
+                // Log the error if necessary
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
 
 
 
@@ -279,8 +360,8 @@ namespace TrackingSheet.Controllers
         {
             if (id == Guid.Empty)
             {
-                _logger.LogWarning("Удаление записи с пустым идентификатором.");
-                TempData["AlertMessage"] = "Некорректный идентификатор.";
+                _logger.LogWarning("Attempted to delete a record with an empty ID.");
+                TempData["AlertMessage"] = "Invalid identifier.";
                 return RedirectToAction("Index");
             }
 
@@ -290,13 +371,13 @@ namespace TrackingSheet.Controllers
             {
                 mvcDbContext.IncidentList.Remove(incident);
                 await mvcDbContext.SaveChangesAsync();
-                TempData["AlertMessage"] = "Инцидент удален";
-                _logger.LogInformation("Инцидент успешно удален.");
+                TempData["AlertMessage"] = "Incident deleted.";
+                _logger.LogInformation("Incident successfully deleted.");
             }
             else
             {
-                _logger.LogWarning($"Инцидент с ID {id} не найден для удаления.");
-                TempData["AlertMessage"] = "Инцидент не найден";
+                _logger.LogWarning($"Incident with ID {id} not found for deletion.");
+                TempData["AlertMessage"] = "Incident not found.";
             }
 
             return RedirectToAction("Index");
@@ -318,11 +399,5 @@ namespace TrackingSheet.Controllers
                 data = data
             });
         }
-
-
-
-
-
     }
-
 }

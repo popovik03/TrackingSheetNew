@@ -18,5 +18,6 @@
 
         public string? Solution { get; set; }
         public int File { get; set; }
+        public DateTime? DateEnd { get; set; }
     }
 }

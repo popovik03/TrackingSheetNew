@@ -25,6 +25,7 @@ namespace TrackingSheet.Controllers
                 : boards.FirstOrDefault();
 
             ViewBag.SelectedBoardId = selectedBoard?.Id;
+            ViewData["CurrentPage"] = "kanban";
             return View(boards);
         }
 

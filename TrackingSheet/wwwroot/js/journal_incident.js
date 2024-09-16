@@ -7,7 +7,7 @@
         const result = await response.json();
 
         // Инициализация DataTable
-        $('#journal_table').DataTable({
+        var table = $('#journal_table').DataTable({
             data: result.data,
             columns: [
                 {
@@ -69,6 +69,28 @@
             if (data && data.id) {
                 window.open(`/Incidents/View/${data.id}`, '_blank');
             }
+        });
+
+        // Фильтрация по диапазону дат
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            var min = $('#min-date').val() ? new Date($('#min-date').val()) : null;
+            var max = $('#max-date').val() ? new Date($('#max-date').val()) : null;
+            var date = new Date(data[0]); // Предполагается, что дата находится в первой колонке
+
+            if (
+                (min === null && max === null) ||
+                (min === null && date <= max) ||
+                (min <= date && max === null) ||
+                (min <= date && date <= max)
+            ) {
+                return true;
+            }
+            return false;
+        });
+
+        // Обработчики изменения диапазона дат
+        $('#min-date, #max-date').on('change', function () {
+            table.draw();
         });
 
         // Обработчик экспорта в Excel

@@ -170,48 +170,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
         requestAnimationFrame(() => {
             fullImage.style.opacity = 1;
-            overlay.style.opacity = 1);
-    });
+            overlay.style.opacity = 1;
+        });
 
-document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keydown', handleKeyDown);
     }
 
-function closeFullImage() {
-    const fullImage = document.getElementById('fullImage');
-    const overlay = document.getElementById('overlay');
+    function closeFullImage() {
+        const fullImage = document.getElementById('fullImage');
+        const overlay = document.getElementById('overlay');
 
-    fullImage.style.opacity = 0;
-    overlay.style.opacity = 0;
+        fullImage.style.opacity = 0;
+        overlay.style.opacity = 0;
 
-    setTimeout(() => {
-        fullImage.style.display = 'none';
-        overlay.style.display = 'none';
-    }, 500);
-}
-
-function handleKeyDown(event) {
-    if (event.key === 'Escape') {
-        closeFullImage();
-    }
-}
-
-const textarea = document.getElementById('exampleFormControlTextarea1');
-if (textarea) {
-    textarea.addEventListener('paste', handlePaste);
-}
-
-// Автоматически нажимаем кнопку "Сохранить" после выбора файла
-window.handleFileSelect = function handleFileSelect(event) {
-    const files = event.target.files;
-    if (files.length + document.querySelectorAll('.file-preview .file-item').length > MAX_FILES) {
-        alert('Можно добавить не более 10 файлов.');
-        return;
+        setTimeout(() => {
+            fullImage.style.display = 'none';
+            overlay.style.display = 'none';
+        }, 500);
     }
 
-    // Нажимаем кнопку "Сохранить" через 100 мс после выбора файла
-    setTimeout(function () {
-        document.querySelector('button[type="submit"]').click();
-    }, 100);
-};
+    function handleKeyDown(event) {
+        if (event.key === 'Escape') {
+            closeFullImage();
+        }
+    }
 
+    const textarea = document.getElementById('exampleFormControlTextarea1');
+    if (textarea) {
+        textarea.addEventListener('paste', handlePaste);
+    }
+
+    // Автоматически нажимаем кнопку "Сохранить" после выбора файла
+    function handleFileSelect(event) {
+        console.log('handleFileSelect called');
+        console.log('Selected file:', event.target.files[0]);
+
+        // Используем setTimeout для отсрочки нажатия кнопки "Сохранить"
+        setTimeout(function () {
+            var submitButton = document.querySelector('button[type="submit"]');
+            if (submitButton) {
+                console.log('Submitting form...');
+                submitButton.click();
+            } else {
+                console.error('Submit button not found');
+            }
+        }, 100); // Задержка в 100 мс для уверенности, что файл выбран
+    }
 });

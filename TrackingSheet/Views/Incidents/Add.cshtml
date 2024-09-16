@@ -53,13 +53,91 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="~/js/new_incident.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .right {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .description {
+            flex: 8; /* 80% */
+            overflow: auto;
+        }
+
+        .attachments {
+            flex: 2; /* 20% */
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .file-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+        }
+
+            .file-item .fa-file-alt {
+                font-size: 2em;
+                color: #555;
+            }
+
+            .file-item .delete-icon {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                color: red;
+                background-color: rgba(255, 255, 255, 0.7);
+                border-radius: 50%;
+                padding: 2px;
+                cursor: pointer;
+                font-size: 0.8em;
+            }
+
+                .file-item .delete-icon:hover {
+                    background-color: rgba(255, 0, 0, 0.8);
+                    color: white;
+                }
+    </style>
 </head>
 
 <body>
     <!-- Объединенная форма для добавления инцидента и получения данных VSAT -->
-    <form method="post" action="/Incidents/Add" id="mainForm">
-        <h1><label>Новый инцидент</label></h1>
-        <h2><label>Добавьте новый инцидент</label></h2>
+    <form method="post" action="/Incidents/Add" id="mainForm" enctype="multipart/form-data">
+
+        <!-- Добавляем скрытое поле для передачи ID -->
+        <input type="hidden" asp-for="ID" />
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1><label>Новый инцидент</label></h1>
+                <h2><label>Добавьте новый инцидент</label></h2>
+            </div>
+            <div style="display: flex; gap: 10px;">
+               
+                <!-- Контейнер для кнопок -->
+                <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 0px; margin-right: 45px">
+                    <!-- Кнопка для загрузки файла -->
+                    <a href="#" onclick="document.getElementById('fileInput').click();" style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px;">
+                        <img src="~/icons/skrepa.png" alt="Добавить вложение" style="width: 48px; height: 48px; transform: scale(1.1);">
+                    </a>
+
+                    <!-- Скрытое поле для выбора файла -->
+                    <input type="file" id="fileInput" name="UploadedFiles" multiple style="display: none;">
+
+                </div>
+            </div>
+        </div>
 
         <div class="container-new-incident">
             <div class="left">
@@ -163,14 +241,23 @@
                 </div>
             </div>
 
-            <div class="right">
-                <div class="input-field">
-                    <label for="" class="form-label">Описание инцидента:</label>
-                    <textarea class="form-control" id="descriptionTextarea" rows="36" asp-for="Solution">
-                        @Html.Raw(bha)
-                    </textarea>
+            <div class="right" style="display: flex; flex-direction: column; height: 100%;">
+                <!-- Секция описания инцидента (80%) -->
+                <div class="description" style="flex: 8; overflow: auto;">
+                    <div class="input-field">
+                        <label for="" class="form-label">Описание инцидента:</label>
+                        <textarea class="form-control" style="width: 99%; margin-left:3px; height:80%" id="descriptionTextarea" rows="12" asp-for="Solution">
+                            @Html.Raw(bha)
+            </textarea>
+                    </div>
+                </div>
+
+                <!-- Секция вложений (20%) -->
+                <div class="attachments" id="filePreview" style="flex: 2; margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
+                    <!-- Примеры отображения файлов будут добавляться сюда через JavaScript -->
                 </div>
             </div>
+
         </div>
 
         <div class="button-container">
@@ -191,41 +278,185 @@
     </form>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var getDataButton = document.querySelector('#getDataButton');
-            var vsatInput = document.querySelector('#vsatInput');
-            var vsatForm = document.querySelector('#vsatForm');
-            var vsatInputHidden = document.querySelector('#vsatInputHidden');
-            var descriptionTextarea = document.querySelector('#descriptionTextarea');
+    // Объявляем массив selectedFiles в глобальной области видимости
+    var selectedFiles = [];
 
-            // Загрузка сохраненного значения из localStorage при загрузке страницы
-            var savedVsatValue = localStorage.getItem('vsatValue');
-            if (savedVsatValue) {
-                vsatInput.value = savedVsatValue;
-            }
+    document.addEventListener('DOMContentLoaded', function () {
+        var getDataButton = document.querySelector('#getDataButton');
+        var vsatInput = document.querySelector('#vsatInput');
+        var vsatForm = document.querySelector('#vsatForm');
+        var vsatInputHidden = document.querySelector('#vsatInputHidden');
+        var descriptionTextarea = document.querySelector('#descriptionTextarea');
 
-            if (getDataButton && vsatInput && vsatForm && vsatInputHidden) {
-                // Сохранение значения в localStorage и отправка формы при нажатии кнопки
-                getDataButton.addEventListener('click', function () {
-                    var ipPart = vsatInput.value;
-                    if (ipPart) {
-                        localStorage.setItem('vsatValue', ipPart); // Сохраняем значение в localStorage
-                        vsatInputHidden.value = ipPart; // Обновляем скрытое поле
-                        vsatForm.submit(); // Отправляем форму для получения данных
-                    } else {
-                        console.error('IP-адрес не введен');
-                    }
-                });
-            } else {
-                console.error('Не удалось найти элементы кнопки или формы.');
-            }
+        // Загрузка сохраненного значения из localStorage при загрузке страницы
+        var savedVsatValue = localStorage.getItem('vsatValue');
+        if (savedVsatValue) {
+            vsatInput.value = savedVsatValue;
+        }
 
-            // Установка значения в поле textarea
-            var bha = `@Html.Raw(bha)`;
-            if (descriptionTextarea) {
-                descriptionTextarea.value = bha;
+        if (getDataButton && vsatInput && vsatForm && vsatInputHidden) {
+            // Сохранение значения в localStorage и отправка формы при нажатии кнопки
+            getDataButton.addEventListener('click', function () {
+                var ipPart = vsatInput.value;
+                if (ipPart) {
+                    localStorage.setItem('vsatValue', ipPart); // Сохраняем значение в localStorage
+                    vsatInputHidden.value = ipPart; // Обновляем скрытое поле
+                    vsatForm.submit(); // Отправляем форму для получения данных
+                } else {
+                    console.error('IP-адрес не введен');
+                    alert('Пожалуйста, введите IP-адрес.');
+                }
+            });
+        } else {
+            console.error('Не удалось найти элементы кнопки или формы.');
+        }
+
+        // Установка значения в поле textarea
+        var bha = "@Html.Raw(bha)"; // Преобразуем значение в строку
+        if (descriptionTextarea) {
+            descriptionTextarea.value = bha;
+        }
+    });
+
+    // Функция для добавления файлов
+    function handleFileSelection(event) {
+        const files = event.target.files;
+        const filePreviewDiv = document.getElementById('filePreview');
+
+        if (!filePreviewDiv) {
+            console.error('Элемент с id "filePreview" не найден.');
+            return; // Прекращаем выполнение функции, если элемент не найден
+        }
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            // Проверка, что файл еще не добавлен
+            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)) {
+                selectedFiles.push(file); // Добавляем каждый выбранный файл в массив
             }
+        }
+
+        updateFilePreview(); // Обновляем отображение файлов
+    }
+
+    // Функция для обновления предпросмотра файлов
+    function updateFilePreview() {
+        const filePreviewDiv = document.getElementById('filePreview');
+
+        if (!filePreviewDiv) {
+            console.error('Элемент с id "filePreview" не найден.');
+            return;
+        }
+
+        // Очистка предыдущего предпросмотра файлов
+        filePreviewDiv.innerHTML = '';
+
+        selectedFiles.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+
+            // Иконка файла
+            const fileIcon = document.createElement('i');
+            fileIcon.className = 'fas fa-file-alt';
+
+            // Название файла
+            const fileName = document.createElement('div');
+            fileName.className = 'file-name';
+            fileName.textContent = file.name;
+
+            // Красный крестик для удаления файла
+            const deleteIcon = document.createElement('i');
+            deleteIcon.className = 'fas fa-times delete-icon';
+            deleteIcon.title = 'Удалить файл';
+            deleteIcon.dataset.index = index; // Используем data-атрибут для индекса
+
+            deleteIcon.addEventListener('click', function () {
+                const idx = parseInt(this.dataset.index, 10);
+                selectedFiles.splice(idx, 1);  // Удаляем файл из массива
+                updateFilePreview(); // Обновляем отображение
+            });
+
+            fileItem.appendChild(fileIcon);
+            fileItem.appendChild(fileName);
+            fileItem.appendChild(deleteIcon);
+            filePreviewDiv.appendChild(fileItem);
         });
-    </script>
+    }
+
+    // Добавляем обработчик события для выбора файлов
+    document.getElementById('fileInput').addEventListener('change', handleFileSelection);
+
+    // Добавляем обработчик события для отправки формы
+    document.getElementById('mainForm').addEventListener('submit', function (event) {
+        event.preventDefault();  // Предотвращаем обычную отправку формы
+
+        const form = this;
+        const formData = new FormData();
+
+        // Добавляем выбранные файлы
+        selectedFiles.forEach(file => formData.append('UploadedFiles', file));
+
+        // Добавляем другие поля формы
+        const formElements = form.elements;
+        for (let i = 0; i < formElements.length; i++) {
+            const element = formElements[i];
+            if (element.name && element.type !== 'file') {
+                formData.append(element.name, element.value);
+            }
+        }
+
+        // Получаем токен антивируса (CSRF токен)
+        const token = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (token) {
+            formData.append('__RequestVerificationToken', token.value);
+        }
+
+        // Отправка формы с использованием fetch
+        fetch(form.action, {
+            method: form.method,
+            body: formData,
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/Incidents/Index';  // Перенаправление после успешной отправки
+                } else {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке формы:', error);
+                alert('Произошла ошибка при сохранении инцидента.');
+            });
+    });
+
+    function deleteFile(fileName, incidentId) {
+        // Код для удаления файла через AJAX
+        fetch('/Incidents/DeleteFile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({ fileName: fileName, incidentId: incidentId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Удаляем элемент из DOM
+                    const fileElement = document.querySelector(`button[data-filename="${fileName}"][data-incidentid="${incidentId}"]`).parentElement;
+                    fileElement.remove();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при удалении файла:', error);
+                alert('Произошла ошибка при удалении файла.');
+            });
+    }
+</script>
+
+
+
 </body>
 </html>
