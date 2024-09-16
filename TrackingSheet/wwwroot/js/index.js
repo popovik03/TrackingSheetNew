@@ -1,10 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     const menuItems = document.querySelectorAll('#menuList li');
-    const mainContainer = document.querySelector('main');
     const menuList = document.getElementById('menuList');
+    const mainContainer = document.querySelector('main');
 
-    // Очищаем активное состояние всех элементов меню при загрузке страницы
-    menuItems.forEach(item => item.classList.remove('active'));
+    // Функция для добавления анимации
+    function fadeInMain() {
+        // Добавляем класс с небольшой задержкой, чтобы анимация началась плавно
+        setTimeout(() => {
+            mainContainer.classList.add('show');
+        }, 400); // Задержка для запуска анимации
+    }
+
+    // Запуск анимации для main при загрузке страницы
+    fadeInMain();
 
     // Получаем текущую страницу из window.currentPage
     const currentPage = window.currentPage;
@@ -15,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         new_incident: 'new_incident.html',
         vsat_bha: 'vsat_bha.html',
         statistics: 'statistics.html',
-        kanban: 'kanban.html',
+        kanban: 'KanbanView.cshtml',
         about: 'about.html'
     };
 
@@ -27,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (url) {
                 try {
-                    mainContainer.innerHTML = ''; // Очистка существующего контента
+                    mainContainer.innerHTML = ''; // Очистить существующий контент
 
                     const response = await fetch(url);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -37,19 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     const tempContainer = document.createElement('div');
                     tempContainer.innerHTML = data;
 
-                    // Перемещение контента в основной контейнер
+                    // Переместить контент в основной контейнер
                     mainContainer.appendChild(tempContainer);
+
+                    // Анимация появления
+                    animateFadeInUp(mainContainer);
+
+                    // Обновить активное состояние элементов меню
+                    menuItems.forEach(item => item.classList.remove('active'));
+                    target.classList.add('active');
 
                     // Обработка скриптов
                     const scripts = mainContainer.querySelectorAll('script');
                     await loadAndExecuteScripts(scripts);
-
-                    // Устанавливаем активное меню после полной загрузки контента
-                    window.currentPage = selectedId;
-                    setTimeout(() => {
-                        menuItems.forEach(item => item.classList.remove('active'));
-                        target.classList.add('active');
-                    }, 0); // Задержка в 0 мс помогает убедиться, что это произойдет после основной задачи
 
                 } catch (error) {
                     console.error('Error loading content:', error);
@@ -57,76 +65,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+});
 
-    // Подсвечиваем активную страницу при загрузке
-    if (currentPage) {
-        setTimeout(() => {
-            menuItems.forEach(item => {
-                if (item.id === currentPage) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
-        }, 0); // Задержка в 0 мс помогает убедиться, что это произойдет после основной задачи
-    }
 
-    async function loadAndExecuteScripts(scripts) {
-        for (let script of scripts) {
-            if (script.src) {
-                try {
-                    await loadScript(script.src);
-                } catch (err) {
-                    console.error('Error loading script:', err);
-                }
-            } else {
-                try {
-                    eval(script.innerText);
-                } catch (err) {
-                    console.error('Error executing script:', err);
-                }
-            }
-        }
-    }
-
-    function loadScript(src) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    }
-
-    // Scroll behavior for sidebar
-    let lastScrollTop = 0;
-    const sidebar = document.querySelector('aside');
-    const hideOffset = 300;
-    const showOffset = 50;
-
-    window.addEventListener('scroll', () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        if (scrollTop > lastScrollTop && scrollTop > hideOffset) {
-            sidebar.classList.add('hidden');
-            mainContainer.classList.add('collapsed');
-        } else if (scrollTop < lastScrollTop - showOffset) {
-            sidebar.classList.remove('hidden');
-            mainContainer.classList.remove('collapsed');
-        }
-
-        lastScrollTop = scrollTop;
-    });
-
-    // Custom select wrapper handling
-    document.addEventListener('click', (e) => {
+document.addEventListener('DOMContentLoaded', function () {
+    // Делегируем событие click на document для элементов с классом select-wrapper
+    document.addEventListener('click', function (e) {
         const selectWrapper = e.target.closest('.select-wrapper');
+
+        // Если клик был внутри select-wrapper
         if (selectWrapper) {
             e.stopPropagation();
             selectWrapper.classList.toggle('open');
         } else {
-            document.querySelectorAll('.select-wrapper.open').forEach(wrapper => wrapper.classList.remove('open'));
+            // Если клик был вне всех select-wrapper, закрыть все выпадающие списки
+            document.querySelectorAll('.select-wrapper.open').forEach(function (wrapper) {
+                wrapper.classList.remove('open');
+            });
         }
+    });
+
+    // Закрываем все открытые селекторы при клике вне их
+    document.addEventListener('click', function (e) {
+        document.querySelectorAll('.select-wrapper.open').forEach(function (selectWrapper) {
+            if (!selectWrapper.contains(e.target)) {
+                selectWrapper.classList.remove('open');
+            }
+        });
     });
 });

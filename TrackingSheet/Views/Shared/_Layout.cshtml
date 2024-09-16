@@ -1,5 +1,5 @@
 ﻿@{
-    
+
     var loggeduser = TempData.Peek("Login") as string ?? string.Empty;
     var boardId = ViewBag.BoardId;
 
@@ -23,12 +23,18 @@
 
 
 <body>
-    <aside class="sidebar">
-        <nav class="menu">
-            <div class="logo">
-                <img src="~/img/logo.svg" alt="Logo">
-            </div>
+    <header>
+        <div class="left-header">
+            <img src="~/img/logo_only.png" alt="Logo">
 
+            <button class="menu-btn" id="menuBtn">
+                <svg class="icon_popup" viewBox="0 0 24 24">
+                    <path d="M3 12H21M3 6H21M3 18H21"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="popup-menu" id="popupMenu">
             <ul id="menuList">
                 <li id="main" class="active">
                     <a asp-area="" asp-controller="Home" asp-action="Index">
@@ -77,15 +83,14 @@
                         Статистика инцидентов
                     </a>
                 </li>
-                <li id="kanban">
-                    <a asp-area="" asp-controller="Kanban" asp-action="KanbanView">
+                <li id="KanbanView">
+                    <a asp-controller="Kanban" asp-action="KanbanView">
                         <svg class="icon_menu" viewBox="0 0 24 24">
                             <path d="M12 20H5.2C4.07989 20 3.51984 20 3.09202 19.782C2.71569 19.5903 2.40973 19.2843 2.21799 18.908C2 18.4802 2 17.9201 2 16.8V7.2C2 6.07989 2 5.51984 2.21799 5.09202C2.40973 4.71569 2.71569 4.40973 3.09202 4.21799C3.51984 4 4.07989 4 5.2 4H5.6C7.84021 4 8.96031 4 9.81596 4.43597C10.5686 4.81947 11.1805 5.43139 11.564 6.18404C12 7.03968 12 8.15979 12 10.4M12 20V10.4M12 20H18.8C19.9201 20 20.4802 20 20.908 19.782C21.2843 19.5903 21.5903 19.2843 21.782 18.908C22 18.4802 22 17.9201 22 16.8V7.2C22 6.07989 22 5.51984 21.782 5.09202C21.5903 4.71569 21.2843 4.40973 20.908 4.21799C20.4802 4 19.9201 4 18.8 4H18.4C16.1598 4 15.0397 4 14.184 4.43597C13.4314 4.81947 12.8195 5.43139 12.436 6.18404C12 7.03968 12 8.15979 12 10.4" />
                         </svg>
                         Задачи
                     </a>
                 </li>
-
                 <li id="about">
                     <a asp-area="" asp-controller="Home" asp-action="Privacy">
                         <svg class="icon_menu" viewBox="0 0 24 24">
@@ -103,8 +108,7 @@
                     </a>
                 </li>
             </ul>
-        </nav>
-
+        </div>
 
         <div class="account">
             <div class="user">
@@ -126,34 +130,48 @@
                 </div>
             </div>
         </div>
-    </aside>
+    </header>
 
-     <main class="main-container">
-         @RenderBody()
-     </main>
-   
+    <main class="main-container">
+        @RenderBody()
+    </main>
 
-
-   
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var currentPage = window.currentPage;
+        // Получаем элементы кнопки и меню
+        const menuBtn = document.getElementById('menuBtn');
+        const popupMenu = document.getElementById('popupMenu');
 
-            // Удалите класс 'active' у всех элементов меню
-            var menuItems = document.querySelectorAll('#menuList li');
-            menuItems.forEach(function (item) {
-                item.classList.remove('active');
-            });
+        // Добавляем обработчик события для кнопки
+        menuBtn.addEventListener('click', function () {
+            // Добавляем/удаляем класс show для плавного открытия/закрытия меню
+            popupMenu.classList.toggle('show');
 
-            // Найдите элемент меню для текущей страницы и добавьте класс 'active'
-            var activeMenuItem = document.getElementById(currentPage);
-            if (activeMenuItem) {
-                activeMenuItem.classList.add('active');
+            // Добавляем/удаляем класс active для кнопки
+            menuBtn.classList.toggle('active');
+        });
+
+        // Закрытие меню при клике вне его области
+        window.addEventListener('click', function (e) {
+            if (!menuBtn.contains(e.target) && !popupMenu.contains(e.target)) {
+                popupMenu.classList.remove('show'); // Скрыть меню, если клик вне меню
+                menuBtn.classList.remove('active'); // Убрать активное состояние кнопки
             }
+        });
+
+        // Добавляем обработчик для каждого элемента меню
+        const menuItems = popupMenu.querySelectorAll('li'); // Если элементы меню — это <li>
+
+        menuItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                popupMenu.classList.remove('show'); // Закрываем меню после выбора элемента
+                menuBtn.classList.remove('active'); // Убираем активное состояние с кнопки
+            });
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>
+
 </html>
