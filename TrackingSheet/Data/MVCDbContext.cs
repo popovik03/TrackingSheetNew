@@ -35,6 +35,14 @@ namespace TrackingSheet.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            //Связь Incidents с апдейтами
+            modelBuilder.Entity<IncidentUpdate>()
+            .HasOne(i => i.Incident)
+            .WithMany(i => i.Updates)
+            .HasForeignKey(iu => iu.IncidentID);
+
+            base.OnModelCreating(modelBuilder);
+
             // Конфигурация для ROemployees
             modelBuilder.Entity<ROemployees>()
                 .HasMany(r => r.PlanerEntries)

@@ -21,6 +21,8 @@
         public int File { get; set; } //добавил для хранения файлов (просьба)
         public DateTime? DateEnd { get; set; } //добавил для даты окончания (просьба)
         public string? Update { get; set; }
+        // Навигационное свойство для связи с обновлениями инцидента
+        public ICollection<IncidentUpdate>? Updates { get; set; }
 
     }
 

@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="~/js/new_incident.js" defer></script>
+    
     <style>
         .file-list {
             display: flex;
@@ -358,10 +358,36 @@
                 <div class="description" style="flex: 70%; overflow: auto;">
                     <div class="input-field">
                         <label for="Solution" class="form-label">Описание инцидента:</label>
-                        <textarea class="form-control" style="width: 99%; margin-left:3px; height:80%" id="exampleFormControlTextarea1" rows="16" asp-for="Solution"></textarea>
+                        <textarea class="form-control" style="width: 99%; margin-left:3px; height:80%" id="exampleFormControlTextarea1" rows="8" asp-for="Solution"></textarea>
                     </div>
                 </div>
-                <div class="attachments" style="flex: 30%; overflow: auto; border-top: 1px solid #ccc; padding-top: 10px;">
+
+                <h4>Обновления инцидента:</h4>
+                <!-- Секция для отображения обновлений инцидента -->
+                <div class="incident-updates" style="flex: 30%; overflow: auto; border-top: 1px solid #ccc; padding-top: 10px;">
+                    @if (Model.Updates != null && Model.Updates.Any())
+                    {
+                       
+                        <ul style="list-style-type: none; padding-left: 0;">
+                            @foreach (var update in Model.Updates.OrderByDescending(u => u.Date))
+                            {
+                                <li style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                                    <div>
+                                        <strong>@update.Date.ToString("dd.MM.yyyy HH:mm")</strong> - @update.UpdateReporter
+                                    </div>
+                                    <div style="margin-top: 5px;">@update.UpdateSolution</div>
+                                    <div style="margin-top: 5px; font-style: italic;">Рейс: @update.Run</div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>Обновлений нет.</p>
+                    }
+                </div>
+
+                <div class="attachments" style="flex: 25%; overflow: auto; border-top: 1px solid #ccc; padding-top: 10px;">
                     <!-- Элемент для предварительного просмотра загруженных файлов -->
                     <div id="filePreview"></div>
 
@@ -405,123 +431,146 @@
         </div>
 
 
-        <script>
-            // Функция для удаления файла
-            function deleteFile(fileName, incidentId) {
-                if (confirm('Вы уверены, что хотите удалить этот файл?')) {
-                    fetch(`/Incidents/DeleteFile?fileName=${encodeURIComponent(fileName)}&incidentId=${incidentId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
+        
+
+
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary btn-lg" style="margin-right: 15px">
+                Сохранить
+                <svg class="icon_plus" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 15L8 17L12.5 12.5M8 8V5.2C8 4.0799 8 3.51984 8.21799 3.09202C8.40973 2.71569 8.71569 2.40973 9.09202 2.21799C9.51984 2 10.0799 2 11.2 2H18.8C19.9201 2 20.4802 2 20.908 2.21799C21.2843 2.40973 21.5903 2.71569 21.782 3.09202C22 3.51984 22 4.0799 22 5.2V12.8C22 13.9201 22 14.4802 21.782 14.908C21.5903 15.2843 21.2843 15.5903 20.908 15.782C20.4802 16 19.9201 16 18.8 16H16M5.2 22H12.8C13.9201 22 14.4802 22 14.908 21.782C15.2843 21.5903 15.5903 21.2843 15.782 20.908C16 20.4802 16 19.9201 16 18.8V11.2C16 10.0799 16 9.51984 15.782 9.09202C15.5903 8.71569 15.2843 8.40973 14.908 8.21799C14.4802 8 13.9201 8 12.8 8H5.2C4.0799 8 3.51984 8 3.09202 8.21799C2.71569 8.40973 2.40973 8.71569 2.21799 9.09202C2 9.51984 2 10.0799 2 11.2V18.8C2 19.9201 2 20.4802 2.21799 20.908C2.40973 21.2843 2.71569 21.5903 3.09202 21.782C3.51984 22 4.07989 22 5.2 22Z"></path>
+                </svg>
+            </button>
+        </div>
+
+        
+
+    </form>
+
+    <!-- Модальное окно для добавления IncidentUpdate -->
+    <div id="incidentUpdateModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header">
+                <h2>Добавить обновление инцидента</h2>
+            </div>
+            <div class="modal-body">
+                <form id="incidentUpdateForm">
+                    <div class="form-group">
+                        <label for="updateDate">Дата и время</label>
+                        <input type="datetime-local" id="updateDate" name="Date" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="updateReporter">Reporter</label>
+                        <input type="text" id="updateReporter" name="UpdateReporter" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="updateRun">Рейс</label>
+                        <input type="number" id="updateRun" name="Run" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="updateSolution">Описание</label>
+                        <textarea id="updateSolution" name="UpdateSolution" rows="4" class="form-control"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="cancelUpdateButton" class="btn btn-secondary">Отмена</button>
+                        <button type="submit" id="saveUpdateButton" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+           
+        </div>
+    </div>
+    <script>
+        // Функция для удаления файла
+        function deleteFile(fileName, incidentId) {
+            if (confirm('Вы уверены, что хотите удалить этот файл?')) {
+                fetch(`/Incidents/DeleteFile?fileName=${encodeURIComponent(fileName)}&incidentId=${incidentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Файл успешно удален.');
+                            location.reload(); // Полная перезагрузка страницы после удаления файла
+                        } else {
+                            alert('Ошибка при удалении файла: ' + (data.message || 'Неизвестная ошибка.'));
                         }
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Файл успешно удален.');
-                                location.reload(); // Полная перезагрузка страницы после удаления файла
-                            } else {
-                                alert('Ошибка при удалении файла: ' + (data.message || 'Неизвестная ошибка.'));
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Ошибка:', error);
-                            alert('Ошибка при удалении файла.');
-                        });
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        alert('Ошибка при удалении файла.');
+                    });
+            }
+        }
+
+        // Функция для обработки выбора файла
+        function handleFileSelect(event) {
+            console.log('handleFileSelect called');
+            console.log('Selected file:', event.target.files[0]);
+
+            // Используем setTimeout для отсрочки нажатия кнопки "Сохранить"
+            setTimeout(function () {
+                var submitButton = document.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    console.log('Submitting form...');
+                    submitButton.click();
+                } else {
+                    console.error('Submit button not found');
                 }
-            }
+            }, 100); // Задержка в 100 мс для уверенности, что файл выбран
+        }
 
-            // Функция для обработки выбора файла
-            function handleFileSelect(event) {
-                console.log('handleFileSelect called');
-                console.log('Selected file:', event.target.files[0]);
+        // Обработчик событий после загрузки DOM
+        document.addEventListener('DOMContentLoaded', function () {
+            var modal = document.getElementById("incidentUpdateModal");
+            var btn = document.getElementById("openModalButton");
+            var span = document.getElementsByClassName("close-modal")[0];
 
-                // Используем setTimeout для отсрочки нажатия кнопки "Сохранить"
-                setTimeout(function () {
-                    var submitButton = document.querySelector('button[type="submit"]');
-                    if (submitButton) {
-                        console.log('Submitting form...');
-                        submitButton.click();
-                    } else {
-                        console.error('Submit button not found');
-                    }
-                }, 100); // Задержка в 100 мс для уверенности, что файл выбран
-            }
+            // Обработчик открытия модального окна
+            btn.onclick = function (event) {
+                event.preventDefault();
 
-            // Обработчик событий после загрузки DOM
-            document.addEventListener('DOMContentLoaded', function () {
-                var modal = document.getElementById("incidentUpdateModal");
-                var btn = document.getElementById("openModalButton");
-                var span = document.getElementsByClassName("close-modal")[0];
+                // Отображаем модальное окно
+                modal.style.display = "block";
 
+                // Теперь ищем форму внутри модального окна после его открытия
                 var updateForm = document.getElementById("incidentUpdateForm");
+                if (!updateForm) {
+                    console.error('Форма с ID "incidentUpdateForm" не найдена.');
+                    return;
+                }
+
                 var updateDate = document.getElementById("updateDate");
                 var updateReporter = document.getElementById("updateReporter");
                 var updateRun = document.getElementById("updateRun");
                 var updateSolution = document.getElementById("updateSolution");
 
-                // Исправленная функция для получения даты с учётом смещения часового пояса
-                function getDateWithTimezoneOffset(offset) {
-                    var currentDate = new Date();
+                // Получаем дату с учётом смещения +5 часов
+                var dateWithOffset = getDateWithTimezoneOffset(5);
+                updateDate.value = dateWithOffset;
+                updateReporter.value = "@reporter";
+                updateRun.value = "@Model.Run";
+                updateSolution.value = "";
 
-                    // Получаем время в UTC в миллисекундах
-                    var utcTime = currentDate.getTime() + (currentDate.getTimezoneOffset() * 60000);
-
-                    // Добавляем смещение (в часах)
-                    var targetTime = utcTime + (offset * 3600000);
-                    var targetDate = new Date(targetTime);
-
-                    // Форматируем дату в формат 'yyyy-MM-ddTHH:mm'
-                    var year = targetDate.getFullYear();
-                    var month = ('0' + (targetDate.getMonth() + 1)).slice(-2);
-                    var day = ('0' + targetDate.getDate()).slice(-2);
-                    var hours = ('0' + targetDate.getHours()).slice(-2);
-                    var minutes = ('0' + targetDate.getMinutes()).slice(-2);
-
-                    return `${year}-${month}-${day}T${hours}:${minutes}`;
-                }
-
-                // Обработчик открытия модального окна
-                btn.onclick = function (event) {
-                    event.preventDefault();
-
-                    // Получаем дату с учётом смещения +5 часов
-                    var dateWithOffset = getDateWithTimezoneOffset(5);
-                    console.log('Устанавливаем updateDate:', dateWithOffset); // Отладка
-
-                    // Устанавливаем значения полей
-                    updateDate.value = dateWithOffset;
-                    updateReporter.value = "@reporter";
-                    updateRun.value = "@Model.Run";
-                    updateSolution.value = "";
-
-                    // Отображаем модальное окно
-                    modal.style.display = "block";
-                }
-
-                // Обработчик закрытия модального окна по клику на крестик
-                span.onclick = function () {
-                    modal.style.display = "none";
-                }
-
-                // Обработчик закрытия модального окна при клике вне его области
-                window.onclick = function (event) {
-                    if (event.target == modal) {
-                        modal.style.display = "none";
-                    }
-                }
-
-                // Обработчик отправки формы в модальном окне
-                updateForm.addEventListener('submit', function (event) {
+                // Обработчик отправки формы
+                updateForm.onsubmit = function (event) {
                     event.preventDefault();
 
                     var formData = {
-                        ID: "@Model.ID",
+                        IncidentID: "@Model.ID",
                         Date: updateDate.value,
                         UpdateReporter: updateReporter.value,
                         Run: updateRun.value,
                         UpdateSolution: updateSolution.value
                     };
+                    console.log('Отправляемые данные:', formData);
 
                     fetch('@Url.Action("AddUpdate", "Incidents")', {
                         method: 'POST',
@@ -545,64 +594,50 @@
                             console.error('Ошибка:', error);
                             alert('Произошла ошибка при обновлении инцидента.');
                         });
-                });
+                };
 
-                // Функция для получения CSRF-токена
-                function getAntiForgeryToken() {
-                    var tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
-                    return tokenElement ? tokenElement.value : '';
+                // Обработчик для закрытия модального окна
+                document.getElementById('cancelUpdateButton').onclick = function () {
+                    modal.style.display = "none";
+                };
+            };
+
+            // Обработчик закрытия модального окна по клику на крестик
+            span.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            // Обработчик закрытия модального окна при клике вне его области
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
                 }
-            });
-        </script>
+            }
 
+            // Функция для получения CSRF-токена
+            function getAntiForgeryToken() {
+                var tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                return tokenElement ? tokenElement.value : '';
+            }
 
-        <div class="button-container">
-            <button type="submit" class="btn btn-primary btn-lg" style="margin-right: 15px">
-                Сохранить
-                <svg class="icon_plus" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 15L8 17L12.5 12.5M8 8V5.2C8 4.0799 8 3.51984 8.21799 3.09202C8.40973 2.71569 8.71569 2.40973 9.09202 2.21799C9.51984 2 10.0799 2 11.2 2H18.8C19.9201 2 20.4802 2 20.908 2.21799C21.2843 2.40973 21.5903 2.71569 21.782 3.09202C22 3.51984 22 4.0799 22 5.2V12.8C22 13.9201 22 14.4802 21.782 14.908C21.5903 15.2843 21.2843 15.5903 20.908 15.782C20.4802 16 19.9201 16 18.8 16H16M5.2 22H12.8C13.9201 22 14.4802 22 14.908 21.782C15.2843 21.5903 15.5903 21.2843 15.782 20.908C16 20.4802 16 19.9201 16 18.8V11.2C16 10.0799 16 9.51984 15.782 9.09202C15.5903 8.71569 15.2843 8.40973 14.908 8.21799C14.4802 8 13.9201 8 12.8 8H5.2C4.0799 8 3.51984 8 3.09202 8.21799C2.71569 8.40973 2.40973 8.71569 2.21799 9.09202C2 9.51984 2 10.0799 2 11.2V18.8C2 19.9201 2 20.4802 2.21799 20.908C2.40973 21.2843 2.71569 21.5903 3.09202 21.782C3.51984 22 4.07989 22 5.2 22Z"></path>
-                </svg>
-            </button>
-        </div>
+            // Функция для получения даты с учётом смещения часового пояса
+            function getDateWithTimezoneOffset(offset) {
+                var currentDate = new Date();
+                var utcTime = currentDate.getTime() + (currentDate.getTimezoneOffset() * 60000);
+                var targetTime = utcTime + (offset * 3600000);
+                var targetDate = new Date(targetTime);
 
-        <!-- Модальное окно для добавления IncidentUpdate -->
-        <div id="incidentUpdateModal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <div class="modal-header">
-                    <h2>Добавить обновление инцидента</h2>
-                </div>
-                <div class="modal-body">
-                    <form id="incidentUpdateForm">
-                        <div class="form-group">
-                            <label for="updateDate">Дата и время</label>
-                            <input type="datetime-local" id="updateDate" name="Date" class="form-control" />
-                        </div>
+                var year = targetDate.getFullYear();
+                var month = ('0' + (targetDate.getMonth() + 1)).slice(-2);
+                var day = ('0' + targetDate.getDate()).slice(-2);
+                var hours = ('0' + targetDate.getHours()).slice(-2);
+                var minutes = ('0' + targetDate.getMinutes()).slice(-2);
 
-                        <div class="form-group">
-                            <label for="updateReporter">Reporter</label>
-                            <input type="text" id="updateReporter" name="UpdateReporter" class="form-control" />
-                        </div>
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+        });
 
-                        <div class="form-group">
-                            <label for="updateRun">Рейс</label>
-                            <input type="number" id="updateRun" name="Run" class="form-control" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="updateSolution">Описание</label>
-                            <textarea id="updateSolution" name="UpdateSolution" rows="4" class="form-control"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="cancelUpdateButton" class="btn btn-secondary">Отмена</button>
-                    <button type="button" id="saveUpdateButton" class="btn btn-primary">Сохранить</button>
-                </div>
-            </div>
-        </div>
-
-    </form>
+    </script>
 </body>
 
 </html>

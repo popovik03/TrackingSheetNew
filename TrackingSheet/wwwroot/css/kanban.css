@@ -4,6 +4,7 @@
     height: 100vh;
     padding: 5px;
     box-sizing: border-box;
+    position: relative;
 }
 
 .kanban-tabs {
@@ -92,4 +93,6 @@
     margin-bottom: 5px;
 }
 
-
+.modal {
+    z-index: 1060;
+}

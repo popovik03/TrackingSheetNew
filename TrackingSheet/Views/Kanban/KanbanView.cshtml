@@ -1,14 +1,15 @@
 ﻿@model List<TrackingSheet.Models.Kanban.KanbanBoard>
 
 @{
-    ViewData["Title"] = "Kanban Boartd";
+    ViewData["Title"] = "Kanban Board";
     var selectedBoardId = ViewBag.SelectedBoardId as Guid?;
     var selectedBoard = selectedBoardId.HasValue
         ? Model.FirstOrDefault(b => b.Id == selectedBoardId.Value)
         : Model.FirstOrDefault();
 }
 
-
+<!DOCTYPE html>
+<html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,310 +18,325 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="~/js/Kanban.js"></script>
-    
 </head>
+<body>
+    <div class="kanban-container">
+        <!-- Tabs for Boards -->
+        <div class="kanban-tabs nav nav-tabs d-flex align-items-center">
+            @foreach (var board in Model)
+            {
+                <div class="nav-item tab-item d-flex align-items-center">
+                    <a class="nav-link @(board.Id == selectedBoardId ? "active" : "")" onclick="showBoard('@board.Id')" style="border: 1px solid #ccc; padding: 5px; background-color: #f8f9fa; border-radius: 4px; margin-right: 5px;">
+                        <span class="board-name" id="board-name-@board.Id">@board.Board</span>
+                        <button type="button" class="btn btn-sm btn-link" onclick="editBoardName('@board.Id')">✎</button>
+                        @if (!board.IsProtected)
+                        {
+                            <button type="button" class="close" aria-label="Close" onclick="deleteBoard('@board.Id')">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        }
+                    </a>
+                </div>
+            }
+            <!-- Button to create a new board -->
+            <form class="d-flex align-items-center">
+                <button type="button" class="btn btn-link" style="font-size: 24px; line-height: 0;" data-toggle="modal" data-target="#createBoardModal">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </form>
+        </div>
 
-<div class="kanban-container">
-    <!-- Верхняя область для вкладок -->
-    <div class="kanban-tabs nav nav-tabs d-flex align-items-center">
-        @foreach (var board in Model)
-        {
-            <div class="nav-item tab-item d-flex align-items-center">
-                <a class="nav-link @(board.Id == selectedBoardId ? "active" : "")" onclick="showBoard('@board.Id')" style="border: 1px solid #ccc; padding: 5px; background-color: #f8f9fa; border-radius: 4px; margin-right: 5px;">
-                    <span class="board-name" id="board-name-@board.Id">@board.Board</span>
-                    <button type="button" class="btn btn-sm btn-link" onclick="editBoardName('@board.Id')">✎</button>
-                    @if (!board.IsProtected)
-                    {
-                        <button type="button" class="close" aria-label="Close" onclick="deleteBoard('@board.Id')">
-                            <span aria-hidden="true">&times;</span>
+        <!-- Board Content -->
+        <div class="kanban-content tab-content">
+            @foreach (var board in Model)
+            {
+                <div class="board-content tab-pane fade @(board.Id == selectedBoardId ? "show active" : "")" id="board-content-@board.Id" style="border: 1px solid #ccc; padding: 10px; background-color: #ffffff; border-radius: 4px; height: 97%">
+                    <h3 class="d-flex justify-content-between align-items-center">
+                        @board.Board
+                        <!-- Button to add a new column -->
+                        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#addColumnModal" onclick="setAddColumnModalData('@board.Id')">
+                            <i class="fas fa-plus"></i>
                         </button>
-                    }
-                </a> <!-- Закрывающий тег <a> -->
-            </div>
-        }
-        <form class="d-flex align-items-center">
-            <button type="button" class="btn btn-link" style="font-size: 24px; line-height: 0;" data-toggle="modal" data-target="#createBoardModal">
-                <i class="fas fa-plus"></i>
-            </button>
-        </form>
-        <!-- Модальное окно для создания новой доски -->
+                    </h3>
+
+                    <!-- Columns -->
+                    <div class="kanban-columns d-flex">
+                        @foreach (var column in board.Columns.OrderBy(c => c.Order))
+                        {
+                            <div class="kanban-column" data-id="@column.Id" data-order="@column.Order" style="background-color: @column.ColumnColor; height: 90%; flex: 1; margin-right: 10px;">
+                                <div class="column-header d-flex justify-content-between align-items-center">
+                                    <h4 class="mb-0">@column.Column</h4>
+                                    <div class="column-actions">
+                                        <!-- Button to add a task -->
+                                        <button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#addTaskModal" onclick="setAddTaskModalData('@column.Id')">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <!-- Button to edit column -->
+                                        <button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#editColumnModal" onclick="setEditColumnModalData('@column.Id', '@column.Column', '@column.Order', '@column.ColumnColor')">✎</button>
+                                        <!-- Button to delete column -->
+                                        <button type="button" class="btn btn-sm btn-link" onclick="deleteColumn('@column.Id')">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Tasks -->
+                                <div class="kanban-tasks">
+                                    @foreach (var task in column.Tasks.OrderBy(t => t.Order))
+                                    {
+                                        <div class="kanban-task" data-id="@task.Id" style="background-color: @task.TaskColor; padding: 5px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px;">
+                                            <div class="task-header d-flex justify-content-between align-items-center">
+                                                <strong>@task.TaskName</strong>
+                                                <div class="task-actions">
+                                                    <!-- Button to edit task -->
+                                                    <button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#editTaskModal" onclick="setEditTaskModalData('@task.Id', '@task.TaskName', '@task.TaskDescription', '@task.TaskColor', '@(task.DueDate.HasValue ? task.DueDate.Value.ToString("yyyy-MM-dd") : "")', '@task.Priority')">✎</button>
+                                                    <!-- Button to delete task -->
+                                                    <button type="button" class="btn btn-sm btn-link" onclick="deleteTask('@task.Id')">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small>@task.TaskDescription</small>
+                                            <!-- Display due date and priority -->
+                                            @if (task.DueDate.HasValue)
+                                            {
+                                                <div>Дедлайн: @task.DueDate.Value.ToShortDateString()</div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(task.Priority))
+                                            {
+                                                <div>Приоритет: @task.Priority</div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Modals Section -->
+    @section Modals {
+        <!-- Create Board Modal -->
         <div class="modal fade" id="createBoardModal" tabindex="-1" role="dialog" aria-labelledby="createBoardModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createBoardModalLabel">Создать новую доску</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="post" asp-action="CreateBoard" asp-controller="Kanban">
+                    <form method="post" asp-action="CreateBoard" asp-controller="Kanban">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createBoardModalLabel">Создать новую доску</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
                             <div class="form-group">
                                 <label for="boardName">Название новой доски:</label>
                                 <input type="text" name="boardName" class="form-control" id="boardName" placeholder="Введите название доски" required />
                             </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
                             <button type="submit" class="btn btn-primary">Создать доску</button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Нижняя область для содержимого доски -->
-    <div class="kanban-content tab-content">
-        @foreach (var board in Model)
-        {
-            <div class="board-content tab-pane fade @(board.Id == selectedBoardId ? "show active" : "")" id="board-content-@board.Id" style="border: 1px solid #ccc; padding: 10px; background-color: #ffffff; border-radius: 4px; height: 97%">
-                <h3 class="d-flex justify-content-between align-items-center">
-                    @board.Board
-                    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#addColumnModal-@board.Id">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </h3>
-
-                <!-- Отображение колонок -->
-                <div class="kanban-columns d-flex">
-                    @foreach (var column in board.Columns.OrderBy(c => c.Order))
-                    {
-                        <div class="kanban-column" data-id="@column.Id" data-order="@column.Order" style="background-color: @column.ColumnColor; height: 90%">
-                            <div class="column-header d-flex justify-content-between align-items-center">
-                                <h4 class="mb-0">@column.Column</h4>
-                                <div class="column-actions">
-                                    <!-- Кнопка для добавления задачи -->
-                                    <button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#addTaskModal-@column.Id">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <!-- Кнопка для редактирования колонки -->
-                                    <button type="button" class="btn btn-sm btn-link" onclick="editColumnName('@column.Id')">
-                                        ✎
-                                    </button>
-                                    <!-- Кнопка для удаления колонки -->
-                                    <button type="button" class="btn btn-sm btn-link" onclick="deleteColumn('@column.Id')">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Контейнер задач -->
-                            <div class="kanban-tasks">
-                                @foreach (var task in column.Tasks.OrderBy(t => t.Order))
-                                {
-                                    <div class="kanban-task" data-id="@task.Id" style="background-color: @task.TaskColor; padding: 5px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px;">
-                                        <div class="task-header d-flex justify-content-between align-items-center">
-                                            <strong>@task.TaskName</strong>
-                                            <div class="task-actions">
-                                                <!-- Кнопка для редактирования задачи -->
-                                                <button type="button" class="btn btn-sm btn-link" onclick="editTask('@task.Id')">
-                                                    ✎
-                                                </button>
-                                                <!-- Кнопка для удаления задачи -->
-                                                <button type="button" class="btn btn-sm btn-link" onclick="deleteTask('@task.Id')">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <small>@task.TaskDescription</small>
-                                        <!-- Отображение других свойств, таких как приоритет или дедлайн -->
-                                        @if (task.DueDate.HasValue)
-                                        {
-                                            <div>Дедлайн: @task.DueDate.Value.ToShortDateString()</div>
-                                        }
-                                        @if (!string.IsNullOrEmpty(task.Priority))
-                                        {
-                                            <div>Приоритет: @task.Priority</div>
-                                        }
-                                    </div>
-                                }
-                            </div>
-
-                            <!-- Модальное окно для добавления новой задачи -->
-                            <div class="modal fade" id="addTaskModal-@column.Id" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel-@column.Id" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <form id="addTaskForm-@column.Id" method="post" asp-action="AddTask" asp-controller="Kanban" novalidate>
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="addTaskModalLabel-@column.Id">Добавить задачу в "@column.Column"</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <input type="hidden" name="columnId" value="@column.Id" />
-                                                <div class="form-group">
-                                                    <label for="taskName-@column.Id">Название задачи:</label>
-                                                    <input type="text" name="taskName" class="form-control" id="taskName-@column.Id" placeholder="Введите название задачи" required />
-                                                    <div class="invalid-feedback">
-                                                        Пожалуйста, заполните название задачи.
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="taskDescription-@column.Id">Описание задачи:</label>
-                                                    <textarea name="taskDescription" class="form-control" id="taskDescription-@column.Id" placeholder="Введите описание задачи" required></textarea>
-                                                    <div class="invalid-feedback">
-                                                        Пожалуйста, заполните описание задачи.
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="taskColor-@column.Id">Цвет задачи:</label>
-                                                    <input type="color" name="taskColor" class="form-control" id="taskColor-@column.Id" value="#ffffff" required />
-                                                    <div class="invalid-feedback">
-                                                        Пожалуйста, выберите цвет задачи.
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="dueDate-@column.Id">Дедлайн:</label>
-                                                    <input type="date" name="dueDate" class="form-control" id="dueDate-@column.Id" />
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="priority-@column.Id">Приоритет:</label>
-                                                    <select name="priority" class="form-control" id="priority-@column.Id">
-                                                        <option value="Низкий">Низкий</option>
-                                                        <option value="Средний">Средний</option>
-                                                        <option value="Высокий">Высокий</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <span class="text-danger mr-auto" id="validationMessage-@column.Id" style="display: none;"></span>
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
-                                                <button type="submit" class="btn btn-primary">Добавить задачу</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+        <!-- Add Column Modal -->
+        <div class="modal fade" id="addColumnModal" tabindex="-1" role="dialog" aria-labelledby="addColumnModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" asp-action="AddColumn" asp-controller="Kanban">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addColumnModalLabel">Добавить новую колонку</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="boardId" id="addColumnBoardId" />
+                            <div class="form-group">
+                                <label for="columnName">Название колонки:</label>
+                                <input type="text" name="columnName" class="form-control" id="columnName" placeholder="Введите название колонки" required />
                             </div>
                         </div>
-                    }
-                </div>
-
-                <!-- Модальное окно для добавления новой колонки -->
-                <div class="modal fade" id="addColumnModal-@board.Id" tabindex="-1" role="dialog" aria-labelledby="addColumnModalLabel-@board.Id" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addColumnModalLabel-@board.Id">Добавить новую колонку</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="post" asp-action="AddColumn" asp-controller="Kanban">
-                                    <input type="hidden" name="boardId" value="@board.Id" />
-                                    <div class="form-group">
-                                        <label for="columnName">Название новой колонки:</label>
-                                        <input type="text" name="columnName" class="form-control" id="columnName" placeholder="Введите название колонки" required />
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Добавить колонку</button>
-                                </form>
-                            </div>
+                        <div class="modal-footer">
+                            <span class="text-danger mr-auto" id="addColumnValidationMessage" style="display: none;"></span>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn btn-primary">Добавить колонку</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
+        </div>
+
+        <!-- Edit Column Modal -->
+        <div class="modal fade" id="editColumnModal" tabindex="-1" role="dialog" aria-labelledby="editColumnModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form method="post" asp-action="EditColumn" asp-controller="Kanban">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editColumnModalLabel">Редактировать колонку</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="columnId" id="editColumnId" />
+                            <div class="form-group">
+                                <label for="editColumnName">Название колонки:</label>
+                                <input type="text" name="columnName" class="form-control" id="editColumnName" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="editColumnOrder">Порядок колонки:</label>
+                                <input type="number" name="order" class="form-control" id="editColumnOrder" min="1" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="editColumnColor">Цвет колонки:</label>
+                                <input type="color" name="columnColor" class="form-control" id="editColumnColor" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <span class="text-danger mr-auto" id="editColumnValidationMessage" style="display: none;"></span>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Task Modal -->
+        <div class="modal fade" id="addTaskModal" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form id="addTaskForm" method="post" asp-action="AddTask" asp-controller="Kanban" novalidate>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addTaskModalLabel">Добавить задачу</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="columnId" id="addTaskColumnId" />
+                            <div class="form-group">
+                                <label for="taskName">Название задачи:</label>
+                                <input type="text" name="taskName" class="form-control" id="taskName" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="taskDescription">Описание задачи:</label>
+                                <textarea name="taskDescription" class="form-control" id="taskDescription" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskColor">Цвет задачи:</label>
+                                <input type="color" name="taskColor" class="form-control" id="taskColor" value="#ffffff" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="dueDate">Дедлайн:</label>
+                                <input type="date" name="dueDate" class="form-control" id="dueDate" />
+                            </div>
+                            <div class="form-group">
+                                <label for="priority">Приоритет:</label>
+                                <select name="priority" class="form-control" id="priority">
+                                    <option value="Низкий">Низкий</option>
+                                    <option value="Средний">Средний</option>
+                                    <option value="Высокий">Высокий</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <span class="text-danger mr-auto" id="addTaskValidationMessage" style="display: none;"></span>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn btn-primary">Добавить задачу</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Task Modal -->
+        <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form id="editTaskForm" method="post" asp-action="EditTask" asp-controller="Kanban" novalidate>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editTaskModalLabel">Редактировать задачу</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="taskId" id="editTaskId" />
+                            <div class="form-group">
+                                <label for="editTaskName">Название задачи:</label>
+                                <input type="text" name="taskName" class="form-control" id="editTaskName" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="editTaskDescription">Описание задачи:</label>
+                                <textarea name="taskDescription" class="form-control" id="editTaskDescription" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editTaskColor">Цвет задачи:</label>
+                                <input type="color" name="taskColor" class="form-control" id="editTaskColor" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="editDueDate">Дедлайн:</label>
+                                <input type="date" name="dueDate" class="form-control" id="editDueDate" />
+                            </div>
+                            <div class="form-group">
+                                <label for="editPriority">Приоритет:</label>
+                                <select name="priority" class="form-control" id="editPriority">
+                                    <option value="Низкий">Низкий</option>
+                                    <option value="Средний">Средний</option>
+                                    <option value="Высокий">Высокий</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <span class="text-danger mr-auto" id="editTaskValidationMessage" style="display: none;"></span>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- JavaScript Functions -->
+    <script>
+        function setAddColumnModalData(boardId) {
+            $('#addColumnBoardId').val(boardId);
         }
-    </div>
-</div>
 
-<!-- Модальное окно для редактирования колонки -->
-<div class="modal fade" id="editColumnModal" tabindex="-1" role="dialog" aria-labelledby="editColumnModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editColumnModalLabel">Редактировать колонку</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="editColumnForm">
-                    <input type="hidden" id="editColumnId" />
+        function setEditColumnModalData(columnId, columnName, order, columnColor) {
+            $('#editColumnId').val(columnId);
+            $('#editColumnName').val(columnName);
+            $('#editColumnOrder').val(order);
+            $('#editColumnColor').val(columnColor);
+        }
 
-                    <div class="form-group">
-                        <label for="editColumnName">Название колонки:</label>
-                        <input type="text" class="form-control" id="editColumnName" required />
-                    </div>
+        function setAddTaskModalData(columnId) {
+            $('#addTaskColumnId').val(columnId);
+        }
 
-                    <div class="form-group">
-                        <label for="editColumnOrder">Порядок колонки:</label>
-                        <input type="number" class="form-control" id="editColumnOrder" min="1" required />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editColumnColor">Цвет колонки:</label>
-                        <input type="color" class="form-control" id="editColumnColor" />
-                    </div>
-
-                    <!-- Кнопки "Отмена" и "OK" -->
-                    <div class="form-group text-right">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
-                        <button type="button" class="btn btn-primary" onclick="saveColumnChanges()">OK</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Модальное окно для редактирования задачи -->
-<div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="editTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="editTaskForm" method="post" asp-action="EditTask" asp-controller="Kanban" novalidate>
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editTaskModalLabel">Редактировать задачу</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" name="taskId" id="editTaskId" />
-
-                    <div class="form-group">
-                        <label for="editTaskName">Название задачи:</label>
-                        <input type="text" name="taskName" class="form-control" id="editTaskName" placeholder="Введите название задачи" required />
-                        <div class="invalid-feedback">
-                            Пожалуйста, заполните название задачи.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTaskDescription">Описание задачи:</label>
-                        <textarea name="taskDescription" class="form-control" id="editTaskDescription" placeholder="Введите описание задачи" required></textarea>
-                        <div class="invalid-feedback">
-                            Пожалуйста, заполните описание задачи.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTaskColor">Цвет задачи:</label>
-                        <input type="color" name="taskColor" class="form-control" id="editTaskColor" value="#ffffff" required />
-                        <div class="invalid-feedback">
-                            Пожалуйста, выберите цвет задачи.
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editDueDate">Дедлайн:</label>
-                        <input type="date" name="dueDate" class="form-control" id="editDueDate" />
-                    </div>
-                    <div class="form-group">
-                        <label for="editPriority">Приоритет:</label>
-                        <select name="priority" class="form-control" id="editPriority">
-                            <option value="Низкий">Низкий</option>
-                            <option value="Средний">Средний</option>
-                            <option value="Высокий">Высокий</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <span class="text-danger mr-auto" id="editValidationMessage" style="display: none;"></span>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+        function setEditTaskModalData(taskId, taskName, taskDescription, taskColor, dueDate, priority) {
+            $('#editTaskId').val(taskId);
+            $('#editTaskName').val(taskName);
+            $('#editTaskDescription').val(taskDescription);
+            $('#editTaskColor').val(taskColor);
+            $('#editDueDate').val(dueDate);
+            $('#editPriority').val(priority);
+        }
+    </script>
+</body>
+</html>

@@ -160,12 +160,13 @@
                 </div>
 
                 <div class="input-field">
-                    <label for="" class="form-label">Смена</label>
+                    <label for="Shift" class="form-label">Смена</label>
                     <select class="form-select" asp-for="Shift">
-                        <option value="Day" selected="@(shift == "Day" ? "selected" : "")">День</option>
-                        <option value="Night" selected="@(shift == "Night" ? "selected" : "")">Ночь</option>
+                        <option value="Day" selected="@((shift == "Day") ? "selected" : null)">День</option>
+                        <option value="Night" selected="@((shift == "Night") ? "selected" : null)">Ночь</option>
                     </select>
                 </div>
+
 
                 <div class="input-field">
                     <label for="reporter" class="form-label">431</label>

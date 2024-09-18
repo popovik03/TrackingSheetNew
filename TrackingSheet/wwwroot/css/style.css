@@ -28,12 +28,11 @@
 }
 
 body {
-    display: flex;
-    flex-direction: column;
+    /*display: flex;
+    /*flex-direction: column;*/
     background-color: #f7f7f7;
     font-family: "Gilroy-Bold";
     color: #07302D; /* Цвет текста */
-    
 }
 
 header {
@@ -63,9 +62,9 @@ header {
 
 main {
     opacity: 0;
-    transform: translateY(300px);
+    transform: translateY(50px);
     visibility: hidden;
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0s 0.5s, margin-left 0.3s ease;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     box-sizing: border-box;
     display: flex;
     flex-basis: auto;
@@ -79,13 +78,13 @@ main {
     min-width: 1200px;
 }
 
-
 main.show {
     opacity: 1;
     transform: translateY(0);
     visibility: visible;
     transition-delay: 0s;
 }
+
 
 
 

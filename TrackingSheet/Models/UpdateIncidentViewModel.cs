@@ -1,4 +1,6 @@
-﻿namespace TrackingSheet.Models
+﻿using TrackingSheet.Models.Domain;
+
+namespace TrackingSheet.Models
 {
     public class UpdateIncidentViewModel
     {
@@ -19,5 +21,8 @@
         public string? Solution { get; set; }
         public int File { get; set; }
         public DateTime? DateEnd { get; set; }
+
+        // Новое свойство: коллекция обновлений инцидента
+        public List<IncidentUpdate>? Updates { get; set; }
     }
 }

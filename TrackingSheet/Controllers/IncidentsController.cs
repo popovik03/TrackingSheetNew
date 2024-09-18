@@ -219,7 +219,9 @@ namespace TrackingSheet.Controllers
         [HttpGet]
         public async Task<IActionResult> View(Guid id)
         {
-            var incidents = await mvcDbContext.IncidentList.FirstOrDefaultAsync(x => x.ID == id);
+            var incidents = await mvcDbContext.IncidentList
+                .Include(i => i.Updates)
+                .FirstOrDefaultAsync(x => x.ID == id);
 
             if (incidents != null)
             {
@@ -238,7 +240,8 @@ namespace TrackingSheet.Controllers
                     Status = incidents.Status,
                     Solution = incidents.Solution,
                     File = incidents.File,
-                    DateEnd = incidents.DateEnd
+                    DateEnd = incidents.DateEnd,
+                    Updates = incidents.Updates?.ToList() // Передаем обновления в представление
                 };
                 ViewData["CurrentPage"] = "journal";
                 return View("View", ViewModel);
@@ -350,6 +353,33 @@ namespace TrackingSheet.Controllers
                 // Log the error if necessary
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddUpdate([FromBody] UpdateIncidentByNewCommentViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var incidentUpdate = new IncidentUpdate
+                {
+                    ID = Guid.NewGuid(), // Генерация нового уникального идентификатора для обновления
+                    IncidentID = model.IncidentID, // Установка ID инцидента, к которому относится обновление
+                    Date = model.Date, // Дата обновления
+                    UpdateReporter = model.UpdateReporter, // Автор обновления
+                    UpdateSolution = model.UpdateSolution, // Решение или описание обновления
+                    Run = model.Run // Номер рейса или другой идентификатор
+                };
+
+                // Сохранение обновления в базе данных
+                await mvcDbContext.IncidentUpdates.AddAsync(incidentUpdate);
+                await mvcDbContext.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false, message = "Ошибка валидации данных" });
         }
 
 

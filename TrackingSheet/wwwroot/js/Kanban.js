@@ -1,4 +1,5 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
+    document.querySelector('main').classList.add('show');
     console.log('Initializing SortableJS');
 
     // Инициализация сортировки для всех колонок
@@ -374,3 +375,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
