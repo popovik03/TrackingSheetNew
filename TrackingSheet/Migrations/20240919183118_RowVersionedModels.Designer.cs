@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrackingSheet.Data;
 
@@ -11,9 +12,11 @@ using TrackingSheet.Data;
 namespace TrackingSheet.Migrations
 {
     [DbContext(typeof(MVCDbContext))]
-    partial class MVCDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240919183118_RowVersionedModels")]
+    partial class RowVersionedModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,9 +252,6 @@ namespace TrackingSheet.Migrations
                     b.Property<Guid>("KanbanColumnId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("KanbanMemberId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
@@ -288,8 +288,6 @@ namespace TrackingSheet.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("KanbanColumnId");
-
-                    b.HasIndex("KanbanMemberId");
 
                     b.ToTable("KanbanTasks");
                 });
@@ -455,10 +453,6 @@ namespace TrackingSheet.Migrations
                         .HasForeignKey("KanbanColumnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TrackingSheet.Models.Kanban.KanbanMember", null)
-                        .WithMany("Tasks")
-                        .HasForeignKey("KanbanMemberId");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanTaskMember", b =>
@@ -509,8 +503,6 @@ namespace TrackingSheet.Migrations
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanMember", b =>
                 {
                     b.Navigation("TaskMembers");
-
-                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("TrackingSheet.Models.Kanban.KanbanTask", b =>

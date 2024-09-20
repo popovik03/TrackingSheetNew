@@ -27,7 +27,7 @@ namespace TrackingSheet.Services
         // Методы для работы с задачами
         Task<KanbanTask> GetTaskByIdAsync(Guid id);
         Task AddTaskToColumnAsync(Guid columnId, KanbanTask task);
-        Task UpdateTaskAsync(KanbanTask task);
+        Task UpdateTaskAsync(KanbanTask updatedTask, byte[] originalRowVersion);
         
         Task<Guid> GetBoardIdByColumnIdAsync(Guid columnId);
 
@@ -40,7 +40,7 @@ namespace TrackingSheet.Services
 
         // Методы редактирования задач
         Task MoveTaskAsync(Guid taskId, Guid oldColumnId, Guid newColumnId, int newIndex);
-        Task EditTaskAsync(Guid taskId, string taskName, string taskDescription, string taskColor, DateTime? dueDate, string priority);
+        Task EditTaskAsync(Guid taskId, string taskName, string taskDescription, string taskColor, DateTime? dueDate, string priority, string taskAuthor, DateTime createdAt, List<KanbanSubtask> subtasks);
         Task DeleteTaskAsync(Guid taskId);
 
     }

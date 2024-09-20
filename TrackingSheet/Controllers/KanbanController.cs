@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using TrackingSheet.Services;
 using TrackingSheet.Models.Kanban;
 using static TrackingSheet.Services.KanbanService;
+using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace TrackingSheet.Controllers
 {
@@ -126,21 +129,34 @@ namespace TrackingSheet.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RenameReorderAndRecolorColumn(Guid columnId, string newName, int newOrder, string newColor)
+        public async Task<IActionResult> RenameReorderAndRecolorColumn(Guid columnId, string columnName, int order, string columnColor)
         {
-            if (!string.IsNullOrWhiteSpace(newName))
+            if (!string.IsNullOrWhiteSpace(columnName))
             {
                 var column = await _kanbanService.GetColumnByIdAsync(columnId);
                 if (column != null)
                 {
-                    column.Column = newName;
-                    column.Order = newOrder;
-                    column.ColumnColor = newColor;
+                    column.Column = columnName;
+                    column.Order = order;
+                    column.ColumnColor = columnColor;
                     await _kanbanService.UpdateColumnAsync(column);
                 }
+                else
+                {
+                    // Можно вернуть ошибку, если колонка не найдена
+                    return NotFound("Колонка не найдена.");
+                }
+            }
+            else
+            {
+                // Можно вернуть ошибку, если имя колонки некорректно
+                return BadRequest("Некорректное название колонки.");
             }
             return RedirectToAction("KanbanView");
         }
+
+
+
 
         [HttpPost]
         public async Task<IActionResult> UpdateColumnOrder([FromBody] List<ColumnOrderUpdateModel> updatedOrder)
@@ -154,7 +170,7 @@ namespace TrackingSheet.Controllers
         #region Методы для работы с задачами
 
         [HttpPost]
-        public async Task<IActionResult> AddTask(Guid columnId, string taskName, string taskDescription, string taskColor, DateTime? dueDate, string priority)
+        public async Task<IActionResult> AddTask(Guid columnId, string taskName, string taskDescription, string taskColor, DateTime? dueDate, string priority, string taskAuthor)
         {
             if (string.IsNullOrWhiteSpace(taskName) || string.IsNullOrWhiteSpace(taskColor))
             {
@@ -165,8 +181,8 @@ namespace TrackingSheet.Controllers
             {
                 TaskName = taskName,
                 TaskDescription = taskDescription,
-                CreatedAt = DateTime.UtcNow,
-                TaskAuthor = User.Identity.Name ?? "Аноним",
+                CreatedAt = DateTimeOffset.Now.DateTime,
+                TaskAuthor = taskAuthor ?? "Аноним",
                 TaskColor = taskColor,
                 DueDate = dueDate,
                 Priority = priority,
@@ -175,6 +191,7 @@ namespace TrackingSheet.Controllers
             await _kanbanService.AddTaskToColumnAsync(columnId, newTask);
             return RedirectToAction("KanbanView", new { selectedBoardId = await _kanbanService.GetBoardIdByColumnIdAsync(columnId) });
         }
+
 
         [HttpPost]
         public async Task<IActionResult> MoveTask([FromBody] TaskMoveModel model)
@@ -188,17 +205,121 @@ namespace TrackingSheet.Controllers
             return Ok();
         }
 
+
+
         [HttpPost]
-        public async Task<IActionResult> EditTask([FromForm] EditTaskModel model)
+        public async Task<IActionResult> EditTask([FromBody] EditTaskModel model)
         {
             if (model == null || model.TaskId == Guid.Empty)
             {
-                return BadRequest("Invalid task edit request.");
+                return BadRequest(new { message = "Invalid task edit request." });
             }
 
-            await _kanbanService.EditTaskAsync(model.TaskId, model.TaskName, model.TaskDescription, model.TaskColor, model.DueDate, model.Priority);
-            return RedirectToAction("KanbanView"); // Возвращаемся на KanbanView после редактирования задачи
+            // Конвертация RowVersion из Base64 строки в byte[]
+            byte[] originalRowVersion;
+            try
+            {
+                originalRowVersion = Convert.FromBase64String(model.RowVersion);
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new { message = "Invalid RowVersion format." });
+            }
+
+            // Десериализуем подзадачи из JSON
+            List<KanbanSubtask> updatedSubtasks = new List<KanbanSubtask>();
+            if (!string.IsNullOrEmpty(model.SubtasksJson))
+            {
+                try
+                {
+                    // Используем кастомный конвертер для обработки RowVersion как строки
+                    updatedSubtasks = JsonConvert.DeserializeObject<List<KanbanSubtask>>(model.SubtasksJson, new JsonSerializerSettings
+                    {
+                        Converters = new List<JsonConverter> { new ByteArrayToBase64Converter() }
+                    });
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Ошибка десериализации подзадач: {ex.Message}");
+                    return BadRequest(new { message = "Ошибка десериализации подзадач." });
+                }
+            }
+
+            // Создаём обновлённую задачу
+            var updatedTask = new KanbanTask
+            {
+                Id = model.TaskId,
+                TaskName = model.TaskName,
+                TaskDescription = model.TaskDescription,
+                TaskColor = model.TaskColor,
+                DueDate = model.DueDate,
+                Priority = model.Priority,
+                Subtasks = updatedSubtasks
+            };
+
+            try
+            {
+                await _kanbanService.UpdateTaskAsync(updatedTask, originalRowVersion);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обновлении задачи: {ex.Message}");
+                return StatusCode(500, new { message = "An error occurred while updating the task." });
+            }
+
+            // После успешного обновления, возвращаем новое значение RowVersion
+            var task = await _kanbanService.GetTaskByIdAsync(model.TaskId);
+            var newRowVersion = Convert.ToBase64String(task.RowVersion);
+
+            return Ok(new { message = "Task updated successfully.", RowVersion = newRowVersion });
         }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetTaskForEdit(Guid taskId)
+        {
+            if (taskId == Guid.Empty)
+            {
+                return BadRequest("Invalid task ID.");
+            }
+
+            var task = await _kanbanService.GetTaskByIdAsync(taskId);
+            if (task == null)
+            {
+                return NotFound("Task not found.");
+            }
+
+            var model = new EditTaskModel
+            {
+                TaskId = task.Id,
+                ColumnId = task.KanbanColumnId,
+                TaskName = task.TaskName,
+                TaskDescription = task.TaskDescription,
+                TaskColor = task.TaskColor,
+                DueDate = task.DueDate,
+                Priority = task.Priority,
+                TaskAuthor = task.TaskAuthor,
+                CreatedAt = task.CreatedAt,
+                SubtasksJson = JsonConvert.SerializeObject(task.Subtasks.Select(s => new
+                {
+                    s.Id,
+                    s.SubtaskDescription,
+                    s.IsCompleted,
+                    RowVersion = Convert.ToBase64String(s.RowVersion)
+                }).ToList()),
+                RowVersion = Convert.ToBase64String(task.RowVersion)
+            };
+
+            return Json(model);
+        }
+
+
 
         [HttpPost]
         public async Task<IActionResult> DeleteTask([FromForm] Guid taskId)
@@ -233,6 +354,15 @@ namespace TrackingSheet.Controllers
             public string TaskColor { get; set; }
             public DateTime? DueDate { get; set; }
             public string Priority { get; set; }
+            public string TaskAuthor { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public string SubtasksJson { get; set; } // Добавлено поле для получения подзадач в формате JSON
+
+            public string RowVersion { get; set; } // Добавлено для отслеживания версий 
         }
+
+        
+
+
     }
 }

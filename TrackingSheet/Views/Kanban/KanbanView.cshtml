@@ -1,6 +1,9 @@
 ﻿@model List<TrackingSheet.Models.Kanban.KanbanBoard>
 
 @{
+    @using Newtonsoft.Json
+
+    var reporter = TempData.Peek("Login") as string ?? string.Empty;
     ViewData["Title"] = "Kanban Board";
     var selectedBoardId = ViewBag.SelectedBoardId as Guid?;
     var selectedBoard = selectedBoardId.HasValue
@@ -23,7 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="~/js/Kanban.js"></script>
+    
 </head>
 <body>
     <div class="kanban-container">
@@ -86,32 +89,46 @@
                                     </div>
                                 </div>
 
-                                <!-- Tasks -->
+                                <!-- Задачи -->
                                 <div class="kanban-tasks">
                                     @foreach (var task in column.Tasks.OrderBy(t => t.Order))
                                     {
-                                        <div class="kanban-task" data-id="@task.Id" style="background-color: @task.TaskColor; padding: 5px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px;">
-                                            <div class="task-header d-flex justify-content-between align-items-center">
+                                        <div class="kanban-task" data-id="@task.Id" data-row-version="@Convert.ToBase64String(task.RowVersion)" style="background-color: @task.TaskColor;">
+                                            <div class="task-header">
                                                 <strong>@task.TaskName</strong>
                                                 <div class="task-actions">
-                                                    <!-- Button to edit task -->
-                                                    <button type="button" class="btn btn-sm btn-link" data-toggle="modal" data-target="#editTaskModal" onclick="setEditTaskModalData('@task.Id', '@task.TaskName', '@task.TaskDescription', '@task.TaskColor', '@(task.DueDate.HasValue ? task.DueDate.Value.ToString("yyyy-MM-dd") : "")', '@task.Priority')">✎</button>
-                                                    <!-- Button to delete task -->
+                                                    <!-- Кнопка редактирования задачи -->
+                                                    <button type="button" class="btn btn-sm btn-link edit-task-button" data-toggle="modal" data-target="#editTaskModal"
+                                                            data-task='@Html.Raw(JsonConvert.SerializeObject(new
+                                                        {
+                                                            Id = task.Id,
+                                                            TaskName = task.TaskName,
+                                                            TaskDescription = task.TaskDescription,
+                                                            TaskColor = task.TaskColor,
+                                                            DueDate = task.DueDate?.ToString("yyyy-MM-dd"),
+                                                            Priority = task.Priority,
+                                                            TaskAuthor = task.TaskAuthor,
+                                                            CreatedAt = task.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                                                            Subtasks = task.Subtasks.Select(s => new
+                                                            {
+                                                                Id = s.Id,
+                                                                SubtaskDescription = s.SubtaskDescription,
+                                                                IsCompleted = s.IsCompleted,
+                                                                RowVersion = Convert.ToBase64String(s.RowVersion)
+                                                            }),
+                                                            RowVersion = Convert.ToBase64String(task.RowVersion)
+                                                        }))'>
+                                                        ✎
+                                                    </button>
+
+                                                    <!-- Кнопка удаления задачи -->
                                                     <button type="button" class="btn btn-sm btn-link" onclick="deleteTask('@task.Id')">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>
                                             </div>
                                             <small>@task.TaskDescription</small>
-                                            <!-- Display due date and priority -->
-                                            @if (task.DueDate.HasValue)
-                                            {
-                                                <div>Дедлайн: @task.DueDate.Value.ToShortDateString()</div>
-                                            }
-                                            @if (!string.IsNullOrEmpty(task.Priority))
-                                            {
-                                                <div>Приоритет: @task.Priority</div>
-                                            }
+                                            <!-- Дедлайн и приоритет -->
                                         </div>
                                     }
                                 </div>
@@ -183,7 +200,7 @@
         <div class="modal fade" id="editColumnModal" tabindex="-1" role="dialog" aria-labelledby="editColumnModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <form method="post" asp-action="EditColumn" asp-controller="Kanban">
+                    <form method="post" asp-action="RenameReorderAndRecolorColumn" asp-controller="Kanban">
                         <div class="modal-header">
                             <h5 class="modal-title" id="editColumnModalLabel">Редактировать колонку</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
@@ -233,6 +250,10 @@
                                 <input type="text" name="taskName" class="form-control" id="taskName" required />
                             </div>
                             <div class="form-group">
+                                <label for="">431:</label>
+                                <input type="text" name="taskAuthor" class="form-control" id="taskAuthor" value =@reporter required />
+                            </div>
+                            <div class="form-group">
                                 <label for="taskDescription">Описание задачи:</label>
                                 <textarea name="taskDescription" class="form-control" id="taskDescription" required></textarea>
                             </div>
@@ -275,7 +296,23 @@
                             </button>
                         </div>
                         <div class="modal-body">
+                            <!-- Нередактируемое поле CreatedAt -->
+                            <div class="form-group">
+                                <label for="editCreatedAt">Дата создания:</label>
+                                <input type="text" name="createdAt" class="form-control" id="editCreatedAt" readonly />
+                            </div>
+
+                            <!-- Нередактируемое поле TaskAuthor -->
+                            <div class="form-group">
+                                <label for="editTaskAuthor">Автор задачи:</label>
+                                <input type="text" name="taskAuthor" class="form-control" id="editTaskAuthor" readonly />
+                            </div>
+
                             <input type="hidden" name="taskId" id="editTaskId" />
+                            <input type="hidden" name="columnId" id="editTaskColumnId" />
+                            <input type="hidden" name="SubtasksJson" id="editSubtasksJson" />
+                            <input type="hidden" name="RowVersion" id="editTaskRowVersion" /> <!-- Добавляем RowVersion -->
+
                             <div class="form-group">
                                 <label for="editTaskName">Название задачи:</label>
                                 <input type="text" name="taskName" class="form-control" id="editTaskName" required />
@@ -284,6 +321,21 @@
                                 <label for="editTaskDescription">Описание задачи:</label>
                                 <textarea name="taskDescription" class="form-control" id="editTaskDescription" required></textarea>
                             </div>
+
+                            <!-- Секция комментариев -->
+                            <div class="form-group">
+                                <label>Комментарии:</label>
+                                <ul id="commentsList" class="list-group mb-3">
+                                    <!-- Здесь будут отображаться комментарии -->
+                                </ul>
+                                <div class="input-group">
+                                    <input type="text" id="newCommentText" class="form-control" placeholder="Добавить комментарий" />
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="addComment()">Добавить</button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <label for="editTaskColor">Цвет задачи:</label>
                                 <input type="color" name="taskColor" class="form-control" id="editTaskColor" required />
@@ -300,6 +352,19 @@
                                     <option value="Высокий">Высокий</option>
                                 </select>
                             </div>
+                            <!-- Секция подзадач -->
+                            <div class="form-group">
+                                <label>Подзадачи:</label>
+                                <ul id="subtasksList" class="list-group">
+                                    <!-- Здесь будут динамически добавляться подзадачи -->
+                                </ul>
+                                <div class="input-group mt-2">
+                                    <input type="text" id="newSubtaskDescription" class="form-control" placeholder="Новая подзадача" />
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="addSubtask()">Добавить</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <span class="text-danger mr-auto" id="editTaskValidationMessage" style="display: none;"></span>
@@ -310,33 +375,10 @@
                 </div>
             </div>
         </div>
+
+
+
     }
-
-    <!-- JavaScript Functions -->
-    <script>
-        function setAddColumnModalData(boardId) {
-            $('#addColumnBoardId').val(boardId);
-        }
-
-        function setEditColumnModalData(columnId, columnName, order, columnColor) {
-            $('#editColumnId').val(columnId);
-            $('#editColumnName').val(columnName);
-            $('#editColumnOrder').val(order);
-            $('#editColumnColor').val(columnColor);
-        }
-
-        function setAddTaskModalData(columnId) {
-            $('#addTaskColumnId').val(columnId);
-        }
-
-        function setEditTaskModalData(taskId, taskName, taskDescription, taskColor, dueDate, priority) {
-            $('#editTaskId').val(taskId);
-            $('#editTaskName').val(taskName);
-            $('#editTaskDescription').val(taskDescription);
-            $('#editTaskColor').val(taskColor);
-            $('#editDueDate').val(dueDate);
-            $('#editPriority').val(priority);
-        }
-    </script>
+    <script src="~/js/Kanban.js"></script>
 </body>
 </html>

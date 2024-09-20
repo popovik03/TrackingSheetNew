@@ -3,11 +3,17 @@ using TrackingSheet.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
 using TrackingSheet.Services;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+// Настройка MVC для использования Newtonsoft.Json с игнорированием циклических ссылок
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson(options =>
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+    );
 
 //Мои сервисы
 builder.Services.AddScoped<RemoteDataService>();

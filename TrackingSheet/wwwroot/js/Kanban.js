@@ -1,4 +1,174 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
+﻿function setAddColumnModalData(boardId) {
+    $('#addColumnBoardId').val(boardId);
+}
+
+function setEditColumnModalData(columnId, columnName, order, columnColor) {
+    $('#editColumnId').val(columnId);
+    $('#editColumnName').val(columnName);
+    $('#editColumnOrder').val(order);
+    $('#editColumnColor').val(columnColor);
+}
+
+function setAddTaskModalData(columnId) {
+    $('#addTaskColumnId').val(columnId);
+}
+
+function setEditTaskModalData(task) {
+    console.log("Editing task:", task);
+
+    // Установка основных полей
+    $('#editTaskId').val(task.Id);
+    $('#editTaskName').val(task.TaskName);
+    $('#editTaskDescription').val(task.TaskDescription);
+    $('#editTaskColor').val(task.TaskColor);
+    $('#editDueDate').val(task.DueDate || '');
+    $('#editPriority').val(task.Priority);
+    $('#editTaskAuthor').val(task.TaskAuthor);
+    $('#editCreatedAt').val(task.CreatedAt);
+
+    // Установка RowVersion
+    $('#editTaskRowVersion').val(task.RowVersion);
+
+    // Очистка списка подзадач
+    $('#subtasksList').empty();
+
+    // Добавление подзадач в список
+    if (task.Subtasks && task.Subtasks.length > 0) {
+        task.Subtasks.forEach(function (subtask) {
+            addSubtaskToList(subtask.Id, subtask.SubtaskDescription, subtask.IsCompleted, subtask.RowVersion);
+        });
+    }
+
+    // Получаем columnId из DOM
+    var taskElement = $('.kanban-task[data-id="' + task.Id + '"]');
+    if (taskElement.length) {
+        var columnId = taskElement.closest('.kanban-column').data('id');
+        console.log("Setting columnId:", columnId); // Логирование для проверки
+        $('#editTaskColumnId').val(columnId);
+    } else {
+        console.error("Task element not found for taskId:", task.Id);
+    }
+
+    // Показываем модальное окно
+    $('#editTaskModal').modal('show');
+}
+
+
+
+// Обновленная функция для добавления подзадачи в список с RowVersion
+function addSubtaskToList(id, description, isCompleted, rowVersion) {
+    var subtaskId = id || generateUUID();
+    var checkedAttribute = isCompleted ? 'checked' : '';
+    var rowVersionValue = rowVersion || '';
+    var listItem = `
+        <li class="list-group-item">
+            <input type="checkbox" class="mr-2" data-subtask-id="${subtaskId}" ${checkedAttribute}>
+            <input type="hidden" name="SubtasksRowVersion" value="${rowVersionValue}" />
+            <input type="text" class="form-control d-inline-block" value="${description}" data-subtask-id="${subtaskId}" style="width: 80%;">
+            <button type="button" class="btn btn-sm btn-danger float-right" onclick="removeSubtask('${subtaskId}')">&times;</button>
+        </li>
+    `;
+    $('#subtasksList').append(listItem);
+    console.log("Добавлена подзадача:", { Id: subtaskId, SubtaskDescription: description, IsCompleted: isCompleted, RowVersion: rowVersionValue });
+}
+
+// Функция для добавления новой подзадачи 
+function addSubtask() {
+    var description = $('#newSubtaskDescription').val().trim();
+    if (description) {
+        addSubtaskToList(null, description, false);
+        $('#newSubtaskDescription').val('');
+    }
+}
+
+// Функция для удаления подзадачи из списка
+function removeSubtask(subtaskId) {
+    $(`li input[data-subtask-id='${subtaskId}']`).closest('li').remove();
+    console.log("Удалена подзадача с ID:", subtaskId);
+}
+
+// Генератор UUID для новых подзадач
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function getSubtasksData() {
+    var subtasks = [];
+    $('#subtasksList li').each(function () {
+        var subtaskId = $(this).find('input[data-subtask-id]').data('subtask-id') || '';
+        var description = $(this).find('input[type="text"]').val();
+        var isCompleted = $(this).find('input[type="checkbox"]').is(':checked');
+        var rowVersion = $(this).find('input[name="SubtasksRowVersion"]').val() || '';
+        subtasks.push({
+            Id: subtaskId,
+            SubtaskDescription: description,
+            IsCompleted: isCompleted,
+            RowVersion: rowVersion
+        });
+    });
+    return subtasks;
+}
+
+$(document).ready(function () {
+    console.log("JavaScript загружен и готов к работе");
+
+    // Обработчик клика для кнопок редактирования задач
+    $(document).on('click', '.edit-task-button', function () {
+        var taskData = $(this).data('task');
+        setEditTaskModalData(taskData);
+    });
+
+    // Отменяем все предыдущие обработчики и привязываем новый
+    $('#editTaskForm').on('submit', function (event) {
+        event.preventDefault();
+
+        // Собираем данные подзадач
+        var subtasks = getSubtasksData();
+        $('#editSubtasksJson').val(JSON.stringify(subtasks));
+
+        var form = $(this);
+        var formData = {
+            taskId: $('#editTaskId').val(),
+            taskName: $('#editTaskName').val().trim(),
+            taskDescription: $('#editTaskDescription').val().trim(),
+            taskColor: $('#editTaskColor').val(),
+            dueDate: $('#editDueDate').val(),
+            priority: $('#editPriority').val(),
+            // Другие поля...
+            SubtasksJson: $('#editSubtasksJson').val(),
+            RowVersion: $('#editTaskRowVersion').val()
+        };
+
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function (response) {
+                alert(response.message);
+                // Обновить RowVersion в скрытом поле
+                $('#editTaskRowVersion').val(response.RowVersion);
+                // Обновить отображение задачи на странице, если необходимо
+                location.reload(); // Или обновить только необходимую часть
+            },
+            error: function (xhr) {
+                if (xhr.status === 409) {
+                    alert(xhr.responseJSON.message);
+                } else {
+                    alert('Произошла ошибка при обновлении задачи.');
+                }
+            }
+        });
+    });
+
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('main').classList.add('show');
     console.log('Initializing SortableJS');
 
@@ -98,53 +268,6 @@
         });
     });
 
-    // Валидация формы редактирования задачи
-    var editTaskForm = document.getElementById('editTaskForm');
-    if (editTaskForm) {
-        editTaskForm.addEventListener('submit', function (event) {
-            // Получаем значения полей
-            var taskNameInput = document.getElementById('editTaskName');
-            var taskDescriptionInput = document.getElementById('editTaskDescription');
-            var validationMessage = document.getElementById('editValidationMessage');
-
-            var taskName = taskNameInput.value.trim();
-            var taskDescription = taskDescriptionInput.value.trim();
-
-            var isValid = true;
-            var errorMessages = [];
-
-            // Проверка названия задачи
-            if (!taskName) {
-                isValid = false;
-                errorMessages.push('Пожалуйста, заполните название задачи.');
-                taskNameInput.classList.add('is-invalid');
-            } else {
-                taskNameInput.classList.remove('is-invalid');
-            }
-
-            // Проверка описания задачи
-            if (!taskDescription) {
-                isValid = false;
-                errorMessages.push('Пожалуйста, заполните описание задачи.');
-                taskDescriptionInput.classList.add('is-invalid');
-            } else {
-                taskDescriptionInput.classList.remove('is-invalid');
-            }
-
-            if (!isValid) {
-                event.preventDefault(); // Отменяем отправку формы
-                event.stopPropagation();
-
-                // Объединяем сообщения об ошибках
-                validationMessage.innerHTML = errorMessages.join('<br>');
-                validationMessage.style.display = 'block';
-            } else {
-                // Скрываем сообщение об ошибке, если форма валидна
-                validationMessage.style.display = 'none';
-                validationMessage.innerHTML = '';
-            }
-        });
-    }
 });
 
 // Функция для отображения выбранной доски
@@ -213,6 +336,7 @@ function deleteBoard(boardId) {
         });
     }
 }
+
 
 // Открыть модальное окно для редактирования колонки
 function editColumnName(columnId) {
