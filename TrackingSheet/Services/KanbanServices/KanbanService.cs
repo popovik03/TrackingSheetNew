@@ -405,5 +405,24 @@ namespace TrackingSheet.Services
             public Guid Id { get; set; }
             public int Order { get; set; }
         }
+
+        //Методы для работы с комментариями
+        public async Task AddCommentAsync(KanbanComment comment)
+        {
+            _context.KanbanComments.Add(comment);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteCommentAsync(KanbanComment comment)
+        {
+            _context.KanbanComments.Remove(comment);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<KanbanComment> GetCommentByIdAsync(Guid commentId)
+        {
+            return await _context.KanbanComments
+                .FirstOrDefaultAsync(c => c.Id == commentId);
+        }
     }
 }

@@ -32,6 +32,12 @@ namespace TrackingSheet.Services
         Task<Guid> GetBoardIdByColumnIdAsync(Guid columnId);
 
 
+        // комментарии
+        Task AddCommentAsync(KanbanComment comment);
+        Task DeleteCommentAsync(KanbanComment comment);
+        Task<KanbanComment> GetCommentByIdAsync(Guid commentId);
+
+
         // Новый метод для получения доски по идентификатору колонки
         Task<KanbanBoard> GetBoardByColumnIdAsync(Guid columnId);
 

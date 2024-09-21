@@ -116,6 +116,14 @@
                                                                 IsCompleted = s.IsCompleted,
                                                                 RowVersion = Convert.ToBase64String(s.RowVersion)
                                                             }),
+                                                            Comments = task.Comments.Select(c => new
+                                                            {
+                                                                Id = c.Id,
+                                                                CommentAuthor = c.CommentAuthor,
+                                                                CommentText = c.CommentText,
+                                                                CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                                                                RowVersion = Convert.ToBase64String(c.RowVersion)
+                                                            }),
                                                             RowVersion = Convert.ToBase64String(task.RowVersion)
                                                         }))'>
                                                         ✎

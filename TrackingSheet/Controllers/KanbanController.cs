@@ -333,6 +333,145 @@ namespace TrackingSheet.Controllers
             return Ok();
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> AddComment([FromBody] AddCommentModel model)
+        {
+            if (model == null || model.TaskId == Guid.Empty || string.IsNullOrWhiteSpace(model.CommentText) || string.IsNullOrWhiteSpace(model.CommentAuthor))
+            {
+                return BadRequest(new { message = "Некорректный запрос для добавления комментария." });
+            }
+
+            // Конвертация RowVersion из Base64 строки в byte[]
+            byte[] originalRowVersion;
+            try
+            {
+                originalRowVersion = Convert.FromBase64String(model.RowVersion);
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new { message = "Некорректный формат RowVersion." });
+            }
+
+            var task = await _kanbanService.GetTaskByIdAsync(model.TaskId);
+            if (task == null)
+            {
+                return NotFound(new { message = "Задача не найдена." });
+            }
+
+            // Проверка RowVersion для оптимистичной конкуренции
+            if (!task.RowVersion.SequenceEqual(originalRowVersion))
+            {
+                return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
+            }
+
+            var newComment = new KanbanComment
+            {
+                Id = Guid.NewGuid(),
+                KanbanTaskId = task.Id,
+                CommentAuthor = model.CommentAuthor,
+                CommentText = model.CommentText,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            try
+            {
+                await _kanbanService.AddCommentAsync(newComment);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при добавлении комментария: {ex.Message}");
+                return StatusCode(500, "Произошла ошибка при добавлении комментария.");
+            }
+
+            // Получение нового RowVersion задачи
+            task = await _kanbanService.GetTaskByIdAsync(model.TaskId);
+            var newRowVersion = Convert.ToBase64String(task.RowVersion);
+
+            // Получение комментария с обновлённым RowVersion
+            var addedComment = await _kanbanService.GetCommentByIdAsync(newComment.Id);
+            if (addedComment == null)
+            {
+                return StatusCode(500, "Произошла ошибка при получении добавленного комментария.");
+            }
+
+            var responseComment = new
+            {
+                Id = addedComment.Id,
+                CommentAuthor = addedComment.CommentAuthor,
+                CommentText = addedComment.CommentText,
+                CreatedAt = addedComment.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                RowVersion = Convert.ToBase64String(addedComment.RowVersion)
+            };
+
+            return Ok(new { message = "Комментарий добавлен успешно.", RowVersion = newRowVersion, Comment = responseComment });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteComment([FromBody] DeleteCommentModel model)
+        {
+            if (model == null || model.CommentId == Guid.Empty)
+            {
+                return BadRequest(new { message = "Некорректный запрос для удаления комментария." });
+            }
+
+            // Конвертация RowVersion из Base64 строки в byte[]
+            byte[] originalRowVersion;
+            try
+            {
+                originalRowVersion = Convert.FromBase64String(model.RowVersion);
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new { message = "Некорректный формат RowVersion." });
+            }
+
+            var comment = await _kanbanService.GetCommentByIdAsync(model.CommentId);
+            if (comment == null)
+            {
+                return NotFound(new { message = "Комментарий не найден." });
+            }
+
+            var task = await _kanbanService.GetTaskByIdAsync(comment.KanbanTaskId);
+            if (task == null)
+            {
+                return NotFound(new { message = "Задача, к которой относится комментарий, не найдена." });
+            }
+
+            // Проверка RowVersion для оптимистичной конкуренции
+            if (!task.RowVersion.SequenceEqual(originalRowVersion))
+            {
+                return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
+            }
+
+            try
+            {
+                await _kanbanService.DeleteCommentAsync(comment);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при удалении комментария: {ex.Message}");
+                return StatusCode(500, "Произошла ошибка при удалении комментария.");
+            }
+
+            // Получение нового RowVersion задачи
+            task = await _kanbanService.GetTaskByIdAsync(comment.KanbanTaskId);
+            var newRowVersion = Convert.ToBase64String(task.RowVersion);
+
+            return Ok(new { message = "Комментарий удален успешно.", RowVersion = newRowVersion });
+        }
+
+
+
         #endregion
 
         // Модель для получения данных о перемещении задачи
@@ -361,7 +500,20 @@ namespace TrackingSheet.Controllers
             public string RowVersion { get; set; } // Добавлено для отслеживания версий 
         }
 
-        
+        public class AddCommentModel
+        {
+            public Guid TaskId { get; set; }
+            public string CommentAuthor { get; set; }
+            public string CommentText { get; set; }
+            public string RowVersion { get; set; }
+        }
+
+        public class DeleteCommentModel
+        {
+            public Guid CommentId { get; set; }
+            public string RowVersion { get; set; }
+        }
+
 
 
     }

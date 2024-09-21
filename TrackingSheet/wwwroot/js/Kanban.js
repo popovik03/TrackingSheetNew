@@ -500,3 +500,149 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+//функция добавления комментариев в список 
+function addCommentToList(commentId, author, text, createdAt, rowVersion) {
+    var listItem = `
+        <li class="list-group-item d-flex justify-content-between align-items-center" data-comment-id="${commentId}" data-row-version="${rowVersion}">
+            <div>
+                <strong>${author}</strong> <small class="text-muted">${createdAt}</small>
+                <p>${text}</p>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger" onclick="deleteComment('${commentId}')">Удалить</button>
+        </li>
+    `;
+    $('#commentsList').append(listItem);
+}
+
+//функция добавления нового комментария
+function addComment() {
+    var taskId = $('#editTaskId').val();
+    var commentAuthor = $('#editTaskAuthor').val(); // Предполагается, что автор задачи является автором комментария
+    var commentText = $('#newCommentText').val().trim();
+    var rowVersion = $('#editTaskRowVersion').val();
+
+    if (!commentText) {
+        alert('Пожалуйста, введите текст комментария.');
+        return;
+    }
+
+    var commentData = {
+        TaskId: taskId,
+        CommentAuthor: commentAuthor,
+        CommentText: commentText,
+        RowVersion: rowVersion
+    };
+
+    $.ajax({
+        url: '/Kanban/AddComment',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(commentData),
+        success: function (response) {
+            alert(response.message);
+            // Обновить RowVersion задачи
+            $('#editTaskRowVersion').val(response.RowVersion);
+            // Обновить RowVersion в атрибуте задачи на странице
+            var taskElement = $('.kanban-task[data-id="' + taskId + '"]');
+            taskElement.attr('data-row-version', response.RowVersion);
+            // Добавить новый комментарий в список
+            var newComment = response.Comment;
+            if (newComment) {
+                var commentItem = `
+                    <li class="list-group-item" data-id="${newComment.Id}" data-row-version="${newComment.RowVersion}">
+                        <strong>${escapeHtml(newComment.CommentAuthor)}</strong>: ${escapeHtml(newComment.CommentText)}
+                        <button type="button" class="btn btn-sm btn-danger float-right" onclick="deleteComment('${newComment.Id}', '${newComment.RowVersion}')">&times;</button>
+                    </li>
+                `;
+                $('#commentsList').append(commentItem);
+                // Очистить поле ввода
+                $('#newCommentText').val('');
+            } else {
+                console.error('Comment data is missing in the response.');
+            }
+        },
+        error: function (xhr) {
+            if (xhr.status === 409) {
+                alert(xhr.responseJSON.message);
+                location.reload(); // Перезагрузка для получения актуальных данных
+            } else if (xhr.status === 400) {
+                var errors = xhr.responseJSON;
+                var errorMessages = [];
+                if (errors.errors) {
+                    for (var key in errors.errors) {
+                        if (errors.errors.hasOwnProperty(key)) {
+                            errorMessages.push(errors.errors[key].join('<br>'));
+                        }
+                    }
+                } else if (errors.message) {
+                    errorMessages.push(errors.message);
+                }
+                alert('Ошибки при добавлении комментария:\n' + errorMessages.join('\n'));
+            } else {
+                alert('Произошла ошибка при добавлении комментария.');
+            }
+        }
+    });
+}
+
+// Функция для удаления комментария
+function deleteComment(commentId, rowVersion) {
+    if (confirm("Вы действительно хотите удалить этот комментарий?")) {
+        var taskId = $('#editTaskId').val();
+
+        var deleteData = {
+            CommentId: commentId,
+            RowVersion: rowVersion
+        };
+
+        $.ajax({
+            url: '/Kanban/DeleteComment',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(deleteData),
+            success: function (response) {
+                alert(response.message);
+                // Обновить RowVersion задачи
+                $('#editTaskRowVersion').val(response.RowVersion);
+                // Обновить RowVersion в атрибуте задачи на странице
+                var taskElement = $('.kanban-task[data-id="' + taskId + '"]');
+                taskElement.attr('data-row-version', response.RowVersion);
+                // Удалить комментарий из списка
+                $(`li[data-id="${commentId}"]`).remove();
+            },
+            error: function (xhr) {
+                if (xhr.status === 409) {
+                    alert(xhr.responseJSON.message);
+                    location.reload(); // Перезагрузка для получения актуальных данных
+                } else if (xhr.status === 400) {
+                    var errors = xhr.responseJSON;
+                    var errorMessages = [];
+                    if (errors.errors) {
+                        for (var key in errors.errors) {
+                            if (errors.errors.hasOwnProperty(key)) {
+                                errorMessages.push(errors.errors[key].join('<br>'));
+                            }
+                        }
+                    } else if (errors.message) {
+                        errorMessages.push(errors.message);
+                    }
+                    alert('Ошибки при удалении комментария:\n' + errorMessages.join('\n'));
+                } else {
+                    alert('Произошла ошибка при удалении комментария.');
+                }
+            }
+        });
+    }
+}
+
+// Функция для экранирования HTML (предотвращение XSS)
+function escapeHtml(text) {
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+}
