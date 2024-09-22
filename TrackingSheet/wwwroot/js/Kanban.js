@@ -54,31 +54,41 @@ function setEditTaskModalData(task) {
 }
 
 
-
 // Обновленная функция для добавления подзадачи в список с RowVersion
 function addSubtaskToList(id, description, isCompleted, rowVersion) {
-    var subtaskId = id || generateUUID();
-    var checkedAttribute = isCompleted ? 'checked' : '';
-    var rowVersionValue = rowVersion || '';
-    var listItem = `
-        <li class="list-group-item">
-            <input type="checkbox" class="mr-2" data-subtask-id="${subtaskId}" ${checkedAttribute}>
-            <input type="hidden" name="SubtasksRowVersion" value="${rowVersionValue}" />
-            <input type="text" class="form-control d-inline-block" value="${description}" data-subtask-id="${subtaskId}" style="width: 80%;">
-            <button type="button" class="btn btn-sm btn-danger float-right" onclick="removeSubtask('${subtaskId}')">&times;</button>
+    var subtaskItem = `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <input type="checkbox" class="subtask-checkbox" ${isCompleted ? 'checked' : ''} disabled>
+                <input type="text" class="form-control d-inline-block" style="width: 70%;" value="${escapeHtml(description)}" />
+            </div>
+            <div>
+                <button type="button" class="btn btn-danger btn-sm remove-subtask-button" data-subtask-id="${id}">Удалить</button>
+            </div>
+            <input type="hidden" name="subtasksRowVersion" value="${rowVersion}">
         </li>
     `;
-    $('#subtasksList').append(listItem);
-    console.log("Добавлена подзадача:", { Id: subtaskId, SubtaskDescription: description, IsCompleted: isCompleted, RowVersion: rowVersionValue });
+    $('#subtasksList').append(subtaskItem);
 }
+
+
 
 // Функция для добавления новой подзадачи 
 function addSubtask() {
     var description = $('#newSubtaskDescription').val().trim();
-    if (description) {
-        addSubtaskToList(null, description, false);
-        $('#newSubtaskDescription').val('');
+    if (description === '') {
+        alert('Подзадача не может быть пустой.');
+        return;
     }
+
+    // Новая подзадача: id = Guid.Empty, rowVersion = 'AAAAAAAAAAA='
+    var subtaskId = '00000000-0000-0000-0000-000000000000';
+    var rowVersion = 'AAAAAAAAAAA='; // Дефолтное значение для новых подзадач
+
+    addSubtaskToList(subtaskId, description, false, rowVersion);
+
+    // Очистка поля ввода
+    $('#newSubtaskDescription').val('');
 }
 
 // Функция для удаления подзадачи из списка
@@ -99,73 +109,186 @@ function generateUUID() {
 function getSubtasksData() {
     var subtasks = [];
     $('#subtasksList li').each(function () {
-        var subtaskId = $(this).find('input[data-subtask-id]').data('subtask-id') || '';
+        // Получаем subtaskId из кнопки удаления
+        var subtaskId = $(this).find('.remove-subtask-button').data('subtask-id') || '00000000-0000-0000-0000-000000000000';
         var description = $(this).find('input[type="text"]').val();
         var isCompleted = $(this).find('input[type="checkbox"]').is(':checked');
-        var rowVersion = $(this).find('input[name="SubtasksRowVersion"]').val() || '';
+        var rowVersion = $(this).find('input[name="subtasksRowVersion"]').val() || 'AAAAAAAAAAA='; // Дефолтное значение
+
         subtasks.push({
-            Id: subtaskId,
-            SubtaskDescription: description,
-            IsCompleted: isCompleted,
-            RowVersion: rowVersion
+            id: subtaskId, // camelCase
+            subtaskDescription: description, // camelCase
+            isCompleted: isCompleted, // camelCase
+            rowVersion: rowVersion // camelCase
         });
     });
+    console.log("SubtasksData:", subtasks); // Для отладки
     return subtasks;
 }
+
+
+
+
+
 
 $(document).ready(function () {
     console.log("JavaScript загружен и готов к работе");
 
     // Обработчик клика для кнопок редактирования задач
-    $(document).on('click', '.edit-task-button', function () {
-        var taskData = $(this).data('task');
-        setEditTaskModalData(taskData);
+    $(document).ready(function () {
+        // Обработчик клика по кнопке редактирования задачи
+        $('.edit-task-button').on('click', function () {
+            // Получаем JSON строку из атрибута data-task
+            var taskDataJson = $(this).attr('data-task');
+            console.log("Task Data JSON:", taskDataJson); // Для отладки
+
+            if (!taskDataJson) {
+                console.error('No task data found in data-task attribute.');
+                return;
+            }
+
+            // Парсим JSON строку в объект
+            var task = JSON.parse(taskDataJson);
+            console.log("Parsed Task Data:", task); // Для отладки
+
+            // Заполняем поля модального окна
+            $('#editTaskId').val(task.id);
+            $('#editTaskName').val(task.taskName);
+            $('#editTaskDescription').val(task.taskDescription);
+            $('#editTaskColor').val(task.taskColor);
+            $('#editDueDate').val(task.dueDate);
+            $('#editPriority').val(task.priority);
+            $('#editTaskAuthor').val(task.taskAuthor);
+            $('#editCreatedAt').val(task.createdAt);
+            $('#editTaskRowVersion').val(task.rowVersion);
+            $('#editTaskColumnId').val(task.columnId);
+
+            // Заполняем подзадачи
+            if (task.subtasks && task.subtasks.length > 0) {
+                $('#subtasksList').empty(); // Очищаем список подзадач
+                task.subtasks.forEach(function (subtask) {
+                    addSubtaskToList(subtask.id, subtask.subtaskDescription, subtask.isCompleted, subtask.rowVersion);
+                });
+            } else {
+                $('#subtasksList').empty();
+            }
+
+            // Заполняем комментарии
+            if (task.comments && task.comments.length > 0) {
+                $('#commentsList').empty(); // Очищаем список комментариев
+                task.comments.forEach(function (comment) {
+                    addCommentToList(comment.id, comment.commentAuthor, comment.commentText, comment.createdAt, comment.rowVersion);
+                });
+            } else {
+                $('#commentsList').empty();
+            }
+
+            // Устанавливаем SubtasksJson перед отправкой формы
+            $('#editSubtasksJson').val(JSON.stringify(getSubtasksData()));
+        });
     });
 
-    // Отменяем все предыдущие обработчики и привязываем новый
-    $('#editTaskForm').on('submit', function (event) {
-        event.preventDefault();
 
-        // Собираем данные подзадач
-        var subtasks = getSubtasksData();
-        $('#editSubtasksJson').val(JSON.stringify(subtasks));
+
+    // Обработчик отправки формы редактирования задачи
+    $('#editTaskForm').on('submit', function (event) {
+        event.preventDefault(); // Останавливаем стандартную отправку формы
 
         var form = $(this);
-        var formData = {
-            taskId: $('#editTaskId').val(),
-            taskName: $('#editTaskName').val().trim(),
-            taskDescription: $('#editTaskDescription').val().trim(),
-            taskColor: $('#editTaskColor').val(),
-            dueDate: $('#editDueDate').val(),
-            priority: $('#editPriority').val(),
-            // Другие поля...
-            SubtasksJson: $('#editSubtasksJson').val(),
-            RowVersion: $('#editTaskRowVersion').val()
-        };
+        var formData = new FormData(this);
 
+        // Добавляем подзадачи в виде JSON-строки
+        formData.set('subtasksJson', JSON.stringify(getSubtasksData())); // camelCase
+
+        // Проверка обязательных полей
+        var taskName = $('#editTaskName').val().trim();
+        var taskDescription = $('#editTaskDescription').val().trim();
+        var columnId = $('#editTaskColumnId').val();
+
+        if (!taskName || !taskDescription || !columnId) {
+            alert('Пожалуйста, заполните все обязательные поля.');
+            return;
+        }
+
+        // Отправляем запрос AJAX
         $.ajax({
-            url: form.attr('action'),
+            url: '/Kanban/EditTask',
             method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function (response) {
-                alert(response.message);
-                // Обновить RowVersion в скрытом поле
-                $('#editTaskRowVersion').val(response.RowVersion);
-                // Обновить отображение задачи на странице, если необходимо
-                location.reload(); // Или обновить только необходимую часть
-            },
-            error: function (xhr) {
-                if (xhr.status === 409) {
-                    alert(xhr.responseJSON.message);
+                console.log("Task updated successfully:", response);
+
+                if (response.updatedTask) {
+                    console.log("Updated Task:", response.updatedTask);
+                    updateTaskInView(response.updatedTask);
+
+                    if (response.updatedTask.rowVersion) {
+                        $('#editTaskRowVersion').val(response.updatedTask.rowVersion);
+                        console.log("RowVersion updated to:", response.updatedTask.rowVersion);
+                    } else {
+                        console.error('RowVersion is missing in the updatedTask response.');
+                    }
+
+                    // Закрываем модальное окно
+                    $('#editTaskModal').modal('hide');
                 } else {
-                    alert('Произошла ошибка при обновлении задачи.');
+                    console.error('Updated task data is missing in the response.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error updating task:', xhr.responseText, error);
+
+                if (xhr.status === 400) {
+                    var response = JSON.parse(xhr.responseText);
+                    var errorMessages = response.errors.map(e => `${e.field}: ${e.errorMessage}`).join('\n');
+                    alert(`${response.message}\n${errorMessages}`);
+                } else if (xhr.status === 409) {
+                    alert(xhr.responseJSON.message);
+                    // Предложите пользователю обновить страницу
+                    location.reload();
+                } else {
+                    alert('Произошла ошибка при обновлении задачи. Пожалуйста, попробуйте снова.');
                 }
             }
         });
     });
 
 });
+
+
+function updateTaskInView(task) {
+    if (!task || !task.id) {
+        console.error('Invalid task data:', task);
+        return;
+    }
+
+    var taskElement = $('.kanban-task[data-id="' + task.id + '"]');
+
+    if (taskElement.length) {
+        // Обновление основных данных задачи
+        taskElement.find('strong').text(task.taskName);
+        taskElement.find('small').text(task.taskDescription);
+        taskElement.css('background-color', task.taskColor);
+        taskElement.attr('data-row-version', task.rowVersion);
+
+        // Обновление подзадач (если отображаются на карточке задачи)
+        var subtasksList = taskElement.find('.subtasks-list');
+        if (subtasksList.length) {
+            subtasksList.empty();
+            task.subtasks.forEach(function (subtask) {
+                var subtaskItem = `<li>${escapeHtml(subtask.subtaskDescription)} ${subtask.isCompleted ? '(Выполнено)' : ''}</li>`;
+                subtasksList.append(subtaskItem);
+            });
+        }
+
+        // Обновление других данных задачи при необходимости
+    } else {
+        console.error('Task element not found for task ID:', task.id);
+    }
+}
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -460,6 +583,10 @@ function editTask(taskId) {
     }
 }
 
+
+
+
+
 // Функция для удаления задачи
 function deleteTask(taskId) {
     if (confirm("Вы действительно хотите удалить эту задачу?")) {
@@ -467,12 +594,13 @@ function deleteTask(taskId) {
             url: '/Kanban/DeleteTask',
             method: 'POST',
             data: {
-                taskId: taskId
+                taskId: taskId,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
             },
             success: function () {
                 // Удаляем задачу из DOM без перезагрузки страницы
-                var taskElement = document.querySelector('.kanban-task[data-id="' + taskId + '"]');
-                if (taskElement) {
+                var taskElement = $('.kanban-task[data-id="' + taskId + '"]');
+                if (taskElement.length) {
                     taskElement.remove();
                 }
             },
@@ -482,6 +610,9 @@ function deleteTask(taskId) {
         });
     }
 }
+
+
+
 
 // Привязка события к кнопке "Отмена" для редактирования колонки
 document.addEventListener('DOMContentLoaded', function () {
@@ -500,133 +631,161 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+
+
+
+
+
+
 //функция добавления комментариев в список 
-function addCommentToList(commentId, author, text, createdAt, rowVersion) {
-    var listItem = `
-        <li class="list-group-item d-flex justify-content-between align-items-center" data-comment-id="${commentId}" data-row-version="${rowVersion}">
+function addCommentToList(id, author, text, createdAt, rowVersion) {
+    // Парсим дату
+    var date = new Date(createdAt);
+    // Добавляем смещение +5 часов
+    date.setHours(date.getHours() + 5);
+    // Форматируем дату
+    var options = {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+    };
+    var formattedDate = date.toLocaleString('ru-RU', options);
+
+    var commentItem = `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
-                <strong>${author}</strong> <small class="text-muted">${createdAt}</small>
-                <p>${text}</p>
+                <strong>${escapeHtml(author)}</strong> (${escapeHtml(formattedDate)}):
+                <p>${escapeHtml(text)}</p>
             </div>
-            <button type="button" class="btn btn-sm btn-danger" onclick="deleteComment('${commentId}')">Удалить</button>
+            <button type="button" class="btn btn-danger btn-sm remove-comment-button" data-comment-id="${id}" data-row-version="${rowVersion}">Удалить</button>
+            <input type="hidden" name="commentsRowVersion" value="${rowVersion}">
         </li>
     `;
-    $('#commentsList').append(listItem);
+    $('#commentsList').append(commentItem);
 }
 
 //функция добавления нового комментария
 function addComment() {
     var taskId = $('#editTaskId').val();
-    var commentAuthor = $('#editTaskAuthor').val(); // Предполагается, что автор задачи является автором комментария
+    var commentAuthor = reporter; // Используем переменную reporter
     var commentText = $('#newCommentText').val().trim();
     var rowVersion = $('#editTaskRowVersion').val();
 
-    if (!commentText) {
-        alert('Пожалуйста, введите текст комментария.');
+    if (commentText === '') {
+        alert('Комментарий не может быть пустым.');
         return;
     }
-
-    var commentData = {
-        TaskId: taskId,
-        CommentAuthor: commentAuthor,
-        CommentText: commentText,
-        RowVersion: rowVersion
-    };
 
     $.ajax({
         url: '/Kanban/AddComment',
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify(commentData),
+        data: JSON.stringify({
+            TaskId: taskId,
+            CommentAuthor: commentAuthor,
+            CommentText: commentText,
+            RowVersion: rowVersion
+        }),
         success: function (response) {
-            alert(response.message);
-            // Обновить RowVersion задачи
-            $('#editTaskRowVersion').val(response.RowVersion);
-            // Обновить RowVersion в атрибуте задачи на странице
-            var taskElement = $('.kanban-task[data-id="' + taskId + '"]');
-            taskElement.attr('data-row-version', response.RowVersion);
-            // Добавить новый комментарий в список
-            var newComment = response.Comment;
-            if (newComment) {
-                var commentItem = `
-                    <li class="list-group-item" data-id="${newComment.Id}" data-row-version="${newComment.RowVersion}">
-                        <strong>${escapeHtml(newComment.CommentAuthor)}</strong>: ${escapeHtml(newComment.CommentText)}
-                        <button type="button" class="btn btn-sm btn-danger float-right" onclick="deleteComment('${newComment.Id}', '${newComment.RowVersion}')">&times;</button>
-                    </li>
-                `;
-                $('#commentsList').append(commentItem);
-                // Очистить поле ввода
+            console.log(response); // Для отладки
+
+            if (response.comment) { // Используем 'comment' с маленькой буквы
+                var comment = response.comment;
+
+                // Добавляем комментарий в список
+                addCommentToList(comment.id, comment.commentAuthor, comment.commentText, comment.createdAt, comment.rowVersion); // Используем camelCase
+
+                // Обновляем RowVersion задачи
+                $('#editTaskRowVersion').val(response.rowVersion); // Используем camelCase
+
+                // Очищаем поле ввода
                 $('#newCommentText').val('');
             } else {
                 console.error('Comment data is missing in the response.');
             }
         },
         error: function (xhr) {
-            if (xhr.status === 409) {
-                alert(xhr.responseJSON.message);
-                location.reload(); // Перезагрузка для получения актуальных данных
-            } else if (xhr.status === 400) {
-                var errors = xhr.responseJSON;
-                var errorMessages = [];
-                if (errors.errors) {
-                    for (var key in errors.errors) {
-                        if (errors.errors.hasOwnProperty(key)) {
-                            errorMessages.push(errors.errors[key].join('<br>'));
-                        }
-                    }
-                } else if (errors.message) {
-                    errorMessages.push(errors.message);
-                }
-                alert('Ошибки при добавлении комментария:\n' + errorMessages.join('\n'));
-            } else {
-                alert('Произошла ошибка при добавлении комментария.');
-            }
+            // Обработка ошибок
+            alert('Произошла ошибка при добавлении комментария.');
         }
     });
 }
 
-// Функция для удаления комментария
-function deleteComment(commentId, rowVersion) {
-    if (confirm("Вы действительно хотите удалить этот комментарий?")) {
-        var taskId = $('#editTaskId').val();
 
-        var deleteData = {
-            CommentId: commentId,
-            RowVersion: rowVersion
-        };
+$(document).on('click', '.remove-comment-button', function () {
+    var commentId = $(this).data('comment-id');
+    var rowVersion = $(this).data('row-version');
+    var taskId = $('#editTaskId').val();
 
+    if (confirm('Вы уверены, что хотите удалить этот комментарий?')) {
         $.ajax({
             url: '/Kanban/DeleteComment',
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify(deleteData),
+            data: JSON.stringify({
+                CommentId: commentId,
+                TaskId: taskId,
+                RowVersion: rowVersion
+            }),
             success: function (response) {
-                alert(response.message);
-                // Обновить RowVersion задачи
-                $('#editTaskRowVersion').val(response.RowVersion);
-                // Обновить RowVersion в атрибуте задачи на странице
-                var taskElement = $('.kanban-task[data-id="' + taskId + '"]');
-                taskElement.attr('data-row-version', response.RowVersion);
-                // Удалить комментарий из списка
-                $(`li[data-id="${commentId}"]`).remove();
+                console.log("Comment deleted successfully:", response);
+                if (response.success) {
+                    // Удаляем комментарий из списка
+                    $(`button[data-comment-id="${commentId}"]`).closest('li').remove();
+                    // Обновляем RowVersion задачи
+                    $('#editTaskRowVersion').val(response.rowVersion);
+                } else {
+                    alert(response.message || 'Не удалось удалить комментарий.');
+                }
+            },
+            error: function (xhr) {
+                console.error('Error deleting comment:', xhr.responseText);
+                alert('Произошла ошибка при удалении комментария.');
+            }
+        });
+    }
+});
+
+
+// Функция для удаления комментария
+function deleteComment(commentId, commentRowVersion) {
+    if (confirm("Вы действительно хотите удалить этот комментарий?")) {
+        $.ajax({
+            url: '/Kanban/DeleteComment',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                CommentId: commentId,
+                RowVersion: commentRowVersion
+            }),
+            success: function (response) {
+                console.log("DeleteComment Response:", response); // Для отладки
+
+                if (response.message) {
+                    alert(response.message);
+
+                    // Удаляем комментарий из списка
+                    $(`li[data-id='${commentId}']`).remove();
+
+                    // Обновляем RowVersion задачи, если он был обновлён
+                    if (response.RowVersion) {
+                        $('#editTaskRowVersion').val(response.RowVersion);
+                    }
+                } else {
+                    console.error('Unexpected response format.');
+                }
             },
             error: function (xhr) {
                 if (xhr.status === 409) {
                     alert(xhr.responseJSON.message);
-                    location.reload(); // Перезагрузка для получения актуальных данных
+                    location.reload();
                 } else if (xhr.status === 400) {
-                    var errors = xhr.responseJSON;
-                    var errorMessages = [];
-                    if (errors.errors) {
-                        for (var key in errors.errors) {
-                            if (errors.errors.hasOwnProperty(key)) {
-                                errorMessages.push(errors.errors[key].join('<br>'));
-                            }
-                        }
-                    } else if (errors.message) {
-                        errorMessages.push(errors.message);
+                    var errors = xhr.responseJSON.errors || [];
+                    var message = xhr.responseJSON.message || 'Ошибки при удалении комментария.';
+                    if (errors.length > 0) {
+                        alert(message + '\n' + errors.join('\n'));
+                    } else {
+                        alert(message);
                     }
-                    alert('Ошибки при удалении комментария:\n' + errorMessages.join('\n'));
                 } else {
                     alert('Произошла ошибка при удалении комментария.');
                 }
@@ -634,6 +793,7 @@ function deleteComment(commentId, rowVersion) {
         });
     }
 }
+
 
 // Функция для экранирования HTML (предотвращение XSS)
 function escapeHtml(text) {
@@ -644,5 +804,6 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+    return text ? text.replace(/[&<>"']/g, function (m) { return map[m]; }) : '';
 }
+

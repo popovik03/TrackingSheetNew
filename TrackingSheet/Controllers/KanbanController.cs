@@ -5,6 +5,7 @@ using TrackingSheet.Services;
 using TrackingSheet.Models.Kanban;
 using static TrackingSheet.Services.KanbanService;
 using Newtonsoft.Json;
+using TrackingSheet.Data;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -13,10 +14,12 @@ namespace TrackingSheet.Controllers
     public class KanbanController : Controller
     {
         private readonly IKanbanService _kanbanService;
+        private readonly MVCDbContext _context;
 
-        public KanbanController(IKanbanService kanbanService)
+        public KanbanController(IKanbanService kanbanService, MVCDbContext context)
         {
             _kanbanService = kanbanService;
+            _context = context; 
         }
 
         // Основной метод для отображения доски Kanban
@@ -205,11 +208,21 @@ namespace TrackingSheet.Controllers
             return Ok();
         }
 
-
-
         [HttpPost]
-        public async Task<IActionResult> EditTask([FromBody] EditTaskModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditTask(EditTaskModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                var errorMessages = ModelState.SelectMany(x => x.Value.Errors.Select(error => new
+                {
+                    field = x.Key,
+                    errorMessage = error.ErrorMessage
+                })).ToList();
+
+                return BadRequest(new { message = "Model validation failed.", errors = errorMessages });
+            }
+
             if (model == null || model.TaskId == Guid.Empty)
             {
                 return BadRequest(new { message = "Invalid task edit request." });
@@ -226,40 +239,58 @@ namespace TrackingSheet.Controllers
                 return BadRequest(new { message = "Invalid RowVersion format." });
             }
 
-            // Десериализуем подзадачи из JSON
-            List<KanbanSubtask> updatedSubtasks = new List<KanbanSubtask>();
+            // Десериализуем подзадачи из JSON в DTO
+            List<EditTaskSubtaskDto> updatedSubtasksDto = new List<EditTaskSubtaskDto>();
             if (!string.IsNullOrEmpty(model.SubtasksJson))
             {
                 try
                 {
-                    // Используем кастомный конвертер для обработки RowVersion как строки
-                    updatedSubtasks = JsonConvert.DeserializeObject<List<KanbanSubtask>>(model.SubtasksJson, new JsonSerializerSettings
-                    {
-                        Converters = new List<JsonConverter> { new ByteArrayToBase64Converter() }
-                    });
+                    updatedSubtasksDto = JsonConvert.DeserializeObject<List<EditTaskSubtaskDto>>(model.SubtasksJson);
                 }
                 catch (JsonException ex)
                 {
-                    Console.WriteLine($"Ошибка десериализации подзадач: {ex.Message}");
-                    return BadRequest(new { message = "Ошибка десериализации подзадач." });
+                    return BadRequest(new { message = "Ошибка десериализации подзадач.", error = ex.Message });
                 }
             }
 
-            // Создаём обновлённую задачу
-            var updatedTask = new KanbanTask
+            // Конвертируем DTO в KanbanSubtask, включая конвертацию RowVersion
+            List<KanbanSubtask> updatedSubtasks = updatedSubtasksDto.Select(dto => new KanbanSubtask
             {
-                Id = model.TaskId,
-                TaskName = model.TaskName,
-                TaskDescription = model.TaskDescription,
-                TaskColor = model.TaskColor,
-                DueDate = model.DueDate,
-                Priority = model.Priority,
-                Subtasks = updatedSubtasks
-            };
+                Id = dto.Id,
+                SubtaskDescription = dto.SubtaskDescription,
+                IsCompleted = dto.IsCompleted,
+                RowVersion = string.IsNullOrEmpty(dto.RowVersion) ? null : Convert.FromBase64String(dto.RowVersion)
+            }).ToList();
+
+            // Получаем существующую задачу из базы данных
+            var existingTask = await _context.KanbanTasks
+                .Include(t => t.Subtasks)
+                .FirstOrDefaultAsync(t => t.Id == model.TaskId);
+
+            if (existingTask == null)
+            {
+                return NotFound(new { message = "Задача не найдена." });
+            }
+
+            // Проверка RowVersion для оптимистичной блокировки
+            if (!existingTask.RowVersion.SequenceEqual(originalRowVersion))
+            {
+                return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
+            }
+
+            // Обновляем основные поля задачи
+            existingTask.TaskName = model.TaskName;
+            existingTask.TaskDescription = model.TaskDescription;
+            existingTask.TaskColor = model.TaskColor;
+            existingTask.DueDate = model.DueDate;
+            existingTask.Priority = model.Priority;
+
+            // Обновляем подзадачи
+            UpdateSubtasks(existingTask, updatedSubtasks);
 
             try
             {
-                await _kanbanService.UpdateTaskAsync(updatedTask, originalRowVersion);
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -267,17 +298,95 @@ namespace TrackingSheet.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при обновлении задачи: {ex.Message}");
-                return StatusCode(500, new { message = "An error occurred while updating the task." });
+                return StatusCode(500, new { message = "An error occurred while updating the task.", error = ex.Message });
             }
 
-            // После успешного обновления, возвращаем новое значение RowVersion
-            var task = await _kanbanService.GetTaskByIdAsync(model.TaskId);
-            var newRowVersion = Convert.ToBase64String(task.RowVersion);
+            // Получаем обновлённую задачу для ответа клиенту
+            var updatedTask = await _context.KanbanTasks
+                .Include(t => t.Subtasks)
+                .FirstOrDefaultAsync(t => t.Id == model.TaskId);
 
-            return Ok(new { message = "Task updated successfully.", RowVersion = newRowVersion });
+            var updatedTaskResponse = new
+            {
+                id = updatedTask.Id,
+                taskName = updatedTask.TaskName,
+                taskDescription = updatedTask.TaskDescription,
+                taskColor = updatedTask.TaskColor,
+                dueDate = updatedTask.DueDate?.ToString("yyyy-MM-dd"),
+                priority = updatedTask.Priority,
+                taskAuthor = updatedTask.TaskAuthor,
+                createdAt = updatedTask.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                columnId = updatedTask.KanbanColumnId,
+                rowVersion = Convert.ToBase64String(updatedTask.RowVersion),
+                subtasks = updatedTask.Subtasks.Select(s => new
+                {
+                    id = s.Id,
+                    subtaskDescription = s.SubtaskDescription,
+                    isCompleted = s.IsCompleted,
+                    rowVersion = Convert.ToBase64String(s.RowVersion)
+                }).ToList(),
+                comments = updatedTask.Comments.Select(c => new
+                {
+                    id = c.Id,
+                    commentAuthor = c.CommentAuthor,
+                    commentText = c.CommentText,
+                    createdAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                    rowVersion = Convert.ToBase64String(c.RowVersion)
+                }).ToList()
+            };
+
+            return Ok(new { message = "Task updated successfully.", updatedTask = updatedTaskResponse });
         }
 
+
+        private void UpdateSubtasks(KanbanTask existingTask, List<KanbanSubtask> updatedSubtasks)
+        {
+            // Удаляем подзадачи, которых нет в обновлённом списке
+            var updatedSubtaskIds = updatedSubtasks.Select(s => s.Id).ToList();
+            var subtasksToRemove = existingTask.Subtasks.Where(s => !updatedSubtaskIds.Contains(s.Id)).ToList();
+            _context.KanbanSubtasks.RemoveRange(subtasksToRemove);
+
+            foreach (var subtask in updatedSubtasks)
+            {
+                if (subtask.Id == Guid.Empty)
+                {
+                    // Новая подзадача
+                    var newSubtask = new KanbanSubtask
+                    {
+                        Id = Guid.NewGuid(),
+                        KanbanTaskId = existingTask.Id,
+                        SubtaskDescription = subtask.SubtaskDescription,
+                        IsCompleted = subtask.IsCompleted
+                        // RowVersion будет автоматически установлено базой данных
+                    };
+                    _context.KanbanSubtasks.Add(newSubtask);
+                }
+                else
+                {
+                    // Обновляем существующую подзадачу
+                    var existingSubtask = existingTask.Subtasks.FirstOrDefault(s => s.Id == subtask.Id);
+                    if (existingSubtask != null)
+                    {
+                        existingSubtask.SubtaskDescription = subtask.SubtaskDescription;
+                        existingSubtask.IsCompleted = subtask.IsCompleted;
+                        // Не присваивайте RowVersion вручную
+                    }
+                    else
+                    {
+                        // Если подзадача с таким Id не найдена, создаём новую
+                        var newSubtask = new KanbanSubtask
+                        {
+                            Id = Guid.NewGuid(),
+                            KanbanTaskId = existingTask.Id,
+                            SubtaskDescription = subtask.SubtaskDescription,
+                            IsCompleted = subtask.IsCompleted
+                            // RowVersion будет автоматически установлено базой данных
+                        };
+                        _context.KanbanSubtasks.Add(newSubtask);
+                    }
+                }
+            }
+        }
 
 
 
@@ -342,25 +451,25 @@ namespace TrackingSheet.Controllers
                 return BadRequest(new { message = "Некорректный запрос для добавления комментария." });
             }
 
-            // Конвертация RowVersion из Base64 строки в byte[]
-            byte[] originalRowVersion;
-            try
-            {
-                originalRowVersion = Convert.FromBase64String(model.RowVersion);
-            }
-            catch (FormatException)
-            {
-                return BadRequest(new { message = "Некорректный формат RowVersion." });
-            }
-
             var task = await _kanbanService.GetTaskByIdAsync(model.TaskId);
             if (task == null)
             {
                 return NotFound(new { message = "Задача не найдена." });
             }
 
-            // Проверка RowVersion для оптимистичной конкуренции
-            if (!task.RowVersion.SequenceEqual(originalRowVersion))
+            // Конвертация RowVersion задачи из Base64 строки в byte[]
+            byte[] originalTaskRowVersion;
+            try
+            {
+                originalTaskRowVersion = Convert.FromBase64String(model.RowVersion);
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new { message = "Некорректный формат RowVersion." });
+            }
+
+            // Проверка RowVersion задачи для оптимистичной конкуренции
+            if (!task.RowVersion.SequenceEqual(originalTaskRowVersion))
             {
                 return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
             }
@@ -385,18 +494,14 @@ namespace TrackingSheet.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при добавлении комментария: {ex.Message}");
-                return StatusCode(500, "Произошла ошибка при добавлении комментария.");
+                return StatusCode(500, "An error occurred while adding the comment.");
             }
 
-            // Получение нового RowVersion задачи
-            task = await _kanbanService.GetTaskByIdAsync(model.TaskId);
-            var newRowVersion = Convert.ToBase64String(task.RowVersion);
-
-            // Получение комментария с обновлённым RowVersion
+            // Получение добавленного комментария с обновлённым RowVersion
             var addedComment = await _kanbanService.GetCommentByIdAsync(newComment.Id);
             if (addedComment == null)
             {
-                return StatusCode(500, "Произошла ошибка при получении добавленного комментария.");
+                return StatusCode(500, new { message = "Unable to retrieve the added comment." });
             }
 
             var responseComment = new
@@ -408,8 +513,12 @@ namespace TrackingSheet.Controllers
                 RowVersion = Convert.ToBase64String(addedComment.RowVersion)
             };
 
+            // Получение нового RowVersion задачи
+            var newRowVersion = Convert.ToBase64String(task.RowVersion);
+
             return Ok(new { message = "Комментарий добавлен успешно.", RowVersion = newRowVersion, Comment = responseComment });
         }
+
 
 
         [HttpPost]
@@ -420,11 +529,11 @@ namespace TrackingSheet.Controllers
                 return BadRequest(new { message = "Некорректный запрос для удаления комментария." });
             }
 
-            // Конвертация RowVersion из Base64 строки в byte[]
-            byte[] originalRowVersion;
+            // Конвертация RowVersion комментария из Base64 строки в byte[]
+            byte[] originalCommentRowVersion;
             try
             {
-                originalRowVersion = Convert.FromBase64String(model.RowVersion);
+                originalCommentRowVersion = Convert.FromBase64String(model.RowVersion);
             }
             catch (FormatException)
             {
@@ -437,16 +546,10 @@ namespace TrackingSheet.Controllers
                 return NotFound(new { message = "Комментарий не найден." });
             }
 
-            var task = await _kanbanService.GetTaskByIdAsync(comment.KanbanTaskId);
-            if (task == null)
+            // Проверка RowVersion комментария для оптимистичной конкуренции
+            if (!comment.RowVersion.SequenceEqual(originalCommentRowVersion))
             {
-                return NotFound(new { message = "Задача, к которой относится комментарий, не найдена." });
-            }
-
-            // Проверка RowVersion для оптимистичной конкуренции
-            if (!task.RowVersion.SequenceEqual(originalRowVersion))
-            {
-                return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
+                return Conflict(new { message = "The comment has been modified by another process. Please refresh and try again." });
             }
 
             try
@@ -455,20 +558,21 @@ namespace TrackingSheet.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return Conflict(new { message = "The task has been modified by another process. Please refresh and try again." });
+                return Conflict(new { message = "The comment has been modified by another process. Please refresh and try again." });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при удалении комментария: {ex.Message}");
-                return StatusCode(500, "Произошла ошибка при удалении комментария.");
+                return StatusCode(500, "An error occurred while deleting the comment.");
             }
 
-            // Получение нового RowVersion задачи
-            task = await _kanbanService.GetTaskByIdAsync(comment.KanbanTaskId);
-            var newRowVersion = Convert.ToBase64String(task.RowVersion);
+            // Получение нового RowVersion задачи (если требуется)
+            var task = await _kanbanService.GetTaskByIdAsync(comment.KanbanTaskId);
+            var newRowVersion = task != null ? Convert.ToBase64String(task.RowVersion) : "";
 
             return Ok(new { message = "Комментарий удален успешно.", RowVersion = newRowVersion });
         }
+
 
 
 
@@ -514,6 +618,13 @@ namespace TrackingSheet.Controllers
             public string RowVersion { get; set; }
         }
 
+        public class EditTaskSubtaskDto
+        {
+            public Guid Id { get; set; }
+            public string SubtaskDescription { get; set; }
+            public bool IsCompleted { get; set; }
+            public string RowVersion { get; set; } // RowVersion как строка (Base64)
+        }
 
 
     }

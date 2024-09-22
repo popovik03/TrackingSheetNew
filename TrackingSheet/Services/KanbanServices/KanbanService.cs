@@ -211,64 +211,33 @@ namespace TrackingSheet.Services
 
         public async Task UpdateTaskAsync(KanbanTask updatedTask, byte[] originalRowVersion)
         {
-            // Загружаем существующую задачу с подзадачами
-            var task = await _context.KanbanTasks
+            var existingTask = await _context.KanbanTasks
                 .Include(t => t.Subtasks)
                 .FirstOrDefaultAsync(t => t.Id == updatedTask.Id);
 
-            if (task == null)
+            if (existingTask == null)
             {
-                throw new DbUpdateConcurrencyException("Task not found.");
+                throw new Exception("Task not found.");
             }
 
-            // Устанавливаем оригинальное значение RowVersion для задачи
-            _context.Entry(task).Property(t => t.RowVersion).OriginalValue = originalRowVersion;
+            // Проверка RowVersion
+            if (!existingTask.RowVersion.SequenceEqual(originalRowVersion))
+            {
+                throw new DbUpdateConcurrencyException();
+            }
 
             // Обновляем основные поля задачи
-            task.TaskName = updatedTask.TaskName;
-            task.TaskDescription = updatedTask.TaskDescription;
-            task.TaskColor = updatedTask.TaskColor;
-            task.DueDate = updatedTask.DueDate;
-            task.Priority = updatedTask.Priority;
+            existingTask.TaskName = updatedTask.TaskName;
+            existingTask.TaskDescription = updatedTask.TaskDescription;
+            existingTask.TaskColor = updatedTask.TaskColor;
+            existingTask.DueDate = updatedTask.DueDate;
+            existingTask.Priority = updatedTask.Priority;
 
             // Обновляем подзадачи
-            var updatedSubtasks = updatedTask.Subtasks;
-            var existingSubtasks = task.Subtasks.ToList();
+            UpdateSubtasks(existingTask, updatedTask.Subtasks);
 
-            // Удаляем подзадачи, которых больше нет в обновлённом списке
-            foreach (var existingSubtask in existingSubtasks)
-            {
-                if (!updatedSubtasks.Any(s => s.Id == existingSubtask.Id))
-                {
-                    _context.KanbanSubtasks.Remove(existingSubtask);
-                }
-            }
-
-            // Добавляем или обновляем подзадачи
-            foreach (var updatedSubtask in updatedSubtasks)
-            {
-                var existingSubtask = existingSubtasks.FirstOrDefault(s => s.Id == updatedSubtask.Id);
-                if (existingSubtask != null)
-                {
-                    // Устанавливаем оригинальное значение RowVersion для подзадачи
-                    _context.Entry(existingSubtask).Property(s => s.RowVersion).OriginalValue = updatedSubtask.RowVersion;
-
-                    // Обновляем поля подзадачи
-                    existingSubtask.SubtaskDescription = updatedSubtask.SubtaskDescription;
-                    existingSubtask.IsCompleted = updatedSubtask.IsCompleted;
-                }
-                else
-                {
-                    // Добавляем новую подзадачу
-                    updatedSubtask.KanbanTaskId = task.Id;
-                    _context.KanbanSubtasks.Add(updatedSubtask);
-                }
-            }
-
-            // Сохраняем изменения
             await _context.SaveChangesAsync();
         }
-
 
 
 

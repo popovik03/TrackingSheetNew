@@ -14,6 +14,10 @@ builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
     );
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken"; // Устанавливаем имя заголовка
+});
 
 //Мои сервисы
 builder.Services.AddScoped<RemoteDataService>();
