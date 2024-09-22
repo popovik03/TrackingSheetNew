@@ -59,17 +59,16 @@ function addSubtaskToList(id, description, isCompleted, rowVersion) {
     var subtaskItem = `
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
-                <input type="checkbox" class="subtask-checkbox" ${isCompleted ? 'checked' : ''} disabled>
-                <input type="text" class="form-control d-inline-block" style="width: 70%;" value="${escapeHtml(description)}" />
+                <input type="checkbox" class="subtask-checkbox" ${isCompleted ? 'checked' : ''}>
+                <input type="text" class="form-control subtask-description" value="${escapeHtml(description)}">
             </div>
-            <div>
-                <button type="button" class="btn btn-danger btn-sm remove-subtask-button" data-subtask-id="${id}">Удалить</button>
-            </div>
+            <button type="button" class="btn btn-danger btn-sm remove-subtask-button" data-subtask-id="${id}" data-row-version="${rowVersion}">Удалить</button>
             <input type="hidden" name="subtasksRowVersion" value="${rowVersion}">
         </li>
     `;
     $('#subtasksList').append(subtaskItem);
 }
+
 
 
 
@@ -670,6 +669,17 @@ function addComment() {
     var commentText = $('#newCommentText').val().trim();
     var rowVersion = $('#editTaskRowVersion').val();
 
+    // Проверка наличия reporter
+    if (!commentAuthor) {
+        commentAuthor = prompt('Пожалуйста, введите ваше имя для добавления комментария:');
+        if (!commentAuthor) {
+            alert('Имя автора комментария обязательно.');
+            return;
+        }
+        // Сохраняем введённое имя в переменную reporter
+        reporter = commentAuthor;
+    }
+
     if (commentText === '') {
         alert('Комментарий не может быть пустым.');
         return;
@@ -709,6 +719,7 @@ function addComment() {
         }
     });
 }
+
 
 
 $(document).on('click', '.remove-comment-button', function () {
@@ -806,4 +817,3 @@ function escapeHtml(text) {
     };
     return text ? text.replace(/[&<>"']/g, function (m) { return map[m]; }) : '';
 }
-

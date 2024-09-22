@@ -22,7 +22,7 @@
         margin-right: 10px;
     }
 
-        .kanban-tabs .tab-item .board-name {
+        .kanban-tabs .tab-item .board-name .kanban-task{
             cursor: pointer;
         }
 

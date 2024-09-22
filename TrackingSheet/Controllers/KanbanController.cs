@@ -573,8 +573,128 @@ namespace TrackingSheet.Controllers
             return Ok(new { message = "Комментарий удален успешно.", RowVersion = newRowVersion });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateSubtaskStatus([FromBody] UpdateSubtaskStatusModel model)
+        {
+            if (model == null || model.SubtaskId == Guid.Empty)
+            {
+                return BadRequest(new { message = "Invalid subtask update request." });
+            }
+
+            byte[] originalRowVersion;
+            try
+            {
+                originalRowVersion = Convert.FromBase64String(model.RowVersion);
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new { message = "Invalid RowVersion format." });
+            }
+
+            var subtask = await _context.KanbanSubtasks.FirstOrDefaultAsync(s => s.Id == model.SubtaskId);
+            if (subtask == null)
+            {
+                return NotFound(new { message = "Subtask not found." });
+            }
+
+            // Проверка RowVersion для оптимистичной блокировки
+            if (!subtask.RowVersion.SequenceEqual(originalRowVersion))
+            {
+                return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
+            }
+
+            subtask.IsCompleted = model.IsCompleted;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating the subtask.", error = ex.Message });
+            }
+
+            // Возвращаем обновленную подзадачу
+            var subtaskResponse = new
+            {
+                id = subtask.Id,
+                subtaskDescription = subtask.SubtaskDescription,
+                isCompleted = subtask.IsCompleted,
+                rowVersion = Convert.ToBase64String(subtask.RowVersion)
+            };
+
+            return Ok(new { message = "Subtask status updated successfully.", subtask = subtaskResponse });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteSubtask([FromBody] DeleteSubtaskModel model)
+        {
+            if (model == null || model.SubtaskId == Guid.Empty)
+            {
+                return BadRequest(new { message = "Invalid subtask delete request." });
+            }
+
+            byte[] originalRowVersion;
+            try
+            {
+                originalRowVersion = Convert.FromBase64String(model.RowVersion);
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new { message = "Invalid RowVersion format." });
+            }
+
+            var subtask = await _context.KanbanSubtasks.FirstOrDefaultAsync(s => s.Id == model.SubtaskId);
+            if (subtask == null)
+            {
+                return NotFound(new { message = "Subtask not found." });
+            }
+
+            // Проверка RowVersion для оптимистичной блокировки
+            if (!subtask.RowVersion.SequenceEqual(originalRowVersion))
+            {
+                return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
+            }
+
+            _context.KanbanSubtasks.Remove(subtask);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while deleting the subtask.", error = ex.Message });
+            }
+
+            return Ok(new { message = "Subtask deleted successfully." });
+        }
 
 
+
+        public class DeleteSubtaskModel
+        {
+            
+            public Guid SubtaskId { get; set; }
+
+            public string RowVersion { get; set; }
+        }
+
+
+        public class ToggleSubtaskCompletionModel
+        {
+            public Guid SubtaskId { get; set; }
+
+            public string RowVersion { get; set; }
+        }
 
         #endregion
 
@@ -626,6 +746,13 @@ namespace TrackingSheet.Controllers
             public string RowVersion { get; set; } // RowVersion как строка (Base64)
         }
 
+        public class UpdateSubtaskStatusModel
+        {
+            public Guid SubtaskId { get; set; }
+            public bool IsCompleted { get; set; }
+            public string RowVersion { get; set; }
+            public Guid TaskId { get; set; } // Если требуется
+        }
 
     }
 }
