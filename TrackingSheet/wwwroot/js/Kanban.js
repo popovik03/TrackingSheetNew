@@ -817,3 +817,55 @@ function escapeHtml(text) {
     };
     return text ? text.replace(/[&<>"']/g, function (m) { return map[m]; }) : '';
 }
+
+
+// Функционал для работы с файлами
+// Функция для переключения секции вложений
+function toggleAttachments(taskId) {
+    $('#attachmentsSection-' + taskId).toggle();
+}
+
+// Функция для загрузки вложений
+function uploadAttachments(taskId) {
+    var input = $('#attachmentsInput-' + taskId)[0];
+    var files = input.files;
+    if (files.length === 0) {
+        alert('Файлы не выбраны.');
+        return;
+    }
+
+    var formData = new FormData();
+    for (var i = 0; i < files.length; i++) {
+        formData.append('Files', files[i]);
+    }
+    formData.append('TaskId', taskId);
+
+    $.ajax({
+        url: '/Kanban/UploadAttachments',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            console.log("Attachments uploaded successfully:", response);
+            if (response.files) {
+                response.files.forEach(function (file) {
+                    var fileItem = `
+                        <li class="list-group-item">
+                            <a href="${file.fileUrl}" target="_blank">${escapeHtml(file.fileName)}</a>
+                        </li>
+                    `;
+                    $('#attachmentsSection-' + taskId + ' ul.list-group').append(fileItem);
+                });
+            }
+            alert('Файлы успешно загружены.');
+            // Очистка инпута после загрузки
+            $('#attachmentsInput-' + taskId).val('');
+        },
+        error: function (xhr, status, error) {
+            console.error('Error uploading attachments:', xhr.responseText, error);
+            alert('Произошла ошибка при загрузке файлов. Пожалуйста, попробуйте снова.');
+        }
+    });
+}
+

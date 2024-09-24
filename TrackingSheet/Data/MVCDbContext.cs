@@ -26,6 +26,7 @@ namespace TrackingSheet.Data
         public DbSet<KanbanComment> KanbanComments { get; set; }
         public DbSet<KanbanMember> KanbanMembers { get; set; }
         public DbSet<KanbanTaskMember> KanbanTaskMembers { get; set; }
+        public DbSet<KanbanFile> KanbanFiles { get; set; } // Добавлено для работы с файлами
 
         // Рабочий планер пока на паузе
         public DbSet<EmployeePlaner2024> EmployeePlaner2024 { get; set; }
@@ -94,6 +95,13 @@ namespace TrackingSheet.Data
                 .WithMany(m => m.TaskMembers)
                 .HasForeignKey(tm => tm.KanbanMemberId)
                 .OnDelete(DeleteBehavior.Cascade); // Удаление участника также удаляет связи с задачами
+
+            // Настройка отношений между KanbanTask и KanbanFile
+            modelBuilder.Entity<KanbanFile>()
+                .HasOne(f => f.KanbanTask)
+                .WithMany(t => t.Files)
+                .HasForeignKey(f => f.KanbanTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             //// Создание начального KanbanBoard
             //modelBuilder.Entity<KanbanBoard>().HasData(

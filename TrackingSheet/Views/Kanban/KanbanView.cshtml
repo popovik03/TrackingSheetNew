@@ -100,6 +100,10 @@
                                             <div class="task-header">
                                                 <strong>@task.TaskName</strong>
                                                 <div class="task-actions">
+                                                    <!-- Кнопка вложений -->
+                                                    <button type="button" class="btn btn-sm btn-link toggle-attachments-button" onclick="toggleAttachments('@task.Id')">
+                                                        <img src="~/icons/skrepa.png" alt="Вложения" style="width: 16px; height: 16px;">
+                                                    </button>
                                                     <!-- Кнопка редактирования задачи -->
                                                     <button type="button" class="btn btn-sm btn-link edit-task-button" data-toggle="modal" data-target="#editTaskModal"
                                                             data-task='@Html.Raw(JsonConvert.SerializeObject(new
@@ -138,15 +142,35 @@
                                                     </button>
 
 
-
                                                     <!-- Кнопка удаления задачи -->
                                                     <button type="button" class="btn btn-sm btn-link" onclick="deleteTask('@task.Id')">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
+
                                                 </div>
                                             </div>
                                             <small>@task.TaskDescription</small>
                                             <!-- Дедлайн и приоритет -->
+
+                                            <!-- Секция вложений -->
+                                            <div id="attachmentsSection-@task.Id" class="attachments-section" style="display: none; margin-top: 10px;">
+                                                <ul class="list-group mb-3">
+                                                    @foreach (var file in task.Files)
+                                                    {
+                                                        <li class="list-group-item">
+                                                            <a href="@file.FileUrl" target="_blank">@file.FileName</a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                                <div class="input-group">
+                                                    <input type="file" class="form-control" id="attachmentsInput-@task.Id" multiple />
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="uploadAttachments('@task.Id')">
+                                                            <img src="~/icons/skrepa.png" alt="Загрузить файлы" style="width: 16px; height: 16px;">
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     }
                                 </div>

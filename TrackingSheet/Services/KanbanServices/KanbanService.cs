@@ -28,6 +28,9 @@ namespace TrackingSheet.Services
                 .Include(b => b.Columns)
                     .ThenInclude(c => c.Tasks)
                         .ThenInclude(t => t.Comments)
+                .Include(b => b.Columns)
+                    .ThenInclude(c => c.Tasks)
+                        .ThenInclude(t => t.Files) // Добавлено
                 .OrderBy(b => b.CreatedAt)
                 .ToListAsync();
         }
@@ -41,8 +44,12 @@ namespace TrackingSheet.Services
                 .Include(b => b.Columns)
                     .ThenInclude(c => c.Tasks)
                         .ThenInclude(t => t.Comments)
+                .Include(b => b.Columns)
+                    .ThenInclude(c => c.Tasks)
+                        .ThenInclude(t => t.Files) // Добавлено
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
+
 
         public async Task<KanbanBoard> CreateBoardAsync(KanbanBoard board)
         {

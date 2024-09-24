@@ -7,6 +7,7 @@ using static TrackingSheet.Services.KanbanService;
 using Newtonsoft.Json;
 using TrackingSheet.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 
 namespace TrackingSheet.Controllers
@@ -15,12 +16,15 @@ namespace TrackingSheet.Controllers
     {
         private readonly IKanbanService _kanbanService;
         private readonly MVCDbContext _context;
+        private readonly ILogger<KanbanController> _logger;
 
-        public KanbanController(IKanbanService kanbanService, MVCDbContext context)
+        public KanbanController(IKanbanService kanbanService, MVCDbContext context, ILogger<KanbanController> logger)
         {
             _kanbanService = kanbanService;
-            _context = context; 
+            _context = context;
+            _logger = logger;
         }
+
 
         // Основной метод для отображения доски Kanban
         public async Task<IActionResult> KanbanView(Guid? selectedBoardId = null)
@@ -35,7 +39,7 @@ namespace TrackingSheet.Controllers
             return View(boards);
         }
 
-        #region Методы для работы с досками
+      
 
         [HttpPost]
         public async Task<IActionResult> CreateBoard(string boardName)
@@ -90,9 +94,7 @@ namespace TrackingSheet.Controllers
             return RedirectToAction(nameof(KanbanView));
         }
 
-        #endregion
 
-        #region Методы для работы с колонками
 
         [HttpPost]
         public async Task<IActionResult> AddColumn(Guid boardId, string columnName)
@@ -168,9 +170,7 @@ namespace TrackingSheet.Controllers
             return Ok();
         }
 
-        #endregion
 
-        #region Методы для работы с задачами
 
         [HttpPost]
         public async Task<IActionResult> AddTask(Guid columnId, string taskName, string taskDescription, string taskColor, DateTime? dueDate, string priority, string taskAuthor)
@@ -678,81 +678,70 @@ namespace TrackingSheet.Controllers
             return Ok(new { message = "Subtask deleted successfully." });
         }
 
-
-
-        public class DeleteSubtaskModel
+        [HttpPost]
+        public async Task<IActionResult> UploadAttachments([FromForm] Guid TaskId, List<IFormFile> Files)
         {
-            
-            public Guid SubtaskId { get; set; }
+            if (TaskId == Guid.Empty)
+            {
+                return BadRequest(new { message = "Invalid TaskId." });
+            }
 
-            public string RowVersion { get; set; }
+            var task = await _context.KanbanTasks.FindAsync(TaskId);
+            if (task == null)
+            {
+                return NotFound(new { message = "Task not found." });
+            }
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploadsKanban", TaskId.ToString());
+
+            // Создаём папку, если её нет
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var savedFiles = new List<object>();
+
+            foreach (var file in Files)
+            {
+                if (file.Length > 0)
+                {
+                    var originalFileName = Path.GetFileName(file.FileName);
+                    // Очищаем имя файла от небезопасных символов
+                    var safeFileName = Regex.Replace(originalFileName, @"[^A-Za-z0-9_\-\.]", "_");
+                    var filePath = Path.Combine(uploadsFolder, safeFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    _logger.LogInformation($"File saved: {filePath}");
+
+                    // Сохраняем информацию о файле в базе данных
+                    var kanbanFile = new KanbanFile
+                    {
+                        Id = Guid.NewGuid(),
+                        KanbanTaskId = TaskId,
+                        FileName = originalFileName,
+                        FileUrl = Url.Content($"~/uploadsKanban/{TaskId}/{safeFileName}"),
+                        UploadedAt = DateTime.UtcNow
+                    };
+                    _context.KanbanFiles.Add(kanbanFile);
+
+                    savedFiles.Add(new
+                    {
+                        fileName = kanbanFile.FileName,
+                        fileUrl = kanbanFile.FileUrl
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Files uploaded successfully.", files = savedFiles });
         }
 
-
-        public class ToggleSubtaskCompletionModel
-        {
-            public Guid SubtaskId { get; set; }
-
-            public string RowVersion { get; set; }
-        }
-
-        #endregion
-
-        // Модель для получения данных о перемещении задачи
-        public class TaskMoveModel
-        {
-            public Guid TaskId { get; set; }
-            public Guid OldColumnId { get; set; }
-            public Guid NewColumnId { get; set; }
-            public int NewIndex { get; set; }
-        }
-
-        // Модель для редактирования задачи
-        public class EditTaskModel
-        {
-            public Guid TaskId { get; set; }
-            public Guid ColumnId { get; set; }
-            public string TaskName { get; set; }
-            public string TaskDescription { get; set; }
-            public string TaskColor { get; set; }
-            public DateTime? DueDate { get; set; }
-            public string Priority { get; set; }
-            public string TaskAuthor { get; set; }
-            public DateTime CreatedAt { get; set; }
-            public string SubtasksJson { get; set; } // Добавлено поле для получения подзадач в формате JSON
-
-            public string RowVersion { get; set; } // Добавлено для отслеживания версий 
-        }
-
-        public class AddCommentModel
-        {
-            public Guid TaskId { get; set; }
-            public string CommentAuthor { get; set; }
-            public string CommentText { get; set; }
-            public string RowVersion { get; set; }
-        }
-
-        public class DeleteCommentModel
-        {
-            public Guid CommentId { get; set; }
-            public string RowVersion { get; set; }
-        }
-
-        public class EditTaskSubtaskDto
-        {
-            public Guid Id { get; set; }
-            public string SubtaskDescription { get; set; }
-            public bool IsCompleted { get; set; }
-            public string RowVersion { get; set; } // RowVersion как строка (Base64)
-        }
-
-        public class UpdateSubtaskStatusModel
-        {
-            public Guid SubtaskId { get; set; }
-            public bool IsCompleted { get; set; }
-            public string RowVersion { get; set; }
-            public Guid TaskId { get; set; } // Если требуется
-        }
 
     }
 }

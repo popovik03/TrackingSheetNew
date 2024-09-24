@@ -36,6 +36,7 @@ namespace TrackingSheet.Models.Kanban
         public List<KanbanSubtask> Subtasks { get; set; } = new List<KanbanSubtask>(); // Подзадачи
         public List<KanbanComment> Comments { get; set; } = new List<KanbanComment>(); // Комментарии
         public List<KanbanTaskMember> TaskMembers { get; set; } = new List<KanbanTaskMember>(); // Ответственные
+        public ICollection<KanbanFile> Files { get; set; } = new List<KanbanFile>();
         public string TaskColor { get; set; } // Цвет задачи
         public DateTime CreatedAt { get; set; } // Дата создания задачи
         public DateTime? DueDate { get; set; } // Дедлайн задачи
@@ -100,4 +101,89 @@ namespace TrackingSheet.Models.Kanban
         [Timestamp]
         public byte[] RowVersion { get; set; } // Поле для отслеживания версий записи
     }
+
+
+    public class DeleteSubtaskModel
+    {
+
+        public Guid SubtaskId { get; set; }
+
+        public string RowVersion { get; set; }
+    }
+
+
+    public class ToggleSubtaskCompletionModel
+    {
+        public Guid SubtaskId { get; set; }
+
+        public string RowVersion { get; set; }
+    }
+
+    // Модель для получения данных о перемещении задачи
+    public class TaskMoveModel
+    {
+        public Guid TaskId { get; set; }
+        public Guid OldColumnId { get; set; }
+        public Guid NewColumnId { get; set; }
+        public int NewIndex { get; set; }
+    }
+
+    // Модель для редактирования задачи
+    public class EditTaskModel
+    {
+        public Guid TaskId { get; set; }
+        public Guid ColumnId { get; set; }
+        public string TaskName { get; set; }
+        public string TaskDescription { get; set; }
+        public string TaskColor { get; set; }
+        public DateTime? DueDate { get; set; }
+        public string Priority { get; set; }
+        public string TaskAuthor { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string SubtasksJson { get; set; } // Добавлено поле для получения подзадач в формате JSON
+
+        public string RowVersion { get; set; } // Добавлено для отслеживания версий 
+    }
+
+    public class AddCommentModel
+    {
+        public Guid TaskId { get; set; }
+        public string CommentAuthor { get; set; }
+        public string CommentText { get; set; }
+        public string RowVersion { get; set; }
+    }
+
+    public class DeleteCommentModel
+    {
+        public Guid CommentId { get; set; }
+        public string RowVersion { get; set; }
+    }
+
+    public class EditTaskSubtaskDto
+    {
+        public Guid Id { get; set; }
+        public string SubtaskDescription { get; set; }
+        public bool IsCompleted { get; set; }
+        public string RowVersion { get; set; } // RowVersion как строка (Base64)
+    }
+
+    public class UpdateSubtaskStatusModel
+    {
+        public Guid SubtaskId { get; set; }
+        public bool IsCompleted { get; set; }
+        public string RowVersion { get; set; }
+        public Guid TaskId { get; set; } // Если требуется
+    }
+
+    public class KanbanFile
+    {
+        public Guid Id { get; set; }
+        public Guid KanbanTaskId { get; set; }
+        public string FileName { get; set; }
+        public string FileUrl { get; set; }
+        public DateTime UploadedAt { get; set; }
+
+        public KanbanTask KanbanTask { get; set; }
+    }
+
 }
