@@ -103,8 +103,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Применяем градиент, если есть отметка "🚩"
                 if (data.highLight && data.highLight.includes('🚩')) {
-                    $(row).addClass('highlight-gradient');
+                    // Красим строку градиентом
+                    $(row).css('background', 'linear-gradient(to right, #FFA500, #FFFFCC, #FFFFFF)');
                 }
+
+
             }
         });
 
@@ -222,6 +225,29 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <option value="Win10">Win10</option>
                                     <option value="WITS">WITS</option>
                                     <option value="Other">Other</option>
+                                </select>
+                            `);
+                            // Устанавливаем текущее значение
+                            $(this).find('select').val(cellData);
+
+                        } else if (columnName === 'shift') {
+                            // Заменяем содержимое на select с вашими опциями
+                            $(this).html(`
+                                <select class="problemtype-select">
+                                    <option value="Day">Day</option>
+                                    <option value="Night">Night</option>
+                                   
+                                </select>
+                            `);
+                            // Устанавливаем текущее значение
+                            $(this).find('select').val(cellData);
+                        } else if (columnName === 'highLight') {
+                            // Заменяем содержимое на select с вашими опциями
+                            $(this).html(`
+                                <select class="problemtype-select">
+                                    <option value="🚩">🚩</option>
+                                    <option value=""></option>
+                                   
                                 </select>
                             `);
                             // Устанавливаем текущее значение
