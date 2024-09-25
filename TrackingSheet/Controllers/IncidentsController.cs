@@ -7,6 +7,7 @@ using TrackingSheet.Models;
 using TrackingSheet.Models.Domain;
 using TrackingSheet.Services;
 using System.Text.Json;
+using TrackingSheet.Models.DTO;
 
 namespace TrackingSheet.Controllers
 {
@@ -36,89 +37,121 @@ namespace TrackingSheet.Controllers
 
         [Authorize]
         [HttpGet]
-        public IActionResult Add()
+        public async Task<IActionResult> View(Guid id)
         {
-            ViewData["CurrentPage"] = "new_incident";
+            var incidents = await mvcDbContext.IncidentList
+                .Include(i => i.Updates)
+                .FirstOrDefaultAsync(x => x.ID == id);
 
-            // Generate a new ID for the incident
-            var newIncidentId = Guid.NewGuid();
-
-            // Retrieve VSAT data from TempData
-            var vsatInfoJson = TempData["VsatInfo"] as string;
-            VsatInfo vsatInfo = string.IsNullOrEmpty(vsatInfoJson) ? null : JsonSerializer.Deserialize<VsatInfo>(vsatInfoJson);
-
-            // Create the model and pass the generated ID
-            var model = new AddIncidentViewModel
+            if (incidents != null)
             {
-                ID = newIncidentId,
-                Well = vsatInfo?.WELL_NAME ?? "Test",
-                Run = vsatInfo?.MWRU_NUMBER ?? 100,
-                Date = DateTime.Now,
-                Shift = DateTime.Now.Hour >= 20 || DateTime.Now.Hour < 8 ? "Night" : "Day",
-                Reporter = TempData.Peek("Login") as string ?? string.Empty,
-                //VSAT = vsatInfo?.IP_PART ?? 0, // Use the correct property from VsatInfo
-                //IpPart = vsatInfo?.IP_PART ?? 0,
-                // Initialize other properties as needed
-            };
+                var ViewModel = new UpdateIncidentViewModel()
+                {
+                    ID = incidents.ID,
+                    Date = incidents.Date,
+                    Shift = incidents.Shift,
+                    Reporter = incidents.Reporter,
+                    VSAT = incidents.VSAT,
+                    Well = incidents.Well,
+                    Run = incidents.Run,
+                    SavedNPT = incidents.SavedNPT,
+                    ProblemType = incidents.ProblemType,
+                    HighLight = incidents.HighLight,
+                    Status = incidents.Status,
+                    Solution = incidents.Solution,
+                    File = incidents.File,
+                    DateEnd = incidents.DateEnd,
+                    Updates = incidents.Updates?.ToList() // Передаем обновления в представление
+                };
+                ViewData["CurrentPage"] = "journal";
+                return View("View", ViewModel);
+            }
 
-            // Pass VSAT data through ViewBag
-            ViewBag.VsatInfo = vsatInfo;
-
-            return View(model);
+            return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> SetIpAddressAndGetLatestVsatInfo(int ipPart)
-        {
-            string connectionStringTemplate = _configuration.GetConnectionString("RemoteDatabase");
-            string connectionString = connectionStringTemplate.Replace("${IPAddress}", ipPart.ToString());
 
-            // Save the connection string in session
-            HttpContext.Session.SetString("RemoteDbConnectionString", connectionString);
-            TempData["ipPart"] = ipPart;
+        
+        //Передача данных из базы в DataTable в формате json
+        [Authorize]
+        [HttpGet("api/incidents/all")]
+        public async Task<IActionResult> GetAllIncidents()
+        {
+            var data = await mvcDbContext.IncidentList.ToListAsync();
+            var totalRecords = data.Count;
+
+            return Json(new
+            {
+                draw = 1,
+                recordsTotal = totalRecords,
+                recordsFiltered = totalRecords,
+                data = data
+            });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> UpdateIncidents([FromBody] List<UpdateIncidentsDTO> updatedIncidents)
+        {
+            if (updatedIncidents == null || !updatedIncidents.Any())
+            {
+                _logger.LogWarning("UpdateIncidents: Нет данных для обновления.");
+                return BadRequest(new { message = "Нет данных для обновления." });
+            }
 
             try
             {
-                // Retrieve the connection string from session
-                string connectionStringNew = HttpContext.Session.GetString("RemoteDbConnectionString");
-                _remoteDataService.SetConnectionString(connectionStringNew);
-
-                // Get VSAT data
-                VsatInfo vsatInfo = await _remoteDataService.GetLatestVsatInfoAsync();
-
-                if (vsatInfo == null)
+                foreach (var updatedIncident in updatedIncidents)
                 {
-                    return NotFound();
+                    if (updatedIncident.ID == Guid.Empty)
+                    {
+                        _logger.LogWarning("UpdateIncidents: Пропуск записи с пустым ID.");
+                        continue; // Пропускаем некорректные записи
+                    }
+
+                    var incident = await mvcDbContext.IncidentList
+                        .FirstOrDefaultAsync(i => i.ID == updatedIncident.ID);
+
+                    if (incident == null)
+                    {
+                        _logger.LogWarning($"UpdateIncidents: Инцидент с ID {updatedIncident.ID} не найден.");
+                        continue; // Пропускаем отсутствующие записи
+                    }
+
+                    // Обновляем только изменённые поля
+                    incident.Date = updatedIncident.Date;
+                    incident.Shift = updatedIncident.Shift;
+                    incident.Reporter = updatedIncident.Reporter;
+                    incident.VSAT = updatedIncident.VSAT;
+                    incident.Well = updatedIncident.Well;
+                    incident.Run = updatedIncident.Run;
+                    incident.SavedNPT = updatedIncident.SavedNPT;
+                    incident.ProblemType = updatedIncident.ProblemType;
+                    incident.HighLight = updatedIncident.HighLight;
+                    incident.Status = updatedIncident.Status;
+                    incident.Solution = updatedIncident.Solution;
+                    incident.File = updatedIncident.File;
+                    incident.DateEnd = updatedIncident.DateEnd;
+                    // Обновите другие поля по необходимости
                 }
 
-                // Create the model and pass data
-                var model = new AddIncidentViewModel
-                {
-                    
-                    VSAT = ipPart,
-                    Well = vsatInfo.WELL_NAME,
-                    Run = vsatInfo.MWRU_NUMBER,
-                    Date = DateTime.Now,
-                    Shift = DateTime.Now.Hour >= 20 || DateTime.Now.Hour < 8 ? "Night" : "Day",
-                    Reporter = TempData.Peek("Login") as string ?? string.Empty,
-                    IpPart = ipPart,
-                    // Initialize other properties as needed
-                };
-
-                // Pass VSAT data through ViewBag
-                ViewBag.CurrentPage = "new_incident";
-                ViewBag.VsatInfo = vsatInfo;
-
-                return View("Add", model); // Pass the model to the view
+                await mvcDbContext.SaveChangesAsync();
+                _logger.LogInformation("UpdateIncidents: Данные успешно обновлены.");
+                return Ok(new { message = "Данные успешно обновлены." });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception occurred while getting latest VSAT info.");
-                string status_message = $"Error retrieving data from {HttpContext.Session.GetString("RemoteDbConnectionString")}";
-                return View("Add");
-                
+                _logger.LogError(ex, "UpdateIncidents: Ошибка при массовом обновлении инцидентов.");
+                return StatusCode(500, new { message = "Произошла ошибка при сохранении данных." });
             }
         }
+
+
+
+        //_________________________Методы для добавления, редактирования и удаления инцидентов_______________________________//
+
 
         [Authorize]
         [HttpPost]
@@ -184,72 +217,6 @@ namespace TrackingSheet.Controllers
 
             return RedirectToAction("Index", "Incidents");
         }
-
-
-
-        // Method to delete temporary files when creating an incident
-        [IgnoreAntiforgeryToken]
-        [HttpPost]
-        public IActionResult DeleteTempFile(string fileName, Guid incidentId)
-        {
-            try
-            {
-                var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incidentId.ToString());
-                var filePath = Path.Combine(incidentFolder, fileName);
-
-                if (System.IO.File.Exists(filePath))
-                {
-                    System.IO.File.Delete(filePath);
-                    return Json(new { success = true });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "File not found." });
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-
-
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> View(Guid id)
-        {
-            var incidents = await mvcDbContext.IncidentList
-                .Include(i => i.Updates)
-                .FirstOrDefaultAsync(x => x.ID == id);
-
-            if (incidents != null)
-            {
-                var ViewModel = new UpdateIncidentViewModel()
-                {
-                    ID = incidents.ID,
-                    Date = incidents.Date,
-                    Shift = incidents.Shift,
-                    Reporter = incidents.Reporter,
-                    VSAT = incidents.VSAT,
-                    Well = incidents.Well,
-                    Run = incidents.Run,
-                    SavedNPT = incidents.SavedNPT,
-                    ProblemType = incidents.ProblemType,
-                    HighLight = incidents.HighLight,
-                    Status = incidents.Status,
-                    Solution = incidents.Solution,
-                    File = incidents.File,
-                    DateEnd = incidents.DateEnd,
-                    Updates = incidents.Updates?.ToList() // Передаем обновления в представление
-                };
-                ViewData["CurrentPage"] = "journal";
-                return View("View", ViewModel);
-            }
-
-            return RedirectToAction("Index");
-        }
-
 
 
         [HttpPost]
@@ -323,6 +290,153 @@ namespace TrackingSheet.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                _logger.LogWarning("Attempted to delete a record with an empty ID.");
+                TempData["AlertMessage"] = "Invalid identifier.";
+                return RedirectToAction("Index");
+            }
+
+            var incident = await mvcDbContext.IncidentList.FindAsync(id);
+
+            if (incident != null)
+            {
+                mvcDbContext.IncidentList.Remove(incident);
+                await mvcDbContext.SaveChangesAsync();
+                TempData["AlertMessage"] = "Incident deleted.";
+                _logger.LogInformation("Incident successfully deleted.");
+            }
+            else
+            {
+                _logger.LogWarning($"Incident with ID {id} not found for deletion.");
+                TempData["AlertMessage"] = "Incident not found.";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
+
+
+        //___________________________________Метод для получения информации из базы данных____________________________________________//
+        [HttpPost]
+        public async Task<IActionResult> SetIpAddressAndGetLatestVsatInfo(int ipPart)
+        {
+            string connectionStringTemplate = _configuration.GetConnectionString("RemoteDatabase");
+            string connectionString = connectionStringTemplate.Replace("${IPAddress}", ipPart.ToString());
+
+            // Save the connection string in session
+            HttpContext.Session.SetString("RemoteDbConnectionString", connectionString);
+            TempData["ipPart"] = ipPart;
+
+            try
+            {
+                // Retrieve the connection string from session
+                string connectionStringNew = HttpContext.Session.GetString("RemoteDbConnectionString");
+                _remoteDataService.SetConnectionString(connectionStringNew);
+
+                // Get VSAT data
+                VsatInfo vsatInfo = await _remoteDataService.GetLatestVsatInfoAsync();
+
+                if (vsatInfo == null)
+                {
+                    return NotFound();
+                }
+
+                // Create the model and pass data
+                var model = new AddIncidentViewModel
+                {
+                    
+                    VSAT = ipPart,
+                    Well = vsatInfo.WELL_NAME,
+                    Run = vsatInfo.MWRU_NUMBER,
+                    Date = DateTime.Now,
+                    Shift = DateTime.Now.Hour >= 20 || DateTime.Now.Hour < 8 ? "Night" : "Day",
+                    Reporter = TempData.Peek("Login") as string ?? string.Empty,
+                    IpPart = ipPart,
+                    // Initialize other properties as needed
+                };
+
+                // Pass VSAT data through ViewBag
+                ViewBag.CurrentPage = "new_incident";
+                ViewBag.VsatInfo = vsatInfo;
+
+                return View("Add", model); // Pass the model to the view
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while getting latest VSAT info.");
+                string status_message = $"Error retrieving data from {HttpContext.Session.GetString("RemoteDbConnectionString")}";
+                return View("Add");
+                
+            }
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult Add()
+        {
+            ViewData["CurrentPage"] = "new_incident";
+
+            // Generate a new ID for the incident
+            var newIncidentId = Guid.NewGuid();
+
+            // Retrieve VSAT data from TempData
+            var vsatInfoJson = TempData["VsatInfo"] as string;
+            VsatInfo vsatInfo = string.IsNullOrEmpty(vsatInfoJson) ? null : JsonSerializer.Deserialize<VsatInfo>(vsatInfoJson);
+
+            // Create the model and pass the generated ID
+            var model = new AddIncidentViewModel
+            {
+                ID = newIncidentId,
+                Well = vsatInfo?.WELL_NAME ?? "Test",
+                Run = vsatInfo?.MWRU_NUMBER ?? 100,
+                Date = DateTime.Now,
+                Shift = DateTime.Now.Hour >= 20 || DateTime.Now.Hour < 8 ? "Night" : "Day",
+                Reporter = TempData.Peek("Login") as string ?? string.Empty,
+                //VSAT = vsatInfo?.IP_PART ?? 0, // Use the correct property from VsatInfo
+                //IpPart = vsatInfo?.IP_PART ?? 0,
+                // Initialize other properties as needed
+            };
+
+            // Pass VSAT data through ViewBag
+            ViewBag.VsatInfo = vsatInfo;
+
+            return View(model);
+        }
+
+
+
+        // Method to delete temporary files when creating an incident
+        [IgnoreAntiforgeryToken]
+        [HttpPost]
+        public IActionResult DeleteTempFile(string fileName, Guid incidentId)
+        {
+            try
+            {
+                var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incidentId.ToString());
+                var filePath = Path.Combine(incidentFolder, fileName);
+
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "File not found." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
 
 
         [IgnoreAntiforgeryToken]
@@ -384,50 +498,9 @@ namespace TrackingSheet.Controllers
 
 
 
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                _logger.LogWarning("Attempted to delete a record with an empty ID.");
-                TempData["AlertMessage"] = "Invalid identifier.";
-                return RedirectToAction("Index");
-            }
+        
 
-            var incident = await mvcDbContext.IncidentList.FindAsync(id);
+        
 
-            if (incident != null)
-            {
-                mvcDbContext.IncidentList.Remove(incident);
-                await mvcDbContext.SaveChangesAsync();
-                TempData["AlertMessage"] = "Incident deleted.";
-                _logger.LogInformation("Incident successfully deleted.");
-            }
-            else
-            {
-                _logger.LogWarning($"Incident with ID {id} not found for deletion.");
-                TempData["AlertMessage"] = "Incident not found.";
-            }
-
-            return RedirectToAction("Index");
-        }
-
-
-        [Authorize]
-        [HttpGet("api/incidents/all")]
-        public async Task<IActionResult> GetAllIncidents()
-        {
-            var data = await mvcDbContext.IncidentList.ToListAsync();
-            var totalRecords = data.Count;
-
-            return Json(new
-            {
-                draw = 1,
-                recordsTotal = totalRecords,
-                recordsFiltered = totalRecords,
-                data = data
-            });
-        }
     }
 }

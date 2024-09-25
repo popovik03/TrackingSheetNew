@@ -1,91 +1,113 @@
-am5.ready(function () {
+am5.ready(function() {
+
+    if (typeof chartData === 'undefined' || chartData.length === 0) {
+        console.warn('Нет данных для отображения графиков.');
+        return;
+    }
+
+    console.log(chartData); // Для отладки
+
+    // Извлекаем данные из chartData
+    const problemType = chartData.map(stat => stat.problemType.trim());
+    const successCount = chartData.map(stat => stat.successCount);
+    const failCount = chartData.map(stat => stat.failCount);
+
+    // Создаем элемент root
     var root = am5.Root.new("bar_chart");
 
+    // Устанавливаем темы
     root.setThemes([
         am5themes_Animated.new(root)
     ]);
 
+    // Создаем диаграмму
     var chart = root.container.children.push(am5xy.XYChart.new(root, {
-        panX: true,
-        panY: true,
-        wheelX: "pan",
-        wheelY: "zoom",
-        cursor: am5xy.XYCursor.new(root, {})
+        panX: false,
+        panY: false,
+        wheelX: "panX",
+        wheelY: "zoomX",
+        paddingLeft: 0,
+        layout: root.verticalLayout
     }));
+
+    // Добавляем легенду
+    var legend = chart.children.push(am5.Legend.new(root, {
+        centerX: am5.p50,
+        x: am5.p50
+    }));
+
+    // Создаем оси
+    var xRenderer = am5xy.AxisRendererX.new(root, {
+        cellStartLocation: 0.1,
+        cellEndLocation: 0.9,
+        minorGridEnabled: true
+    });
 
     var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-        categoryField: "category",
-        renderer: am5xy.AxisRendererX.new(root, {})
+        categoryField: "problemType",
+        renderer: xRenderer,
+        tooltip: am5.Tooltip.new(root, {})
     }));
+
+    xRenderer.grid.template.setAll({
+        location: 1
+    });
 
     var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-        renderer: am5xy.AxisRendererY.new(root, {})
-    }));
-
-    var series0 = chart.series.push(am5xy.ColumnSeries.new(root, {
-        name: "Успешно закрыты",
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueYField: "success",
-        categoryXField: "category",
-        clustered: false,
-        tooltip: am5.Tooltip.new(root, {
-            labelText: "Успешно закрыты: {valueY}"
+        min: 0,
+        renderer: am5xy.AxisRendererY.new(root, {
+            strokeOpacity: 0.1
         })
     }));
 
-    series0.columns.template.setAll({
-        width: am5.percent(40),
-        tooltipY: 0,
-        strokeOpacity: 0,
-        cornerRadiusTL: 5,
-        cornerRadiusTR: 5
-    });
+    // Передаем данные в ось X
+    xAxis.data.setAll(chartData);
 
-    var series1 = chart.series.push(am5xy.ColumnSeries.new(root, {
-        name: "Не закрыты",
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueYField: "failed",
-        categoryXField: "category",
-        clustered: false,
-        tooltip: am5.Tooltip.new(root, {
-            labelText: "Не закрыты: {valueY}"
-        })
-    }));
+    // Функция для добавления серий
+    function makeSeries(name, fieldName, color) {
+        var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+            name: name,
+            xAxis: xAxis,
+            yAxis: yAxis,
+            valueYField: fieldName,
+            categoryXField: "problemType",
+            stacked: true
+        }));
 
-    series1.columns.template.setAll({
-        width: am5.percent(50),
-        tooltipY: 0,
-        strokeOpacity: 0,
-        cornerRadiusTL: 5,
-        cornerRadiusTR: 5
-    });
+        series.columns.template.setAll({
+            tooltipText: "{categoryX} (" + name + "): {valueY}",
+            width: am5.percent(90),
+            fill: color,
+            stroke: color
+        });
 
-    var series2 = chart.series.push(am5xy.ColumnSeries.new(root, {
-        name: "Количество обращений",
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueYField: "count",
-        categoryXField: "category",
-        clustered: false,
-        tooltip: am5.Tooltip.new(root, {
-            labelText: "Количество обращений: {valueY}"
-        })
-    }));
+        series.data.setAll(chartData);
 
-    series2.columns.template.setAll({
-        width: am5.percent(30),
-        tooltipY: 0,
-        strokeOpacity: 0,
-        cornerRadiusTL: 5,
-        cornerRadiusTR: 5
-    });
+        // Добавляем подписи к столбцам
+        series.bullets.push(function() {
+            return am5.Bullet.new(root, {
+                locationY: 0.5,
+                sprite: am5.Label.new(root, {
+                    text: "{valueY}",
+                    fill: root.interfaceColors.get("alternativeText"),
+                    centerY: am5.percent(50),
+                    centerX: am5.percent(50),
+                    populateText: true
+                })
+            });
+        });
 
-    window.updateBarChart = function (data) {
-        xAxis.data.setAll(data);
-        series0.data.setAll(data);
-        series1.data.setAll(data);
-        series2.data.setAll(data);
+        // Добавляем серию в легенду
+        legend.data.push(series);
     }
+
+    // Добавляем серию для успешных операций (SuccessCount)
+    makeSeries("Success Count", "successCount"); // Зеленый цвет для успешных операций
+
+    // Добавляем серию для неудачных операций (FailCount)
+    makeSeries("Fail Count", "failCount"); // Красный цвет для неудач
+
+    // Анимация при загрузке диаграммы
+    chart.appear(1000, 100);
+
 });

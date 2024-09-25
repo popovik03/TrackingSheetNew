@@ -27,15 +27,41 @@
     box-sizing: border-box;
 }
 
-body {
-    /*display: flex;
-    /*flex-direction: column;*/
-    background-color: #f7f7f7;
-    font-family: "Gilroy-Bold";
-    color: #07302D; /* Цвет текста */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-header {
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: #e8ebed;
+    font-family: "Gilroy-Bold";
+    color: #07302D; /* Цвет текста */
+    overflow-y: auto;
+}
+
+body::-webkit-scrollbar{
+    width: 0.5rem;
+    height: 0.5rem;
+    transition: all .6s ease;
+
+}
+
+body::-webkit-scrollbar-thumb{
+    border-radius: .5rem;
+    background-color: #0004;
+
+}
+
+body:hover::-webkit-scrollbar-thumb{ 
+    background-color: rgba(75, 75, 75, 0.267);
+}
+
+
+.main-header {
     border-radius: 30px;
     box-sizing: border-box;
     display: flex;
@@ -46,10 +72,14 @@ header {
     height: 90px;
     min-width: 1200px; /* Устанавливаем минимальную ширину */
     padding: 20px 40px 20px 40px;
-    background-image: url('../img/gradient (1).png'); /* Путь к вашей картинке */
+    background-image: url('../img/gradient (2).png'); /* Путь к вашей картинке */
     background-size: cover; /* Картинка будет масштабироваться, чтобы заполнить блок */
     background-position: center; /* Картинка будет центрирована */
     background-repeat: no-repeat; /* Картинка не будет повторяться */
+    position: relative;
+    z-index: 10;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+
 }
 
 .left-header {
@@ -57,26 +87,31 @@ header {
     justify-content: space-between;
     align-items: center;
     flex-direction: row;
+    gap: 5px;
+    position: relative;
+    z-index: 10; /* эти элементы должны быть выше фона */
 }
+
 
 
 main {
     opacity: 0;
-    transform: translateY(50px);
+    transform: translateY(300px);
     visibility: hidden;
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0s 0.5s, margin-left 0.3s ease;
     box-sizing: border-box;
     display: flex;
     flex-basis: auto;
     flex-direction: column;
     flex-grow: 1;
-    height: 100%;
-    overflow-y: auto;
     background-color: #fff;
     border-radius: 30px;
-    margin: 20px 20px 0px 20px;
+    margin: 20px;
     min-width: 1200px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+
 }
+
 
 main.show {
     opacity: 1;
@@ -87,45 +122,50 @@ main.show {
 
 
 
-
 header img {
-    width: 35px;
+    margin-top: 4px;
+    width: 33px;
     height: auto;
 }
-
 
 .menu-btn {
     background-color: transparent; /* Цвет фона кнопки */
     border: none; /* Убираем границу */
-    border-radius: 10px; /* Скругление углов кнопки */
+    border-top-left-radius: 10px; /* Скругление углов кнопки */
+    border-top-right-radius: 10px; /* Скругление углов кнопки */
     cursor: pointer; /* Указатель при наведении */
     font-family: 'Gilroy-Bold', sans-serif; /* Шрифт кнопки */
-    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
-    height: 80px;
-    width: 80px;
+    transition: all 500ms cubic-bezier(.23, 1, 0.32, 1); /* Плавное изменение ширины */
+
     fill: none;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 10px;
 }
 
 .icon_popup {
-    width: 45%;
-    height: auto;
-    margin-right: 7px;
+    width: 40px;
     fill: none;
     stroke: #fff;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    transition: width 500ms cubic-bezier(.23, 1, 0.32, 1); /* Плавное изменение ширины */
   }
 
 .menu-btn:hover .icon_popup,
 .menu-btn.active .icon_popup {
-      stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
-      width: 48%;
-  }
+    stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
+}
+
+.menu-btn:hover {
+    transform: translateX(5px);
+}
+
+.menu-btn.active {
+    transform: translateX(5px);
+    background-color: white;
+}
 
 .menu-btn:disabled {
     pointer-events: none;
@@ -137,12 +177,15 @@ header img {
     max-height: 0;
     overflow: hidden;
     position: absolute;
-    top: 10%;
+    top: 75px;
     left: 20px;
     border-radius: 20px;
     background-color: #ffffff;
-    border: 1px solid #ccc;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
     z-index: 100;
     opacity: 0;
     visibility: hidden;
@@ -308,7 +351,8 @@ header img {
     display: grid;
     grid-template-columns: repeat(2, 50%);
     justify-items: stretch;
-    padding: 40px
+    padding: 40px 40px 20px 40px;
+    align-items: start;
 }
 
 .left {
@@ -316,7 +360,7 @@ header img {
     display: grid;
     grid-template-columns: repeat(2, 45%);
     grid-auto-rows: auto;
-    grid-gap: 2em;
+    grid-gap: 1em;
 }
 
 .right {
@@ -333,7 +377,7 @@ h1 {
     align-items: center;
     font-family: 'Gilroy-SemiBold';    
     color: #07302D;
-    padding-top: 40px;
+    padding-top: 20px;
     padding-left: 40px;
     padding-right: 40px;
 }
@@ -440,6 +484,40 @@ h2 label {
     color: #8A94A6;
 }
 
+.vsat_field {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.get_data_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+
+}
+
+.icon_get_data {
+    width: 35px;
+    fill: none;
+    stroke: #03BE93;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+.get_data_button .icon_get_data {
+    transition: transform 0.5s ease; /* Добавляем плавный переход */
+}
+
+.get_data_button:hover .icon_get_data {
+    transform: rotate(180deg);
+}
+
 .select-wrapper {
     position: relative;
     display: inline-block;
@@ -499,7 +577,7 @@ h2 label {
 }
 
 .input-field textarea {
-    height: 360px;
+    height: 340px;
 }
 
 tfoot input {
@@ -634,6 +712,7 @@ tfoot input {
     transition: all .2s ease-in-out;
     cursor: pointer;
     margin-top: 25px;
+    margin-bottom: 45px;
 }
 
 .file-button:hover { 
@@ -717,12 +796,8 @@ tfoot input {
    }
 
 .table_container {
-    height: 100%;
     min-height: 100px;
-    display: flex;
     box-sizing: border-box;
-    justify-content: center;
-    align-items: center;
     border-radius: 15px;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 0.7px; 
     margin: 30px;
@@ -733,7 +808,7 @@ tfoot input {
     width: 100%;
     height: 10%;
     background-color: #fff4;
-    padding: 30px 30px 20px 30px;
+    padding: 40px 40px 20px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -789,11 +864,7 @@ tfoot input {
 }
 
 .table__body {
-    width: 100%;
-    max-height: calc(89% - 1.6rem);
-    background-color: #fffb;
     margin: 30px;
-    border-radius: .6rem;
     overflow: overlay;
 }
 
@@ -823,14 +894,15 @@ table {
 table th:first-child, 
 table td:first-child {
     width: 120px; /* Укажите нужное значение ширины */
+    border-bottom-left-radius: 20px;
+    border-top-left-radius: 20px;
 }
 
 td img {
     width: 36px;
-    height: 36px;
-    margin-right: .5rem;
     border-radius: 50%;
     vertical-align: middle;
+    background-color: transparent;
 }
 
 table, th, td {
@@ -845,10 +917,10 @@ table, th, td {
 thead th {
     top: 0;
     left: 0;
-    background-color: #F6F6F6;
+    background-color: #f2f2f2;
     font-family: 'Gilroy-SemiBold';
     font-size: 17px; /* Размер шрифта */
-    color: #8A94A6;
+    color: #778091;
     cursor: pointer;
     text-transform: capitalize;
     
@@ -862,6 +934,11 @@ thead th:first-child {
 thead th:last-child {
     border-top-right-radius: 15px; /* Угол справа вверху */
     border-bottom-right-radius: 15px; /* Угол слева вверху */
+}
+
+
+thead th:nth-last-child(2) input {
+    width: 100%;
 }
 
 
@@ -917,12 +994,13 @@ thead th.active,tbody td.active {
 tbody tr {
     background-color: #ffffff;
     border-bottom: 2px solid #e4e4e4; /* Границы снизу */
-    --delay: .1s;
-    transition: .5s ease-in-out var(--delay), background-color 0.3s;
+    transition: 0.3s ease; /* Добавляем плавный переход */
 }
 
 tbody tr:last-child {
     border-bottom: 0px; /* Границы снизу */
+    border-radius: 20px;
+
 }
 
 tbody tr.hide {
@@ -933,7 +1011,6 @@ tbody tr.hide {
 }
 
 tbody tr:hover {
-    border-bottom: 2px solid #03BE93; /* Границы снизу */
     cursor: pointer;
 }
 
@@ -942,19 +1019,20 @@ tbody tr:hover .icon_edit{
 }
 
 /* Стили, закрашивающие строки поочередно */
-table tbody tr:nth-child(odd) {
+table tbody tr:nth-child(odd),
+table tbody tr:nth-child(even) {
     background-color: #ffffff;
 }
 
-table tbody tr:nth-child(even) {
-    background-color: #ffffff;
+table tbody tr:nth-child(odd):hover,
+table tbody tr:nth-child(even):hover {
+    background-color: #f9f9f9;
 }
 
 
 tbody tr td,
 tbody tr td p,
 tbody tr td img {
-    transition: .2s ease-in-out;
     font-family: 'Gilroy-Medium';    
     color: #07302D;
     padding-top: 15px;
@@ -998,9 +1076,19 @@ tbody tr.hide td .icon-container-edit {
     text-align: center;
 }
 
+.status.day {
+    background-color: #fff5c2;
+    color: #cd7a36;
+}
+
+.status.night {
+    background-color: #35405ca1;
+    color: white;
+}
+
 .status.success {
-    background-color: #E9F9F5;
-    color: #2DC8A4;
+    background-color: #cdefe0e8;
+    color: #219b7f;
 }
 
 .status.failed {
@@ -1012,6 +1100,7 @@ tbody tr.hide td .icon-container-edit {
     background-color: #FFEECE;
     color: #EF9548;
 }
+
 
 
 @media (max-width: 1000px) {
@@ -1146,20 +1235,18 @@ tbody tr.hide td .icon-container-edit {
 
 .statistics_container {
     display: flex;
-    height: 20%;
     flex-direction: row;
 }
 
 .chart_container {
-    justify-content: space-between;
+    display: flex;
+    justify-content: space-around;
     flex-direction: column;
     width: -webkit-fill-available;
-    gap: 30px;
-
+    margin: 30px;
 }
 
 #pie_chart, #pie_chart2, #bar_chart {
-    padding-top: 100px;
     width: 100%;
     height: 500px;
 }
@@ -1282,7 +1369,7 @@ tbody tr.hide td .icon-container-edit {
 .year-group input[type="number"]:focus {
     background: #fff;
     outline: 0;
-    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 3px;
+    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
 }
 
 .icon_calendar {
@@ -1311,7 +1398,7 @@ tbody tr.hide td .icon-container-edit {
 .container-vsat {
     display: flex;
     justify-items: center;
-    margin: 30px;
+    margin: 0px 30px 0px 30px;
     border-radius: 10px; /* Скругление углов */
     box-sizing: border-box; /* Включает паддинг и границы в ширину */
     box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
@@ -1346,13 +1433,341 @@ tbody tr.hide td .icon-container-edit {
     font-family: 'Gilroy-SemiBold';
     color: #07302D;
     font-size: 25px;
-    padding-left: 5px;
 }
 
 .header_vsat {
     width: 100%;
     height: 10%;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
+}
+
+.icon_passport {
+    width: 30px;
+    height: auto;
+    fill: none;
+    stroke: #8A94A6;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: all .3s ease;
+
+  }
+
+  .icon_passport:hover {
+    stroke: #03BE93;
+  }
+
+
+
+
+  /* ------------ТАБЛИЦА------------------ */
+
+.header-journal {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 12px 0px 12px;
+    font-family: 'Gilroy-SemiBold';
+    color: #07302D;
+    align-items: center;
+}
+
+.date-range-filter {
+    display: flex;
+    gap: 15px;
+    font-size: 20px;
+}
+
+
+.dt-layout-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    font-family: 'Gilroy-SemiBold';
+    color: #07302D;
+}
+
+
+.dt-length {
+    font-size: 20px;
+}
+
+.dt-length label{
+    display: flex;
+    gap: 15px;
+}
+
+.dt-search {
+    display: flex;
+    font-size: 20px;
+    gap: 15px;
+}
+
+.dt-search input[type="search"],
+.date-range-filter input[type="date"] {
+    font-size: 15px; /* Размер шрифта */
+    font-family: 'Gilroy-Medium';
+    height: 30px;
+    border-radius: 10px; /* Скругление углов */
+    box-sizing: border-box; /* Включает паддинг и границы в ширину */
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    border: 0;
+    background: rgba(0, 0, 0, 0);
+    appearance: none;
+    padding: 15px;
+    line-height: 1.4;
+    color: rgb(0, 0, 0);
+    transition: all .2s ease;
+    resize: none;
+}
+
+/* Эффект при наведении на поля ввода */
+.dt-search input[type="search"]:hover,
+.date-range-filter input[type="date"]:hover {
+    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 1px;
+}
+
+.dt-search input[type="search"]:focus,
+.date-range-filter input[type="date"]:focus {
+    background: #fff;
+    outline: 0;
+    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
+}
+
+
+
+.dt-length select {
+    font-size: 15px; /* Размер шрифта */
+    font-family: 'Gilroy-Medium';
+    height: 30px;
+    border-radius: 10px; /* Скругление углов */
+    box-sizing: border-box; /* Включает паддинг и границы в ширину */
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    border: 0;
+    background: rgba(0, 0, 0, 0);
+    padding-left: 10px;
+    padding-right: 5px;
+    color: rgb(0, 0, 0);
+    transition: all .2s ease;
+    resize: none;
+}
+
+
+.dt-length select:hover {
+    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 1px;
+}
+
+.dt-length select:focus {
+    background: #fff;
+    outline: 0;
+    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
+}
+
+.dt-info {
+    font-size: 20px;
+}
+
+.dt-paging nav{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dt-paging nav span{
+    font-family: 'Gilroy-SemiBold';
+    color: #07302D;
+    font-size: 15px;
+}
+
+button.dt-paging-button {
+    font-size: 12px; /* Размер шрифта кнопки */
+    padding: 10px 15px 10px 15px;
+    font-family: 'Gilroy-SemiBold';
+    color: #07302D;
+    background-color: #ffffff; /* Цвет фона при наведении */
+    border: 1px solid #CCCCCC; /* Граница при наведении */
+    border-radius: 7px; /* Скругление углов кнопки */
+    cursor: pointer; /* Указатель при наведении */
+    text-decoration: none;
+    transition: all 200ms cubic-bezier(.23, 1, 0.32, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+
+}
+
+button.dt-paging-button:hover {
+    color: #03BE93; /* Цвет текста при наведении */
+    border: 1px solid #03BE93; /* Граница при наведении */
+}
+
+button.dt-paging-button:disabled {
+    pointer-events: none;
+}
+
+button.dt-paging-button.current  {
+    background-color: #03BE93;
+    color: #fff;
+    border: 1px solid #03BE93; /* Граница при наведении */
+}
+
+button.dt-paging-button.current:hover  {
+    color: #03BE93; /* Цвет текста при наведении */
+    border: 1px solid #03BE93; /* Граница при наведении */
+    background-color: #ffffff; /* Цвет фона при наведении */
+}
+
+button.dt-paging-button.disabled.first,
+button.dt-paging-button.disabled.last  {
+    background-color: #03BE93;
+    color: #fff;
+    border: 1px solid #03BE93; /* Граница при наведении */
+}
+
+
+button.dt-paging-button.disabled.first:hover,
+button.dt-paging-button.disabled.last:hover  {
+    color: #03BE93; /* Цвет текста при наведении */
+    border: 1px solid #03BE93; /* Граница при наведении */
+    background-color: #ffffff; /* Цвет фона при наведении */
+}
+
+.search-row {
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.search-row input {
+    font-size: 15px; /* Размер шрифта */
+    font-family: 'Gilroy-Medium';
+    height: 30px;
+    width: 100px;
+    border-radius: 10px; /* Скругление углов */
+    box-sizing: border-box; /* Включает паддинг и границы в ширину */
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    border: 0;
+    background: #fff;
+    padding-left: 10px;
+    padding-right: 5px;
+    color: rgb(0, 0, 0);
+    transition: all .2s ease;
+    resize: none;
+}
+
+.search-row input:hover {
+    box-shadow: 0 0 0 0 #fff inset, #9b9b9b 0 0 0 1px;
+}
+
+.search-row input:focus {
+    background: #fff;
+    outline: 0;
+    box-shadow: 0 0 0 0 #fff inset, #9b9b9b 0 0 0 2px;
+}
+
+
+
+
+  /* ------------О ПРОЕКТЕ------------------ */
+.about_us {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    font-size: 18px; 
+    margin: 20px
+}
+
+.about_us img {
+    width: 25%;
+    margin-bottom: 100px;
+}
+  
+  /* ------------АНИМАЦИЯ------------------ */
+
+.particle-network-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* ниже остальных элементов */
+    opacity: 0.7; /* прозрачность, чтобы виден был основной контент */
+}
+
+
+/* Анимация свечения */
+.glow {
+    z-index: 0; /* Этот слой будет под анимацией частиц */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    background-image: radial-gradient(circle closest-side, rgba(255, 255, 255, 0.025), transparent);
+}
+
+  /* ------------РЕДАКТИРОВАТЬ ИНЦИДЕНТ------------------ */
+
+  .header_incident_editing {
+    display: flex;
+    align-content: center;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-right: 40px;
+  }
+
+  .incident_editing_buttons {
+    display: flex;
+    align-content: center;
+    flex-direction: row;
+    gap: 15px;
+  }
+
+  .file-button-delete {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 .8rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #e5525e;
+    transition: all .2s ease-in-out;
+    cursor: pointer;
+    margin-top: 25px;
+    margin-bottom: 45px;
+}
+
+.file-button-delete:hover { 
+    transform: scale(1.15);
+    cursor: pointer;
+    background-color: white;
+    border: 2px solid #e5525e;
+}
+
+.file-button-delete svg {
+    width: 30px;
+    height: auto;
+    fill: none;
+    stroke: white;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    cursor: pointer;
+
+}
+
+.file-button-delete:hover svg { 
+    transform: scale(1.15);
+    stroke: #e5525e;
+}
+
+.editing-date-field {
+    display: flex;
+    gap: 15px;
+}
+
+.editing-date-field .input-field {
+    min-width: 100px;
 }

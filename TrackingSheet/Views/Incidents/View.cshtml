@@ -13,267 +13,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    
-    <style>
-        .file-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .file-item {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 5px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #f9f9f9;
-            text-align: center;
-        }
-
-            .file-item a {
-                text-decoration: none;
-                color: #555;
-            }
-
-            .file-item .fas {
-                font-size: 2em;
-                color: #555;
-                margin-bottom: 5px;
-            }
-
-            .file-item .file-name {
-                font-size: 0.8em;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                max-width: 80px;
-            }
-
-            
-
-        /* Стили для модального окна */
-        .modal {
-            display: none; /* Скрыто по умолчанию */
-            position: fixed; /* Остаётся на месте */
-            z-index: 1000; /* Располагается поверх других элементов */
-            left: 0;
-            top: 0;
-            width: 100%; /* Полная ширина */
-            height: 100%; /* Полная высота */
-            overflow: auto; /* Включает прокрутку, если необходимо */
-            background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
-        }
-
-        /* Стили для содержимого модального окна */
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto; /* 10% сверху и по центру */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Ширина модального окна */
-            max-width: 500px; /* Максимальная ширина */
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        /* Стили для заголовка модального окна */
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.5em;
-        }
-
-        /* Стили для закрывающего крестика */
-        .close-modal {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            cursor: pointer;
-        }
-
-            .close-modal:hover,
-            .close-modal:focus {
-                color: black;
-                text-decoration: none;
-            }
-
-        /* Стили для тела модального окна */
-        .modal-body {
-            margin-top: 20px;
-        }
-
-        /* Стили для футера модального окна */
-        .modal-footer {
-            margin-top: 20px;
-            text-align: right;
-        }
-
-        /* Стили для кнопок */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-
-            .btn-primary:hover {
-                background-color: #0069d9;
-            }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-
-            .btn-secondary:hover {
-                background-color: #5a6268;
-            }
-
-        /* Стили для полей формы */
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-            .form-group label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
-
-        .form-control {
-            width: 100%;
-            padding: 8px 12px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .right {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .description {
-            flex: 8; /* 80% */
-            overflow: auto;
-        }
-
-        .attachments {
-            flex: 2; /* 20% */
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: flex-start;
-        }
-
-        .delete-icon {
-            position: absolute;
-            top: 4px;
-            right: 2px;
-            width: 12px; /* Увеличьте размер, чтобы иконка была лучше видна */
-            height: 12px;
-            background-color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 6px; /* Увеличьте размер шрифта, чтобы иконка была лучше видна */
-            color: red;
-            border: none;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-            .delete-icon i {
-                color: inherit; /* Убедитесь, что иконка наследует цвет от родительского элемента */
-            }
-
-            .delete-icon:hover {
-                background-color: red;
-                color: white;
-            }
-
-                .delete-icon:hover i {
-                    color: inherit; /* Иконка будет белой при наведении, так как наследует цвет от родительского элемента */
-                }
-
-
-    </style>
+    <script src="~/js/editing_incident.js" defer></script>
 </head>
 
 <body>
     <form method="post" action="@Url.Action("View", "Incidents")" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="header_incident_editing">
             <div>
                 <h1><label>Редактирование инцидента</label></h1>
-                <h2><label>Внесите изменения или удалите инцидент</label></h2>
+                <h2><label>Внесите изменения, добавьте комментарий или удалите инцидент</label></h2>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <!-- Контейнер для кнопок -->
-                <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 0px; margin-right: 45px">
-                    <!-- Кнопка для загрузки файла -->
-                    <a href="#" onclick="document.getElementById('fileInput').click();" style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px;">
-                        <img src="~/icons/skrepa.png" alt="Добавить вложение" style="width: 48px; height: 48px; transform: scale(1.1);">
-                    </a>
+            <div class="incident_editing_buttons">
+                <div class="add_file_container">
+                    <input type="file" id="fileInput" class="file-input" multiple onchange="handleFileSelect(event)">
+                    <label for="fileInput" class="file-button">
+                        <svg class="icon_addfile" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 7V6.8C20 5.11984 20 4.27976 19.673 3.63803C19.3854 3.07354 18.9265 2.6146 18.362 2.32698C17.7202 2 16.8802 2 15.2 2H8.8C7.11984 2 6.27976 2 5.63803 2.32698C5.07354 2.6146 4.6146 3.07354 4.32698 3.63803C4 4.27976 4 5.11984 4 6.8V17.2C4 18.8802 4 19.7202 4.32698 20.362C4.6146 20.9265 5.07354 21.3854 5.63803 21.673C6.27976 22 7.11984 22 8.8 22H12.5M12.5 11H8M11.5 15H8M16 7H8M18 18V12.5C18 11.6716 18.6716 11 19.5 11C20.3284 11 21 11.6716 21 12.5V18C21 19.6569 19.6569 21 18 21C16.3431 21 15 19.6569 15 18V14"></path>
+                        </svg>
+                    </label>
+                </div>
 
-                    <!-- Скрытое поле для выбора файла -->
-                    <input type="file" id="fileInput" name="uploadedFile" style="display: none;" onchange="handleFileSelect(event)">
+                <div class="add_file_container">
+                    <input id="openModalButton" type="button" style="display:none;">
+                    <label for="openModalButton" class="file-button" onclick="openModal()">
+                        <svg class="icon_addfile" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 10.5V6.8C20 5.11984 20 4.27976 19.673 3.63803C19.3854 3.07354 18.9265 2.6146 18.362 2.32698C17.7202 2 16.8802 2 15.2 2H8.8C7.11984 2 6.27976 2 5.63803 2.32698C5.07354 2.6146 4.6146 3.07354 4.32698 3.63803C4 4.27976 4 5.11984 4 6.8V17.2C4 18.8802 4 19.7202 4.32698 20.362C4.6146 20.9265 5.07354 21.3854 5.63803 21.673C6.27976 22 7.11984 22 8.8 22H12M14 11H8M10 15H8M16 7H8M18 21V15M15 18H21"></path>
+                        </svg>
+                    </label>
+                </div>
 
-                    <!-- Кнопка открытия модального окна для добавления IncidentUpdate -->
-                    <a href="#" id="openModalButton" style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px;">
-                        <img src="~/icons/add.png" alt="Добавить" style="width: 48px; height: 48px; transform: scale(1.1);">
-                    </a>
-
-                    <!-- Кнопка удаления инцидента -->
-                    <a href="@Url.Action("Delete", "Incidents", new { id = Model.ID })"
-                       style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; transform: scale(1.1);"
-                       onclick="return confirm('Вы уверены, что хотите удалить запись?')">
-                        <img src="~/icons/delete.png" alt="Удалить" style="width: 48px; height: 48px;">
-                    </a>
+                <div class="add_file_container">
+                    <label class="file-button-delete" onclick="confirmDelete('@Url.Action("Delete", "Incidents", new { id = Model.ID })')">
+                        <svg class="icon_addfile" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 11H8M10 15H8M16 7H8M20 12V6.8C20 5.11984 20 4.27976 19.673 3.63803C19.3854 3.07354 18.9265 2.6146 18.362 2.32698C17.7202 2 16.8802 2 15.2 2H8.8C7.11984 2 6.27976 2 5.63803 2.32698C5.07354 2.6146 4.6146 3.07354 4.32698 3.63803C4 4.27976 4 5.11984 4 6.8V17.2C4 18.8802 4 19.7202 4.32698 20.362C4.6146 20.9265 5.07354 21.3854 5.63803 21.673C6.27976 22 7.11984 22 8.8 22H12M16 16L21 21M21 16L16 21"></path>
+                        </svg>
+                    </label>
                 </div>
             </div>
+
         </div>
 
         <div class="container-new-incident">
             <!-- Поля ввода данных инцидента -->
             <!-- Левый блок -->
             <div class="left">
-                <div class="input-field" style="display: flex; gap: 10px; ">
-                    <div style="flex: 1;">
+                <div class="editing-date-field">
+                    <div class="input-field">
                         <label for="Date" class="form-label">Дата начала</label>
                         <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" />
                     </div>
-                    <div style="flex: 1; max-width: 40%;">
-                        <label for="DateEnd" class="form-label">Дата окончания</label>
+                    <div class="input-field">
+                        <label for="DateEnd" class="form-label">Дата конца</label>
                         <input type="datetime-local" class="form-control form-control-sm" asp-for="DateEnd" />
                     </div>
                 </div>
                 <div class="input-field">
-                    <label for="Shift" class="form-label">Смена</label>
-                    <div class="col-sm-12">
-                        <select class="form-select" asp-for="Shift">
-                            <option value="Day">День</option>
-                            <option value="Night">Ночь</option>
+                    <label class="form-label">Смена</label>
+                    <div class="select-wrapper">
+                        <select class="custom-select" asp-for="Shift">
+                        <option value="Day">День</option>
+                        <option value="Night">Ночь</option>
                         </select>
+                        <div class="select-arrow">
+                            <svg class="icon_dropdown_arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 9L12 15L18 9"/>
+                            </svg>
+                        </div>
                     </div>
                 </div>
                 <div class="input-field">
@@ -297,10 +103,9 @@
                     <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" />
                 </div>
                 <div class="input-field">
-                    <label for="ProblemType" class="form-label">Тип проблемы</label>
-                    <div class="col-sm-12">
-                        <select class="form-select form-select-sm" asp-for="ProblemType">
-                            <!-- Список типов проблем -->
+                    <label class="form-label">Тип проблемы</label>
+                    <div class="select-wrapper">
+                        <select asp-for="ProblemType">
                             <option value="Advantage">Advantage</option>
                             <option value="ATK issue">ATK issue</option>
                             <option value="APS">APS</option>
@@ -329,54 +134,66 @@
                             <option value="WITS">WITS</option>
                             <option value="Other">Other</option>
                         </select>
+                        <div class="select-arrow">
+                            <svg class="icon_dropdown_arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 9L12 15L18 9" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
                 <div class="input-field">
-                    <label for="HighLight" class="form-label">Отметка</label>
-                    <div class="col-sm-12">
-                        <select class="form-select form-select-sm" asp-for="HighLight">
+                    <label class="form-label">Отметка</label>
+                    <div class="select-wrapper">
+                        <select asp-for="HighLight">
                             <option value=""></option>
                             <option value="🚩">🚩</option>
                         </select>
+                        <div class="select-arrow">
+                            <svg class="icon_dropdown_arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 9L12 15L18 9" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
                 <div class="input-field">
-                    <label for="Status" class="form-label">Статус</label>
-                    <div class="col-sm-12">
-                        <select class="form-select form-select-sm" asp-for="Status">
-                            <option value="Success" style="background-color: lawngreen">Success</option>
-                            <option value="Process" style="background-color: yellow">Process</option>
-                            <option value="Fail" style="background-color: orangered">Fail</option>
-                            <option value="None" style="background-color: darkgrey">None</option>
+                    <label class="form-label">Статус</label>
+                    <div class="select-wrapper">
+                        <select asp-for="Status" id="status-select">
+                            <option value="Success">Success</option>
+                            <option value="Process">Process</option>
+                            <option value="Fail">Fail</option>
+                            <option value="None">None</option>
                         </select>
+                        <div class="select-arrow">
+                            <svg class="icon_dropdown_arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 9L12 15L18 9" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Правый блок -->
-            <div class="right" style="display: flex; flex-direction: column; height: 100%;">
-                <div class="description" style="flex: 70%; overflow: auto;">
+            <div class="right">
+                <div class="description">
                     <div class="input-field">
                         <label for="Solution" class="form-label">Описание инцидента:</label>
-                        <textarea class="form-control" style="width: 99%; margin-left:3px; height:80%" id="exampleFormControlTextarea1" rows="8" asp-for="Solution"></textarea>
+                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="8" asp-for="Solution"></textarea>
                     </div>
                 </div>
 
-                <h4>Обновления инцидента:</h4>
                 <!-- Секция для отображения обновлений инцидента -->
-                <div class="incident-updates" style="flex: 30%; overflow: auto; border-top: 1px solid #ccc; padding-top: 10px;">
+                <div class="incident-updates">
                     @if (Model.Updates != null && Model.Updates.Any())
                     {
-                       
-                        <ul style="list-style-type: none; padding-left: 0;">
+                        <h4>Обновления инцидента:</h4>
+                        <ul>
                             @foreach (var update in Model.Updates.OrderByDescending(u => u.Date))
                             {
-                                <li style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
-                                    <div>
-                                        <strong>@update.Date.ToString("dd.MM.yyyy HH:mm")</strong> - @update.UpdateReporter
-                                    </div>
-                                    <div style="margin-top: 5px;">@update.UpdateSolution</div>
-                                    <div style="margin-top: 5px; font-style: italic;">Рейс: @update.Run</div>
+                                <li>
+                                    <div>@update.Date.ToString("dd.MM.yyyy HH:mm")- @update.UpdateReporter</div>
+                                    <div>Рейс: @update.Run</div>
+                                    <div>@update.UpdateSolution</div>
                                 </li>
                             }
                         </ul>
@@ -387,9 +204,9 @@
                     }
                 </div>
 
-                <div class="attachments" style="flex: 25%; overflow: auto; border-top: 1px solid #ccc; padding-top: 10px;">
+                <div class="attachments">
                     <!-- Элемент для предварительного просмотра загруженных файлов -->
-                    <div id="filePreview"></div>
+                    <div class="file-preview" id="filePreview"></div>
 
                     <!-- Отображение загруженных файлов -->
                     @{
@@ -400,17 +217,17 @@
                     @if (filesExist)
                     {
                         <h4>Вложенные файлы:</h4>
-                        <div class="file-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <div class="file-list">
                             @foreach (var file in System.IO.Directory.GetFiles(incidentFolder))
                             {
                                 var fileName = System.IO.Path.GetFileName(file);
                                 var fileUrl = Url.Content($"~/uploads/{Model.ID}/{fileName}");
 
-                                <div class="file-item" style="position: relative; width: 100px; height: 100px; border: 1px solid #ccc; border-radius: 5px; padding: 5px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                    <a href="@fileUrl" target="_blank" title="@fileName" style="text-align: center;">
-                                        <i class="fas fa-file-alt" style="font-size: 2em; color: #555;"></i>
+                                <div class="file-item">
+                                    <a href="@fileUrl" target="_blank" title="@fileName">
+                                        <i class="fas fa-file-alt"></i>
                                     </a>
-                                    <span class="file-name" style="font-size: 12px; text-align: center; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">@fileName</span>
+                                    <span class="file-name">@fileName</span>
                                     <button type="button" class="delete-icon" onclick="deleteFile('@fileName', '@Model.ID')" >
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -423,67 +240,22 @@
                         <p>Файлы не найдены.</p>
                     }
                 </div>
-
-
             </div>
 
-            
         </div>
-
-
-        
 
 
         <div class="button-container">
-            <button type="submit" class="btn btn-primary btn-lg" style="margin-right: 15px">
-                Сохранить
+            <button type="submit" class="btn btn-primary btn-lg">
                 <svg class="icon_plus" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M6 15L8 17L12.5 12.5M8 8V5.2C8 4.0799 8 3.51984 8.21799 3.09202C8.40973 2.71569 8.71569 2.40973 9.09202 2.21799C9.51984 2 10.0799 2 11.2 2H18.8C19.9201 2 20.4802 2 20.908 2.21799C21.2843 2.40973 21.5903 2.71569 21.782 3.09202C22 3.51984 22 4.0799 22 5.2V12.8C22 13.9201 22 14.4802 21.782 14.908C21.5903 15.2843 21.2843 15.5903 20.908 15.782C20.4802 16 19.9201 16 18.8 16H16M5.2 22H12.8C13.9201 22 14.4802 22 14.908 21.782C15.2843 21.5903 15.5903 21.2843 15.782 20.908C16 20.4802 16 19.9201 16 18.8V11.2C16 10.0799 16 9.51984 15.782 9.09202C15.5903 8.71569 15.2843 8.40973 14.908 8.21799C14.4802 8 13.9201 8 12.8 8H5.2C4.0799 8 3.51984 8 3.09202 8.21799C2.71569 8.40973 2.40973 8.71569 2.21799 9.09202C2 9.51984 2 10.0799 2 11.2V18.8C2 19.9201 2 20.4802 2.21799 20.908C2.40973 21.2843 2.71569 21.5903 3.09202 21.782C3.51984 22 4.07989 22 5.2 22Z"></path>
                 </svg>
+                Сохранить
             </button>
         </div>
-
-        
-
     </form>
 
-    <!-- Модальное окно для добавления IncidentUpdate -->
-    <div id="incidentUpdateModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div class="modal-header">
-                <h2>Добавить обновление инцидента</h2>
-            </div>
-            <div class="modal-body">
-                <form id="incidentUpdateForm">
-                    <div class="form-group">
-                        <label for="updateDate">Дата и время</label>
-                        <input type="datetime-local" id="updateDate" name="Date" class="form-control" />
-                    </div>
 
-                    <div class="form-group">
-                        <label for="updateReporter">Reporter</label>
-                        <input type="text" id="updateReporter" name="UpdateReporter" class="form-control" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="updateRun">Рейс</label>
-                        <input type="number" id="updateRun" name="Run" class="form-control" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="updateSolution">Описание</label>
-                        <textarea id="updateSolution" name="UpdateSolution" rows="4" class="form-control"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" id="cancelUpdateButton" class="btn btn-secondary">Отмена</button>
-                        <button type="submit" id="saveUpdateButton" class="btn btn-primary">Сохранить</button>
-                    </div>
-                </form>
-            </div>
-           
-        </div>
-    </div>
     <script>
         // Функция для удаления файла
         function deleteFile(fileName, incidentId) {

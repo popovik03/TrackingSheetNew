@@ -1,6 +1,7 @@
 ﻿@model List<TrackingSheet.Models.Kanban.KanbanBoard>
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Serialization;
+@using System.Linq;
 
 
 @{
@@ -100,10 +101,28 @@
                                             <div class="task-header">
                                                 <strong>@task.TaskName</strong>
                                                 <div class="task-actions">
+
+
                                                     <!-- Кнопка вложений -->
                                                     <button type="button" class="btn btn-sm btn-link toggle-attachments-button" onclick="toggleAttachments('@task.Id')">
                                                         <img src="~/icons/skrepa.png" alt="Вложения" style="width: 16px; height: 16px;">
                                                     </button>
+                                                    <!-- Кнопка комментариев -->
+                                                    <button type="button" class="btn btn-sm btn-link toggle-comments-button" onclick="toggleComments('@task.Id')">
+                                                        <img src="~/icons/shit.png" alt="Комментарии" style="width: 16px; height: 16px;">
+                                                    </button>
+
+                                                    <!-- Кнопка описания -->
+                                                    <button type="button" class="btn btn-sm btn-link toggle-description-button" onclick="toggleDescription('@task.Id')">
+                                                        <img src="~/icons/delete.png" alt="Описание" style="width: 16px; height: 16px;">
+                                                    </button>
+
+                                                    <!-- Кнопка подзадач -->
+                                                    <button type="button" class="btn btn-sm btn-link toggle-subtasks-button" onclick="toggleSubtasks('@task.Id')">
+                                                        <img src="~/icons/add.png" alt="Подзадачи" style="width: 16px; height: 16px;">
+                                                    </button>
+
+
                                                     <!-- Кнопка редактирования задачи -->
                                                     <button type="button" class="btn btn-sm btn-link edit-task-button" data-toggle="modal" data-target="#editTaskModal"
                                                             data-task='@Html.Raw(JsonConvert.SerializeObject(new
@@ -168,6 +187,53 @@
                                                         <button type="button" class="btn btn-outline-secondary" onclick="uploadAttachments('@task.Id')">
                                                             <img src="~/icons/skrepa.png" alt="Загрузить файлы" style="width: 16px; height: 16px;">
                                                         </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Секция комментариев -->
+                                            <div id="commentsSection-@task.Id" class="comments-section" style="display: none; margin-top: 10px;">
+                                                <ul class="list-group mb-3">
+                                                    @foreach (var comment in task.Comments.OrderByDescending(c => c.CreatedAt))
+                                                    {
+                                                        <li class="list-group-item">
+                                                            <strong>@comment.CommentAuthor</strong> <small>@comment.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                                                            <p>@comment.CommentText</p>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="newCommentInput-@task.Id" placeholder="Добавить комментарий..." />
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="addComment('@task.Id')">Отправить</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Секция описания -->
+                                            <div id="descriptionSection-@task.Id" class="description-section" style="display: none; margin-top: 10px;">
+                                                <p>@task.TaskDescription</p>
+                                                <button type="button" class="btn btn-sm btn-link edit-description-button" onclick="editDescription('@task.Id')">Редактировать</button>
+                                            </div>
+
+                                            <!-- Секция подзадач -->
+                                            <div id="subtasksSection-@task.Id" class="subtasks-section" style="display: none; margin-top: 10px;">
+                                                <ul class="list-group mb-3">
+                                                    @foreach (var subtask in task.Subtasks)
+                                                    {
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <input type="checkbox" class="subtask-checkbox" onchange="toggleSubtaskCompletion('@subtask.Id')" @(subtask.IsCompleted ? "checked" : "")>
+                                                                <span>@subtask.SubtaskDescription</span>
+                                                            </div>
+                                                            <button type="button" class="btn btn-sm btn-link text-danger" onclick="deleteSubtask('@subtask.Id')">✕</button>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="newSubtaskInput-@task.Id" placeholder="Добавить подзадачу..." />
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="addSubtask('@task.Id')">Добавить</button>
                                                     </div>
                                                 </div>
                                             </div>

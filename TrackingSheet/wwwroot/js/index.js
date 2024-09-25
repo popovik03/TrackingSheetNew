@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     // Делегируем событие click на document для элементов с классом select-wrapper
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
         const selectWrapper = e.target.closest('.select-wrapper');
 
         // Если клик был внутри select-wrapper
@@ -79,18 +79,19 @@ document.addEventListener('DOMContentLoaded', function () {
             selectWrapper.classList.toggle('open');
         } else {
             // Если клик был вне всех select-wrapper, закрыть все выпадающие списки
-            document.querySelectorAll('.select-wrapper.open').forEach(function (wrapper) {
+            document.querySelectorAll('.select-wrapper.open').forEach(function(wrapper) {
                 wrapper.classList.remove('open');
             });
         }
     });
 
     // Закрываем все открытые селекторы при клике вне их
-    document.addEventListener('click', function (e) {
-        document.querySelectorAll('.select-wrapper.open').forEach(function (selectWrapper) {
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.select-wrapper.open').forEach(function(selectWrapper) {
             if (!selectWrapper.contains(e.target)) {
                 selectWrapper.classList.remove('open');
             }
         });
     });
 });
+

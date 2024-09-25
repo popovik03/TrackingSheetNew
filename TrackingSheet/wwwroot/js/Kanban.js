@@ -709,6 +709,7 @@ function addComment() {
 
                 // Очищаем поле ввода
                 $('#newCommentText').val('');
+                updateCommentsIcon(taskId, true);
             } else {
                 console.error('Comment data is missing in the response.');
             }
@@ -869,3 +870,18 @@ function uploadAttachments(taskId) {
     });
 }
 
+// Функционал для отображения в задачах
+// Функция для переключения отображения секции комментариев
+function toggleComments(taskId) {
+    $('#commentsSection-' + taskId).toggle();
+}
+
+// Функция для переключения отображения секции описания
+function toggleDescription(taskId) {
+    $('#descriptionSection-' + taskId).toggle();
+}
+
+// Функция для переключения отображения секции подзадач
+function toggleSubtasks(taskId) {
+    $('#subtasksSection-' + taskId).toggle();
+}

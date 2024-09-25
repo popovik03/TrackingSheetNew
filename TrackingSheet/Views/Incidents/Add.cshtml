@@ -39,8 +39,8 @@
     }
 
     // Определение текущей смены на сервере
-    var currentTime = DateTime.Now.TimeOfDay;
-    var shift = (currentTime >= new TimeSpan(20, 0, 0) || currentTime < new TimeSpan(8, 0, 0)) ? "Night" : "Day";
+     var currentTime = DateTime.Now.TimeOfDay;
+     var shift = (currentTime >= new TimeSpan(20, 0, 0) || currentTime < new TimeSpan(8, 0, 0)) ? "Night" : "Day";
 
 
 }
@@ -51,122 +51,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="~/js/new_incident.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        .right {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .description {
-            flex: 8; /* 80% */
-            overflow: auto;
-        }
-
-        .attachments {
-            flex: 2; /* 20% */
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: flex-start;
-        }
-
-        .file-item {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 5px;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f9f9f9;
-        }
-
-            .file-item .fa-file-alt {
-                font-size: 2em;
-                color: #555;
-            }
-
-            .file-item .delete-icon {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                color: red;
-                background-color: rgba(255, 255, 255, 0.7);
-                border-radius: 50%;
-                padding: 2px;
-                cursor: pointer;
-                font-size: 0.8em;
-            }
-
-                .file-item .delete-icon:hover {
-                    background-color: rgba(255, 0, 0, 0.8);
-                    color: white;
-                }
-    </style>
 </head>
 
 <body>
-    <!-- Объединенная форма для добавления инцидента и получения данных VSAT -->
     <form method="post" action="/Incidents/Add" id="mainForm" enctype="multipart/form-data">
 
         <!-- Добавляем скрытое поле для передачи ID -->
         <input type="hidden" asp-for="ID" />
         
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
             <div>
                 <h1><label>Новый инцидент</label></h1>
                 <h2><label>Добавьте новый инцидент</label></h2>
             </div>
-            <div style="display: flex; gap: 10px;">
-               
-                <!-- Контейнер для кнопок -->
-                <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 0px; margin-right: 45px">
-                    <!-- Кнопка для загрузки файла -->
-                    <a href="#" onclick="document.getElementById('fileInput').click();" style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px;">
-                        <img src="~/icons/skrepa.png" alt="Добавить вложение" style="width: 48px; height: 48px; transform: scale(1.1);">
-                    </a>
-
-                    <!-- Скрытое поле для выбора файла -->
-                    <input type="file" id="fileInput" name="UploadedFiles" multiple style="display: none;">
-
-                </div>
-            </div>
+            <input type="file" id="fileInput" name="UploadedFiles" multiple style="display: none;">
         </div>
 
         <div class="container-new-incident">
             <div class="left">
 
                 <!-- Поле для IP-адреса -->
-                <div class="input-field" style="display: flex; flex-direction: column; align-items: flex-start; width: 100%;">
-                    <label for="vsatInput" class="form-label" style="margin-bottom: 5px;">VSAT</label>
-                    <div style="display: flex; align-items: center; width: 100%;">
-                        <input type="number" id="vsatInput" name="ipPart" class="form-control form-control-sm" min="0" asp-for="VSAT"
-                               style="flex: 1; width: 70%; margin-right: 10px;" />
-                        <button type="button" id="getDataButton" class="btn-icon" style="background: none; border: none; padding: 0; cursor: pointer; font-size: 1.5em; color: #03BE93;">
-                            <i class="fas fa-database"></i> <!-- Иконка для кнопки -->
+                <div class="input-field">
+                    <label for="vsatInput" class="form-label">VSAT</label>
+                    <div class=vsat_field>
+                        <input type="number" id="vsatInput" name="ipPart" class="form-control form-control-sm" min="0" asp-for="VSAT"/>
+                        <button type="button" id="getDataButton" class="get_data_button">
+                            <svg class="icon_get_data" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2 10C2 10 2.12132 9.15076 5.63604 5.63604C9.15076 2.12132 14.8492 2.12132 18.364 5.63604C19.6092 6.88131 20.4133 8.40072 20.7762 10M2 10V4M2 10H8M22 14C22 14 21.8787 14.8492 18.364 18.364C14.8492 21.8787 9.15076 21.8787 5.63604 18.364C4.39076 17.1187 3.58669 15.5993 3.22383 14M22 14V20M22 14H16"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
 
                 <div class="input-field">
-                    <label for="" class="form-label">Дата инцидента</label>
+                    <label class="form-label">Дата инцидента</label>
                     <input type="datetime-local" class="form-control form-control-sm" asp-for="Date" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
                 </div>
 
                 <div class="input-field">
-                    <label for="Shift" class="form-label">Смена</label>
-                    <select class="form-select" asp-for="Shift">
+                    <label class="form-label">Смена</label>
+                    <div class="select-wrapper">
+                        <select class="custom-select" asp-for="Shift">
                         <option value="Day" selected="@((shift == "Day") ? "selected" : null)">День</option>
                         <option value="Night" selected="@((shift == "Night") ? "selected" : null)">Ночь</option>
-                    </select>
+                        </select>
+                        <div class="select-arrow">
+                            <svg class="icon_dropdown_arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 9L12 15L18 9"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-
+                
 
                 <div class="input-field">
                     <label for="reporter" class="form-label">431</label>
@@ -186,10 +122,9 @@
                     <input type="number" class="form-control form-control-sm" asp-for="SavedNPT" min="0" />
                 </div>
                 <div class="input-field">
-                    <label for="" class="form-label">Тип проблемы</label>
-                    <div class="col-sm-12">
-                        <select class="form-select form-select-sm" asp-for="ProblemType">
-                            <!-- Опции -->
+                    <label class="form-label">Тип проблемы</label>
+                    <div class="select-wrapper">
+                        <select asp-for="ProblemType">
                             <option value="Advantage">Advantage</option>
                             <option value="ATK issue">ATK issue</option>
                             <option value="APS">APS</option>
@@ -218,44 +153,65 @@
                             <option value="WITS">WITS</option>
                             <option value="Other">Other</option>
                         </select>
+                        <div class="select-arrow">
+                            <svg class="icon_dropdown_arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 9L12 15L18 9" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
                 <div class="input-field">
-                    <label for="" class="form-label">Отметка</label>
-                    <div class="col-sm-12">
-                        <select class="form-select form-select-sm" asp-for="HighLight">
+                    <label class="form-label">Отметка</label>
+                    <div class="select-wrapper">
+                        <select asp-for="HighLight">
                             <option value=""></option>
                             <option value="🚩">🚩</option>
                         </select>
+                        <div class="select-arrow">
+                            <svg class="icon_dropdown_arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 9L12 15L18 9" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
                 <div class="input-field">
-                    <label for="" class="form-label">Статус</label>
-                    <div class="col-sm-12">
-                        <select class="form-select form-select-sm" asp-for="Status">
-                            <option value="Success" style="background-color: lawngreen">Success</option>
-                            <option value="Process" style="background-color: yellow">Process</option>
-                            <option value="Fail" style="background-color: orangered">Fail</option>
-                            <option value="None" style="background-color: darkgrey">None</option>
+                    <label class="form-label">Статус</label>
+                    <div class="select-wrapper">
+                        <select asp-for="Status" id="status-select">
+                            <option value="Success">Success</option>
+                            <option value="Process">Process</option>
+                            <option value="Fail">Fail</option>
+                            <option value="None">None</option>
                         </select>
+                        <div class="select-arrow">
+                            <svg class="icon_dropdown_arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 9L12 15L18 9" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="right" style="display: flex; flex-direction: column; height: 100%;">
-                <!-- Секция описания инцидента (80%) -->
-                <div class="description" style="flex: 8; overflow: auto;">
+            <div class="right">
+                <div class="description">
                     <div class="input-field">
                         <label for="" class="form-label">Описание инцидента:</label>
-                        <textarea class="form-control" style="width: 99%; margin-left:3px; height:80%" id="descriptionTextarea" rows="12" asp-for="Solution">
+                        <textarea class="form-control" id="descriptionTextarea" rows="12" asp-for="Solution">
                             @Html.Raw(bha)
                         </textarea>
                     </div>
                 </div>
 
-                <!-- Секция вложений (20%) -->
-                <div class="attachments" id="filePreview" style="flex: 2; margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
-                    <!-- Примеры отображения файлов будут добавляться сюда через JavaScript -->
+                <div class="add_file_container">
+                    <input type="file" id="fileInput" class="file-input" multiple onchange="handleFileSelect(event)">
+                    <label for="fileInput" class="file-button">
+                        <svg class="icon_addfile" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 7V6.8C20 5.11984 20 4.27976 19.673 3.63803C19.3854 3.07354 18.9265 2.6146 18.362 2.32698C17.7202 2 16.8802 2 15.2 2H8.8C7.11984 2 6.27976 2 5.63803 2.32698C5.07354 2.6146 4.6146 3.07354 4.32698 3.63803C4 4.27976 4 5.11984 4 6.8V17.2C4 18.8802 4 19.7202 4.32698 20.362C4.6146 20.9265 5.07354 21.3854 5.63803 21.673C6.27976 22 7.11984 22 8.8 22H12.5M12.5 11H8M11.5 15H8M16 7H8M18 18V12.5C18 11.6716 18.6716 11 19.5 11C20.3284 11 21 11.6716 21 12.5V18C21 19.6569 19.6569 21 18 21C16.3431 21 15 19.6569 15 18V14"></path>
+                        </svg>
+                    </label>
+                    <div class="file-preview" id="filePreview"></div>
+                    @* <div id="overlay"></div>
+                    <img id="fullImage" class="full-image" onclick="closeFullImage()"> *@
                 </div>
             </div>
 
@@ -279,144 +235,181 @@
     </form>
 
     <script>
-    // Объявляем массив selectedFiles в глобальной области видимости
-    var selectedFiles = [];
+        var selectedFiles = [];
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var getDataButton = document.querySelector('#getDataButton');
-        var vsatInput = document.querySelector('#vsatInput');
-        var vsatForm = document.querySelector('#vsatForm');
-        var vsatInputHidden = document.querySelector('#vsatInputHidden');
-        var descriptionTextarea = document.querySelector('#descriptionTextarea');
+        document.addEventListener('DOMContentLoaded', function () {
+            var getDataButton = document.querySelector('#getDataButton');
+            var vsatInput = document.querySelector('#vsatInput');
+            var vsatForm = document.querySelector('#vsatForm');
+            var vsatInputHidden = document.querySelector('#vsatInputHidden');
+            var descriptionTextarea = document.querySelector('#descriptionTextarea');
 
-        // Загрузка сохраненного значения из localStorage при загрузке страницы
-        var savedVsatValue = localStorage.getItem('vsatValue');
-        if (savedVsatValue) {
-            vsatInput.value = savedVsatValue;
-        }
-
-        if (getDataButton && vsatInput && vsatForm && vsatInputHidden) {
-            // Сохранение значения в localStorage и отправка формы при нажатии кнопки
-            getDataButton.addEventListener('click', function () {
-                var ipPart = vsatInput.value;
-                if (ipPart) {
-                    localStorage.setItem('vsatValue', ipPart); // Сохраняем значение в localStorage
-                    vsatInputHidden.value = ipPart; // Обновляем скрытое поле
-                    vsatForm.submit(); // Отправляем форму для получения данных
-                } else {
-                    console.error('IP-адрес не введен');
-                    alert('Пожалуйста, введите IP-адрес.');
-                }
-            });
-        } else {
-            console.error('Не удалось найти элементы кнопки или формы.');
-        }
-
-        // Установка значения в поле textarea
-        var bha = "@Html.Raw(bha)"; // Преобразуем значение в строку
-        if (descriptionTextarea) {
-            descriptionTextarea.value = bha;
-        }
-    });
-
-    // Функция для добавления файлов
-    function handleFileSelection(event) {
-        const files = event.target.files;
-        const filePreviewDiv = document.getElementById('filePreview');
-
-        if (!filePreviewDiv) {
-            console.error('Элемент с id "filePreview" не найден.');
-            return; // Прекращаем выполнение функции, если элемент не найден
-        }
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            // Проверка, что файл еще не добавлен
-            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)) {
-                selectedFiles.push(file); // Добавляем каждый выбранный файл в массив
+            // Загрузка сохраненного значения из localStorage при загрузке страницы
+            var savedVsatValue = localStorage.getItem('vsatValue');
+            if (savedVsatValue) {
+                vsatInput.value = savedVsatValue;
             }
-        }
 
-        updateFilePreview(); // Обновляем отображение файлов
-    }
+            if (getDataButton && vsatInput && vsatForm && vsatInputHidden) {
+                // Сохранение значения в localStorage и отправка формы при нажатии кнопки
+                getDataButton.addEventListener('click', function () {
+                    var ipPart = vsatInput.value;
+                    if (ipPart) {
+                        localStorage.setItem('vsatValue', ipPart); // Сохраняем значение в localStorage
+                        vsatInputHidden.value = ipPart; // Обновляем скрытое поле
+                        vsatForm.submit(); // Отправляем форму для получения данных
+                    } else {
+                        console.error('IP-адрес не введен');
+                        alert('Пожалуйста, введите IP-адрес.');
+                    }
+                });
+            } else {
+                console.error('Не удалось найти элементы кнопки или формы.');
+            }
 
-    // Функция для обновления предпросмотра файлов
-    function updateFilePreview() {
-        const filePreviewDiv = document.getElementById('filePreview');
-
-        if (!filePreviewDiv) {
-            console.error('Элемент с id "filePreview" не найден.');
-            return;
-        }
-
-        // Очистка предыдущего предпросмотра файлов
-        filePreviewDiv.innerHTML = '';
-
-        selectedFiles.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-
-            // Иконка файла
-            const fileIcon = document.createElement('i');
-            fileIcon.className = 'fas fa-file-alt';
-
-            // Название файла
-            const fileName = document.createElement('div');
-            fileName.className = 'file-name';
-            fileName.textContent = file.name;
-
-            // Красный крестик для удаления файла
-            const deleteIcon = document.createElement('i');
-            deleteIcon.className = 'fas fa-times delete-icon';
-            deleteIcon.title = 'Удалить файл';
-            deleteIcon.dataset.index = index; // Используем data-атрибут для индекса
-
-            deleteIcon.addEventListener('click', function () {
-                const idx = parseInt(this.dataset.index, 10);
-                selectedFiles.splice(idx, 1);  // Удаляем файл из массива
-                updateFilePreview(); // Обновляем отображение
-            });
-
-            fileItem.appendChild(fileIcon);
-            fileItem.appendChild(fileName);
-            fileItem.appendChild(deleteIcon);
-            filePreviewDiv.appendChild(fileItem);
+            // Установка значения в поле textarea
+            var bha = "@Html.Raw(bha)"; // Преобразуем значение в строку
+            if (descriptionTextarea) {
+                descriptionTextarea.value = bha;
+            }
         });
-    }
 
-    // Добавляем обработчик события для выбора файлов
-    document.getElementById('fileInput').addEventListener('change', handleFileSelection);
+        // Функция для добавления файлов
+        function handleFileSelection(event) {
+            const files = event.target.files;
+            const filePreviewDiv = document.getElementById('filePreview');
 
-    // Добавляем обработчик события для отправки формы
-    document.getElementById('mainForm').addEventListener('submit', function (event) {
-        event.preventDefault();  // Предотвращаем обычную отправку формы
-
-        const form = this;
-        const formData = new FormData();
-
-        // Добавляем выбранные файлы
-        selectedFiles.forEach(file => formData.append('UploadedFiles', file));
-
-        // Добавляем другие поля формы
-        const formElements = form.elements;
-        for (let i = 0; i < formElements.length; i++) {
-            const element = formElements[i];
-            if (element.name && element.type !== 'file') {
-                formData.append(element.name, element.value);
+            if (!filePreviewDiv) {
+                console.error('Элемент с id "filePreview" не найден.');
+                return; // Прекращаем выполнение функции, если элемент не найден
             }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                // Проверка, что файл еще не добавлен
+                if (!selectedFiles.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)) {
+                    selectedFiles.push(file); // Добавляем каждый выбранный файл в массив
+                }
+            }
+
+            updateFilePreview(); // Обновляем отображение файлов
         }
 
-        // Получаем токен антивируса (CSRF токен)
-        const token = document.querySelector('input[name="__RequestVerificationToken"]');
-        if (token) {
-            formData.append('__RequestVerificationToken', token.value);
+        // Функция для обновления предпросмотра файлов
+        function updateFilePreview() {
+            const filePreviewDiv = document.getElementById('filePreview');
+
+            if (!filePreviewDiv) {
+                console.error('Элемент с id "filePreview" не найден.');
+                return;
+            }
+
+            // Очистка предыдущего предпросмотра файлов
+            filePreviewDiv.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+
+                // Create SVG element for file icon
+                const svgElement1 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svgElement1.setAttribute("viewBox", "0 0 24 24");
+                svgElement1.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                svgElement1.setAttribute("class", "icon_delete_item");
+
+                // Create path element for file icon
+                const pathElement1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                pathElement1.setAttribute("d", getFileIcon(file.type));
+
+                svgElement1.appendChild(pathElement1);
+
+                // File icon element
+                const fileIcon = document.createElement('div');
+                fileIcon.className = 'file-icon';
+                fileIcon.title = file.name;
+                fileIcon.onclick = function() {
+                    openFile(URL.createObjectURL(file), file.type);
+                };
+
+                fileIcon.appendChild(svgElement1);
+
+                // File name
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.style.wordBreak = 'break-all';
+
+                // Ограничиваем имя файла до 20 символов и добавляем многоточие, если оно длиннее
+                const maxLength = 20;
+                fileName.textContent = file.name.length > maxLength ? file.name.substring(0, maxLength) + '...' : file.name;
+
+
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.dataset.index = index;
+
+                deleteBtn.addEventListener('click', function () {
+                    const idx = parseInt(this.dataset.index, 10);
+                    selectedFiles.splice(idx, 1);  // Удаляем файл из массива
+                    updateFilePreview(); // Обновляем отображение
+                });
+
+                // Create SVG element for delete icon
+                const svgElement2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svgElement2.setAttribute("viewBox", "0 0 24 24");
+                svgElement2.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                svgElement2.setAttribute("class", "icon_delete_item");
+
+                // Create path element for delete icon
+                const pathElement2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                pathElement2.setAttribute("d", "M17 7L7 17M7 7L17 17");
+
+                svgElement2.appendChild(pathElement2);
+
+                deleteBtn.appendChild(svgElement2);
+
+                // Append elements to file item
+                fileItem.appendChild(fileIcon);
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(deleteBtn);
+
+                filePreviewDiv.appendChild(fileItem);
+            });
         }
 
-        // Отправка формы с использованием fetch
-        fetch(form.action, {
-            method: form.method,
-            body: formData,
-        })
+        // Добавляем обработчик события для выбора файлов
+        document.getElementById('fileInput').addEventListener('change', handleFileSelection);
+
+        // Добавляем обработчик события для отправки формы
+        document.getElementById('mainForm').addEventListener('submit', function (event) {
+            event.preventDefault();  // Предотвращаем обычную отправку формы
+
+            const form = this;
+            const formData = new FormData();
+
+            // Добавляем выбранные файлы
+            selectedFiles.forEach(file => formData.append('UploadedFiles', file));
+
+            // Добавляем другие поля формы
+            const formElements = form.elements;
+            for (let i = 0; i < formElements.length; i++) {
+                const element = formElements[i];
+                if (element.name && element.type !== 'file') {
+                    formData.append(element.name, element.value);
+                }
+            }
+
+            // Получаем токен антивируса (CSRF токен)
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                formData.append('__RequestVerificationToken', token.value);
+            }
+
+            // Отправка формы с использованием fetch
+            fetch(form.action, {
+                method: form.method,
+                body: formData,
+            })
             .then(response => {
                 if (response.ok) {
                     window.location.href = '/Incidents/Index';  // Перенаправление после успешной отправки
@@ -428,18 +421,18 @@
                 console.error('Ошибка при отправке формы:', error);
                 alert('Произошла ошибка при сохранении инцидента.');
             });
-    });
+        });
 
-    function deleteFile(fileName, incidentId) {
-        // Код для удаления файла через AJAX
-        fetch('/Incidents/DeleteFile', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-            },
-            body: JSON.stringify({ fileName: fileName, incidentId: incidentId })
-        })
+        function deleteFile(fileName, incidentId) {
+            // Код для удаления файла через AJAX
+            fetch('/Incidents/DeleteFile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ fileName: fileName, incidentId: incidentId })
+            })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -454,10 +447,43 @@
                 console.error('Ошибка при удалении файла:', error);
                 alert('Произошла ошибка при удалении файла.');
             });
-    }
-</script>
+        }
 
+        function getFileIcon(fileType) {
+            // Return a default icon or a specific icon based on the file type
+            if (fileType.includes('text/')) return "M14 2.26953V6.40007C14 6.96012 14 7.24015 14.109 7.45406C14.2049 7.64222 14.3578 7.7952 14.546 7.89108C14.7599 8.00007 15.0399 8.00007 15.6 8.00007H19.7305M14 17H8M16 13H8M20 9.98822V17.2C20 18.8802 20 19.7202 19.673 20.362C19.3854 20.9265 18.9265 21.3854 18.362 21.673C17.7202 22 16.8802 22 15.2 22H8.8C7.11984 22 6.27976 22 5.63803 21.673C5.07354 21.3854 4.6146 20.9265 4.32698 20.362C4 19.7202 4 18.8802 4 17.2V6.8C4 5.11984 4 4.27976 4.32698 3.63803C4.6146 3.07354 5.07354 2.6146 5.63803 2.32698C6.27976 2 7.11984 2 8.8 2H12.0118C12.7455 2 13.1124 2 13.4577 2.08289C13.7638 2.15638 14.0564 2.27759 14.3249 2.44208C14.6276 2.6276 14.887 2.88703 15.4059 3.40589L18.5941 6.59411C19.113 7.11297 19.3724 7.3724 19.5579 7.67515C19.7224 7.94356 19.8436 8.2362 19.9171 8.5423C20 8.88757 20 9.25445 20 9.98822Z";
+            if (fileType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) return "M14 2.26953V6.40007C14 6.96012 14 7.24015 14.109 7.45406C14.2049 7.64222 14.3578 7.7952 14.546 7.89108C14.7599 8.00007 15.0399 8.00007 15.6 8.00007H19.7305M14 17H8M16 13H8M20 9.98822V17.2C20 18.8802 20 19.7202 19.673 20.362C19.3854 20.9265 18.9265 21.3854 18.362 21.673C17.7202 22 16.8802 22 15.2 22H8.8C7.11984 22 6.27976 22 5.63803 21.673C5.07354 21.3854 4.6146 20.9265 4.32698 20.362C4 19.7202 4 18.8802 4 17.2V6.8C4 5.11984 4 4.27976 4.32698 3.63803C4.6146 3.07354 5.07354 2.6146 5.63803 2.32698C6.27976 2 7.11984 2 8.8 2H12.0118C12.7455 2 13.1124 2 13.4577 2.08289C13.7638 2.15638 14.0564 2.27759 14.3249 2.44208C14.6276 2.6276 14.887 2.88703 15.4059 3.40589L18.5941 6.59411C19.113 7.11297 19.3724 7.3724 19.5579 7.67515C19.7224 7.94356 19.8436 8.2362 19.9171 8.5423C20 8.88757 20 9.25445 20 9.98822Z";
+            return "M14 2.26946V6.4C14 6.96005 14 7.24008 14.109 7.45399C14.2049 7.64215 14.3578 7.79513 14.546 7.89101C14.7599 8 15.0399 8 15.6 8H19.7305M20 9.98822V17.2C20 18.8802 20 19.7202 19.673 20.362C19.3854 20.9265 18.9265 21.3854 18.362 21.673C17.7202 22 16.8802 22 15.2 22H8.8C7.11984 22 6.27976 22 5.63803 21.673C5.07354 21.3854 4.6146 20.9265 4.32698 20.362C4 19.7202 4 18.8802 4 17.2V6.8C4 5.11984 4 4.27976 4.32698 3.63803C4.6146 3.07354 5.07354 2.6146 5.63803 2.32698C6.27976 2 7.11984 2 8.8 2H12.0118C12.7455 2 13.1124 2 13.4577 2.08289C13.7638 2.15638 14.0564 2.27759 14.3249 2.44208C14.6276 2.6276 14.887 2.88703 15.4059 3.40589L18.5941 6.59411C19.113 7.11297 19.3724 7.3724 19.5579 7.67515C19.7224 7.94356 19.8436 8.2362 19.9171 8.5423C20 8.88757 20 9.25445 20 9.98822Z";
+        }
 
+        function openFile(fileUrl, fileType) {
+            // Открываем файл в новом окне
+            const newWindow = window.open();
+            newWindow.document.write(`<embed src="${fileUrl}" type="${fileType}" width="100%" height="100%" />`);
+        }
+            
+        const textarea = document.getElementById('exampleFormControlTextarea1');
+        if (textarea) {
+            textarea.addEventListener('paste', handlePaste);
+        }
 
+        // Автоматически нажимаем кнопку "Сохранить" после выбора файла
+        function handleFileSelect(event) {
+            console.log('handleFileSelect called');
+            console.log('Selected file:', event.target.files[0]);
+
+            // Используем setTimeout для отсрочки нажатия кнопки "Сохранить"
+            setTimeout(function () {
+                var submitButton = document.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    console.log('Submitting form...');
+                    submitButton.click();
+                } else {
+                    console.error('Submit button not found');
+                }
+            }, 100); // Задержка в 100 мс для уверенности, что файл выбран
+        }
+
+    </script>
 </body>
 </html>
