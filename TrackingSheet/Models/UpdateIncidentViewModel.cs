@@ -24,5 +24,8 @@ namespace TrackingSheet.Models
 
         // Новое свойство: коллекция обновлений инцидента
         public List<IncidentUpdate>? Updates { get; set; }
+
+        // свойство для загрузки нескольких файлов
+        public IEnumerable<IFormFile> UploadedFiles { get; set; }
     }
 }

@@ -219,13 +219,27 @@ namespace TrackingSheet.Controllers
         }
 
 
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> View(UpdateIncidentViewModel model, IFormFile uploadedFile)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(UpdateIncidentViewModel model, IEnumerable<IFormFile> UploadedFiles)
         {
-            var incident = await mvcDbContext.IncidentList.FindAsync(model.ID);
-            if (incident != null)
+            if (model == null)
             {
-                // Update incident properties
+                _logger.LogWarning("Edit: Model is null.");
+                return BadRequest(new { success = false, message = "Invalid data." });
+            }
+
+            var incident = await mvcDbContext.IncidentList.FindAsync(model.ID);
+            if (incident == null)
+            {
+                _logger.LogWarning($"Edit: Incident with ID {model.ID} not found.");
+                return NotFound(new { success = false, message = "Incident not found." });
+            }
+
+            try
+            {
+                // Обновление свойств инцидента
                 incident.Date = model.Date;
                 incident.DateEnd = model.DateEnd;
                 incident.Shift = model.Shift;
@@ -238,57 +252,64 @@ namespace TrackingSheet.Controllers
                 incident.HighLight = model.HighLight;
                 incident.Status = model.Status;
                 incident.Solution = model.Solution;
-                // Do not assign incident.File here; it will be updated after file upload
+                // Не присваиваем incident.File здесь; оно будет обновлено после загрузки файлов
 
-                // Handle uploaded file
-                if (uploadedFile != null && uploadedFile.Length > 0)
+                _logger.LogInformation($"Edit: Updating incident {model.ID}.");
+
+                // Обработка загруженных файлов
+                if (UploadedFiles != null && UploadedFiles.Any())
                 {
-                    try
+                    var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incident.ID.ToString());
+                    if (!Directory.Exists(incidentFolder))
                     {
-                        var fileName = Path.GetFileName(uploadedFile.FileName);
-
-                        // Path to save the file
-                        var incidentFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", incident.ID.ToString());
-                        if (!Directory.Exists(incidentFolder))
-                        {
-                            Directory.CreateDirectory(incidentFolder);
-                        }
-
-                        // Check if a file with the same name exists
-                        var filePath = Path.Combine(incidentFolder, fileName);
-                        if (System.IO.File.Exists(filePath))
-                        {
-                            // Add a suffix to avoid overwriting
-                            fileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{Guid.NewGuid()}{Path.GetExtension(fileName)}";
-                            filePath = Path.Combine(incidentFolder, fileName);
-                        }
-
-                        // Save the file
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await uploadedFile.CopyToAsync(stream);
-                        }
-
-                        // Update the File field in the database
-                        incident.File = 1;
+                        Directory.CreateDirectory(incidentFolder);
+                        _logger.LogInformation($"Edit: Created folder {incidentFolder}.");
                     }
-                    catch (Exception ex)
+
+                    foreach (var uploadedFile in UploadedFiles)
                     {
-                        // Log the error and return an error message to the user
-                        TempData["ErrorMessage"] = "An error occurred while uploading the file. Please try again.";
-                        return RedirectToAction("View", new { id = model.ID });
+                        if (uploadedFile != null && uploadedFile.Length > 0)
+                        {
+                            var fileName = Path.GetFileName(uploadedFile.FileName);
+                            var filePath = Path.Combine(incidentFolder, fileName);
+
+                            // Проверка на существование файла и добавление уникального идентификатора
+                            if (System.IO.File.Exists(filePath))
+                            {
+                                fileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{Guid.NewGuid()}{Path.GetExtension(fileName)}";
+                                filePath = Path.Combine(incidentFolder, fileName);
+                                _logger.LogWarning($"Edit: File {fileName} already exists. Renaming to {fileName}.");
+                            }
+
+                            // Сохранение файла
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await uploadedFile.CopyToAsync(stream);
+                                _logger.LogInformation($"Edit: Saved file {filePath}.");
+                            }
+                        }
                     }
+
+                    // Обновление поля File, если файлы загружены
+                    incident.File = 1;
+                    _logger.LogInformation($"Edit: Updated File field for incident {model.ID}.");
                 }
 
                 await mvcDbContext.SaveChangesAsync();
+                _logger.LogInformation($"Edit: Incident {model.ID} successfully updated.");
 
-                // Return to the View for this incident
-                ViewData["CurrentPage"] = "journal";
+                TempData["SuccessMessage"] = "Инцидент успешно обновлен.";
                 return RedirectToAction("View", new { id = model.ID });
             }
-            ViewData["CurrentPage"] = "journal";
-            return RedirectToAction("Index");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Edit: Error updating incident {model.ID}.");
+                ModelState.AddModelError(string.Empty, "Произошла ошибка при обновлении инцидента.");
+                return View(model);
+            }
         }
+
+
 
         [Authorize]
         [HttpGet]
@@ -478,15 +499,14 @@ namespace TrackingSheet.Controllers
             {
                 var incidentUpdate = new IncidentUpdate
                 {
-                    ID = Guid.NewGuid(), // Генерация нового уникального идентификатора для обновления
-                    IncidentID = model.IncidentID, // Установка ID инцидента, к которому относится обновление
-                    Date = model.Date, // Дата обновления
-                    UpdateReporter = model.UpdateReporter, // Автор обновления
-                    UpdateSolution = model.UpdateSolution, // Решение или описание обновления
-                    Run = model.Run // Номер рейса или другой идентификатор
+                    ID = Guid.NewGuid(),
+                    IncidentID = model.IncidentID,
+                    Date = DateTime.Now,
+                    UpdateReporter = model.UpdateReporter,
+                    UpdateSolution = model.UpdateSolution,
+                    Run = model.Run
                 };
 
-                // Сохранение обновления в базе данных
                 await mvcDbContext.IncidentUpdates.AddAsync(incidentUpdate);
                 await mvcDbContext.SaveChangesAsync();
 
@@ -496,11 +516,8 @@ namespace TrackingSheet.Controllers
             return Json(new { success = false, message = "Ошибка валидации данных" });
         }
 
-
-
-        
-
-        
-
     }
+
+
 }
+

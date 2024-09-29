@@ -26,10 +26,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 {
                     title: "Дата",
                     data: "date",
-                    render: function (data) {
-                        const date = new Date(data);
-                        const formattedDateTime = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-                        return formattedDateTime;
+                    render: function (data, type, row) {
+                        if (type === 'display' || type === 'filter') {
+                            const date = new Date(data);
+                            const formattedDateTime = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                            return formattedDateTime;
+                        }
+                        return data;
                     }
                 },
                 {
@@ -72,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 lengthMenu: "Показать _MENU_ записей на странице.",
                 zeroRecords: "Ничего не найдено.",
                 info: "Показаны записи с _START_ по _END_ из _TOTAL_.",
-                infoEmpty: "Нет записей для отображения.",
+                infoEmpty: "",
                 infoFiltered: "(отфильтровано из _MAX_ записей)",
                 paginate: {
                     first: "Первая",
@@ -109,6 +112,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             }
+        });
+
+        // Кастомный фильтр для диапазона дат
+        $.fn.dataTable.ext.search.push(
+            function (settings, data, dataIndex) {
+                var minDate = $('#min-date').val();
+                var maxDate = $('#max-date').val();
+
+                // Если даты не выбраны, показываем все записи
+                if (!minDate && !maxDate) {
+                    return true;
+                }
+
+                // Получаем дату из первого столбца (индекс 0)
+                var dateStr = data[0]; // Предполагается, что дата в первом столбце
+                var date = moment(dateStr, 'DD/MM/YYYY HH:mm');
+
+                // Если дата некорректна, не отображаем запись
+                if (!date.isValid()) {
+                    return false;
+                }
+
+                // Проверяем минимальную дату
+                if (minDate) {
+                    var min = moment(minDate, 'YYYY-MM-DD');
+                    if (date.isBefore(min)) {
+                        return false;
+                    }
+                }
+
+                // Проверяем максимальную дату
+                if (maxDate) {
+                    var max = moment(maxDate, 'YYYY-MM-DD').endOf('day');
+                    if (date.isAfter(max)) {
+                        return false;
+                    }
+                }
+
+                // Если запись попадает в диапазон, отображаем её
+                return true;
+            }
+        );
+
+        // Обработчики событий для полей ввода дат
+        $('#min-date, #max-date').on('change', function () {
+            table.draw();
         });
 
         // Добавление полей ввода в заголовки

@@ -353,6 +353,7 @@ header img {
     justify-items: stretch;
     padding: 40px 40px 20px 40px;
     align-items: start;
+   
 }
 
 .left {
@@ -698,7 +699,7 @@ tfoot input {
 .file-name {
     font-size: 12px;
     text-align: center;
-    margin-top: 5px;
+    margin-top:0;
 }
 
 .file-button {
@@ -1716,6 +1717,7 @@ button.dt-paging-button.disabled.last:hover  {
     flex-direction: row;
     justify-content: space-between;
     padding-right: 40px;
+    max-height: 100px;
   }
 
   .incident_editing_buttons {
@@ -1771,3 +1773,227 @@ button.dt-paging-button.disabled.last:hover  {
 .editing-date-field .input-field {
     min-width: 100px;
 }
+
+
+
+/* Стилизация модального окна */
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed; /* Остается на месте при прокрутке */
+    z-index: 1000; /* Располагается поверх других элементов */
+    left: 0;
+    top: 0;
+    width: 100%; /* Полная ширина */
+    height: 100%; /* Полная высота */
+    overflow: auto; /* Включает прокрутку при необходимости */
+    background-color: rgba(0, 0, 0, 0.5); /* Черный фон с прозрачностью */
+    transition: opacity 0.3s ease; /* Плавное появление */
+}
+
+/* Стилизация содержимого модального окна */
+.modal-content {
+    background-color: #fff; /* Белый фон */
+    margin: 10% auto; /* Центрирование по вертикали и горизонтали */
+    padding: 20px 30px; /* Внутренние отступы */
+    border: 1px solid #888; /* Серая рамка */
+    width: 90%; /* Ширина модального окна */
+    max-width: 600px; /* Максимальная ширина */
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Тень */
+    position: relative; /* Для позиционирования крестика закрытия */
+    animation: fadeIn 0.3s; /* Анимация появления */
+}
+
+/* Анимация появления модального окна */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Крестик для закрытия модального окна */
+.close-modal {
+    color: #aaa; /* Светло-серый цвет */
+    position: absolute; /* Абсолютное позиционирование */
+    top: 15px; /* Отступ сверху */
+    right: 20px; /* Отступ справа */
+    font-size: 28px; /* Размер шрифта */
+    font-weight: bold; /* Жирный шрифт */
+    cursor: pointer; /* Курсор-указатель */
+    transition: color 0.2s; /* Плавное изменение цвета */
+}
+
+    .close-modal:hover,
+    .close-modal:focus {
+        color: #000; /* Черный цвет при наведении */
+        text-decoration: none; /* Убираем подчеркивание */
+    }
+
+/* Заголовок модального окна */
+.modal-content h2 {
+    margin-top: 0;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+}
+
+/* Стилизация формы внутри модального окна */
+#incidentUpdateForm .form-group {
+    margin-bottom: 15px;
+}
+
+#incidentUpdateForm label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+#incidentUpdateForm input[type="text"],
+#incidentUpdateForm input[type="number"],
+#incidentUpdateForm textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+    #incidentUpdateForm input[type="text"]:focus,
+    #incidentUpdateForm input[type="number"]:focus,
+    #incidentUpdateForm textarea:focus {
+        border-color: #66afe9; /* Синий цвет при фокусе */
+        outline: none; /* Убираем стандартный фокус */
+    }
+
+/* Стилизация кнопок внутри модального окна */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+    .modal-buttons button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .modal-buttons .btn-primary {
+        background-color: #007bff; /* Синий цвет */
+        color: #fff; /* Белый текст */
+    }
+
+        .modal-buttons .btn-primary:hover {
+            background-color: #0056b3; /* Темно-синий при наведении */
+        }
+
+    .modal-buttons .btn-secondary {
+        background-color: #6c757d; /* Серый цвет */
+        color: #fff; /* Белый текст */
+    }
+
+        .modal-buttons .btn-secondary:hover {
+            background-color: #5a6268; /* Темно-серый при наведении */
+        }
+
+/* Адаптивность модального окна */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;
+        margin: 20% auto;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .modal-buttons button {
+            width: 100%;
+        }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* Стилизация контейнера для обновлений */
+.updates-container {
+    border: 1px solid #ccc; /* Серый контур */
+    border-radius: 8px; /* Закругленные углы */
+    padding: 15px; /* Внутренние отступы */
+    max-height: 150px; /* Максимальная высота контейнера */
+    overflow-y: auto; /* Вертикальная прокрутка при переполнении */
+    background-color: #f9f9f9; /* Светлый фон */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Тень для объёма */
+    margin-top: 10px; /* Отступ сверху */
+}
+
+/* Стилизация списка обновлений */
+.updates-list {
+    list-style-type: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем отступы */
+    margin: 0; /* Убираем внешние отступы */
+}
+
+/* Стилизация отдельных элементов обновлений */
+.update-item {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0; /* Лёгкая граница между элементами */
+}
+
+    .update-item:last-child {
+        border-bottom: none; /* Убираем границу у последнего элемента */
+    }
+
+/* Стилизация заголовка обновления */
+.update-header {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+/* Стилизация описания обновления */
+.update-solution {
+    color: #555;
+    line-height: 1.5;
+}
+
+/* Стилизация полосы прокрутки для Webkit-браузеров */
+.updates-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.updates-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 8px;
+}
+
+.updates-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 8px;
+}
+
+    .updates-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }

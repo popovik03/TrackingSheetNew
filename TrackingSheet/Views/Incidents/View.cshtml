@@ -4,6 +4,28 @@
     ViewData["Title"] = "Редактирование инцидента";
     var reporter = TempData.Peek("Login") as string ?? string.Empty;
 }
+@functions {
+    public string GetFileIconPath(string extension)
+    {
+        switch (extension.ToLower())
+        {
+            case ".txt":
+                return "M14 2.26953V6.40007C14 6.96012 14 7.24015 14.109 7.45406C14.2049 7.64222 14.3578 7.7952 14.546 7.89108C14.7599 8.00007 15.0399 8.00007 15.6 8.00007H19.7305M14 17H8M16 13H8M20 9.98822V17.2C20 18.8802 20 19.7202 19.673 20.362C19.3854 20.9265 18.9265 21.3854 18.362 21.673C17.7202 22 16.8802 22 15.2 22H8.8C7.11984 22 6.27976 22 5.63803 21.673C5.07354 21.3854 4.6146 20.9265 4.32698 20.362C4 19.7202 4 18.8802 4 17.2V6.8C4 5.11984 4 4.27976 4.32698 3.63803C4.6146 3.07354 5.07354 2.6146 5.63803 2.32698C6.27976 2 7.11984 2 8.8 2H12.0118C12.7455 2 13.1124 2 13.4577 2.08289C13.7638 2.15638 14.0564 2.27759 14.3249 2.44208C14.6276 2.6276 14.887 2.88703 15.4059 3.40589L18.5941 6.59411C19.113 7.11297 19.3724 7.3724 19.5579 7.67515C19.7224 7.94356 19.8436 8.2362 19.9171 8.5423C20 8.88757 20 9.25445 20 9.98822Z";
+            case ".xlsx":
+                return "M14 2.26953V6.40007C14 6.96012 14 7.24015 14.109 7.45406C14.2049 7.64222 14.3578 7.7952 14.546 7.89108C14.7599 8.00007 15.0399 8.00007 15.6 8.00007H19.7305M14 17H8M16 13H8M20 9.98822V17.2C20 18.8802 20 19.7202 19.673 20.362C19.3854 20.9265 18.9265 21.3854 18.362 21.673C17.7202 22 16.8802 22 15.2 22H8.8C7.11984 22 6.27976 22 5.63803 21.673C5.07354 21.3854 4.6146 20.9265 4.32698 20.362C4 19.7202 4 18.8802 4 17.2V6.8C4 5.11984 4 4.27976 4.32698 3.63803C4.6146 3.07354 5.07354 2.6146 5.63803 2.32698C6.27976 2 7.11984 2 8.8 2H12.0118C12.7455 2 13.1124 2 13.4577 2.08289C13.7638 2.15638 14.0564 2.27759 14.3249 2.44208C14.6276 2.6276 14.887 2.88703 15.4059 3.40589L18.5941 6.59411C19.113 7.11297 19.3724 7.3724 19.5579 7.67515C19.7224 7.94356 19.8436 8.2362 19.9171 8.5423C20 8.88757 20 9.25445 20 9.98822Z";
+            default:
+                return "M14 2.26946V6.4C14 6.96005 14 7.24008 14.109 7.45399C14.2049 7.64215 14.3578 7.79513 14.546 7.89101C14.7599 8 15.0399 8 15.6 8H19.7305M20 9.98822V17.2C20 18.8802 20 19.7202 19.673 20.362C19.3854 20.9265 18.9265 21.3854 18.362 21.673C17.7202 22 16.8802 22 15.2 22H8.8C7.11984 22 6.27976 22 5.63803 21.673C5.07354 21.3854 4.6146 20.9265 4.32698 20.362C4 19.7202 4 18.8802 4 17.2V6.8C4 5.11984 4 4.27976 4.32698 3.63803C4.6146 3.07354 5.07354 2.6146 5.63803 2.32698C6.27976 2 7.11984 2 8.8 2H12.0118C12.7455 2 13.1124 2 13.4577 2.08289C13.7638 2.15638 14.0564 2.27759 14.3249 2.44208C14.6276 2.6276 14.887 2.88703 15.4059 3.40589L18.5941 6.59411C19.113 7.11297 19.3724 7.3724 19.5579 7.67515C19.7224 7.94356 19.8436 8.2362 19.9171 8.5423C20 8.88757 20 9.25445 20 9.98822Z";
+        }
+    }
+
+    public string Truncate(string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        return value.Length > maxLength ? value.Substring(0, maxLength - 3) + "..." : value;
+    }
+}
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,21 +34,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="~/js/editing_incident.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    
+    <script>
+        window.appSettings = {
+            incidentId: '@Model.ID',
+            reporter: '@reporter',
+            run: '@Model.Run',
+            addUpdateUrl: '@Url.Action("AddUpdate", "Incidents")'
+        };
+    </script>
+    <script src="~/js/view_incident.js" defer></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 </head>
 
 <body>
-    <form method="post" action="@Url.Action("View", "Incidents")" enctype="multipart/form-data">
+    <form method="post" action="@Url.Action("Edit", "Incidents")" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ID" />
+
         <div class="header_incident_editing">
             <div>
                 <h1><label>Редактирование инцидента</label></h1>
-                <h2><label>Внесите изменения, добавьте комментарий или удалите инцидент</label></h2>
+               
             </div>
             <div class="incident_editing_buttons">
                 <div class="add_file_container">
-                    <input type="file" id="fileInput" class="file-input" multiple onchange="handleFileSelect(event)">
+                    <input type="file" id="fileInput" class="file-input" multiple name="UploadedFiles" onchange="handleFileSelect(event)">
                     <label for="fileInput" class="file-button">
                         <svg class="icon_addfile" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 7V6.8C20 5.11984 20 4.27976 19.673 3.63803C19.3854 3.07354 18.9265 2.6146 18.362 2.32698C17.7202 2 16.8802 2 15.2 2H8.8C7.11984 2 6.27976 2 5.63803 2.32698C5.07354 2.6146 4.6146 3.07354 4.32698 3.63803C4 4.27976 4 5.11984 4 6.8V17.2C4 18.8802 4 19.7202 4.32698 20.362C4.6146 20.9265 5.07354 21.3854 5.63803 21.673C6.27976 22 7.11984 22 8.8 22H12.5M12.5 11H8M11.5 15H8M16 7H8M18 18V12.5C18 11.6716 18.6716 11 19.5 11C20.3284 11 21 11.6716 21 12.5V18C21 19.6569 19.6569 21 18 21C16.3431 21 15 19.6569 15 18V14"></path>
@@ -57,7 +94,7 @@
         <div class="container-new-incident">
             <!-- Поля ввода данных инцидента -->
             <!-- Левый блок -->
-            <div class="left">
+            <div class="left" >
                 <div class="editing-date-field">
                     <div class="input-field">
                         <label for="Date" class="form-label">Дата начала</label>
@@ -186,23 +223,26 @@
                 <div class="incident-updates">
                     @if (Model.Updates != null && Model.Updates.Any())
                     {
-                        <h4>Обновления инцидента:</h4>
-                        <ul>
-                            @foreach (var update in Model.Updates.OrderByDescending(u => u.Date))
-                            {
-                                <li>
-                                    <div>@update.Date.ToString("dd.MM.yyyy HH:mm")- @update.UpdateReporter</div>
-                                    <div>Рейс: @update.Run</div>
-                                    <div>@update.UpdateSolution</div>
-                                </li>
-                            }
-                        </ul>
+                        <label>Обновления инцидента:</label>
+
+                        <div class="updates-container">
+                            <ul class="updates-list">
+                                @foreach (var update in Model.Updates.OrderByDescending(u => u.Date))
+                                {
+                                    <li class="update-item">
+                                        <div class="update-header">@update.Date.ToString("dd.MM.yyyy HH:mm") - @update.UpdateReporter  Рейс: @update.Run</div>
+                                        <div class="update-solution">@update.UpdateSolution</div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
                     }
                     else
                     {
                         <p>Обновлений нет.</p>
                     }
                 </div>
+
 
                 <div class="attachments">
                     <!-- Элемент для предварительного просмотра загруженных файлов -->
@@ -216,20 +256,32 @@
 
                     @if (filesExist)
                     {
-                        <h4>Вложенные файлы:</h4>
-                        <div class="file-list">
+                        <div class="add_file_container">
                             @foreach (var file in System.IO.Directory.GetFiles(incidentFolder))
                             {
                                 var fileName = System.IO.Path.GetFileName(file);
                                 var fileUrl = Url.Content($"~/uploads/{Model.ID}/{fileName}");
+                                var extension = System.IO.Path.GetExtension(fileName);
+                                var iconPath = GetFileIconPath(extension);
 
                                 <div class="file-item">
                                     <a href="@fileUrl" target="_blank" title="@fileName">
-                                        <i class="fas fa-file-alt"></i>
+                                        <svg class="file-icon" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" style="stroke: #000000; fill: #FFFFFF; margin: 15px">
+                                            <g transform="translate(6,6) scale(0.5)">
+                                                <path d="@iconPath"></path>
+                                            </g>
+                                        </svg>
                                     </a>
-                                    <span class="file-name">@fileName</span>
-                                    <button type="button" class="delete-icon" onclick="deleteFile('@fileName', '@Model.ID')" >
-                                        <i class="fas fa-times"></i>
+
+                                    <span class="file-name">
+                                        @Truncate(fileName, 15)
+                                    </span>
+
+
+                                    <button type="button" class="delete-btn" onclick="deleteFile('@fileName', '@Model.ID')">
+                                        <svg class="icon_delete_item" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M17 7L7 17M7 7L17 17"></path>
+                                        </svg>
                                     </button>
                                 </div>
                             }
@@ -240,6 +292,9 @@
                         <p>Файлы не найдены.</p>
                     }
                 </div>
+
+
+
             </div>
 
         </div>
@@ -256,160 +311,41 @@
     </form>
 
 
-    <script>
-        // Функция для удаления файла
-        function deleteFile(fileName, incidentId) {
-            if (confirm('Вы уверены, что хотите удалить этот файл?')) {
-                fetch(`/Incidents/DeleteFile?fileName=${encodeURIComponent(fileName)}&incidentId=${incidentId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Файл успешно удален.');
-                            location.reload(); // Полная перезагрузка страницы после удаления файла
-                        } else {
-                            alert('Ошибка при удалении файла: ' + (data.message || 'Неизвестная ошибка.'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка:', error);
-                        alert('Ошибка при удалении файла.');
-                    });
-            }
-        }
+    <!-- Модальное окно для добавления обновления -->
+    <div id="incidentUpdateModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Добавить обновление</h2>
+            <form id="incidentUpdateForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="updateDate" name="Date" />
+                <input type="hidden" id="incidentId" name="IncidentID" value="@Model.ID" />
 
-        // Функция для обработки выбора файла
-        function handleFileSelect(event) {
-            console.log('handleFileSelect called');
-            console.log('Selected file:', event.target.files[0]);
+                <div class="form-group">
+                    <label for="updateReporter">Автор обновления</label>
+                    <input type="text" id="updateReporter" name="UpdateReporter" value="@TempData.Peek("Login") as string ?? string.Empty" required />
+                </div>
 
-            // Используем setTimeout для отсрочки нажатия кнопки "Сохранить"
-            setTimeout(function () {
-                var submitButton = document.querySelector('button[type="submit"]');
-                if (submitButton) {
-                    console.log('Submitting form...');
-                    submitButton.click();
-                } else {
-                    console.error('Submit button not found');
-                }
-            }, 100); // Задержка в 100 мс для уверенности, что файл выбран
-        }
+                <div class="form-group">
+                    <label for="updateRun">Рейс</label>
+                    <input type="number" id="updateRun" name="Run" value="@Model.Run" required />
+                </div>
 
-        // Обработчик событий после загрузки DOM
-        document.addEventListener('DOMContentLoaded', function () {
-            var modal = document.getElementById("incidentUpdateModal");
-            var btn = document.getElementById("openModalButton");
-            var span = document.getElementsByClassName("close-modal")[0];
+                <div class="form-group">
+                    <label for="updateSolution">Описание обновления</label>
+                    <textarea id="updateSolution" name="UpdateSolution" rows="4" required></textarea>
+                </div>
 
-            // Обработчик открытия модального окна
-            btn.onclick = function (event) {
-                event.preventDefault();
+                <div class="modal-buttons">
+                    <button type="submit">Сохранить</button>
+                    <button type="button" id="cancelUpdateButton">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                // Отображаем модальное окно
-                modal.style.display = "block";
 
-                // Теперь ищем форму внутри модального окна после его открытия
-                var updateForm = document.getElementById("incidentUpdateForm");
-                if (!updateForm) {
-                    console.error('Форма с ID "incidentUpdateForm" не найдена.');
-                    return;
-                }
 
-                var updateDate = document.getElementById("updateDate");
-                var updateReporter = document.getElementById("updateReporter");
-                var updateRun = document.getElementById("updateRun");
-                var updateSolution = document.getElementById("updateSolution");
-
-                // Получаем дату с учётом смещения +5 часов
-                var dateWithOffset = getDateWithTimezoneOffset(5);
-                updateDate.value = dateWithOffset;
-                updateReporter.value = "@reporter";
-                updateRun.value = "@Model.Run";
-                updateSolution.value = "";
-
-                // Обработчик отправки формы
-                updateForm.onsubmit = function (event) {
-                    event.preventDefault();
-
-                    var formData = {
-                        IncidentID: "@Model.ID",
-                        Date: updateDate.value,
-                        UpdateReporter: updateReporter.value,
-                        Run: updateRun.value,
-                        UpdateSolution: updateSolution.value
-                    };
-                    console.log('Отправляемые данные:', formData);
-
-                    fetch('@Url.Action("AddUpdate", "Incidents")', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': getAntiForgeryToken()
-                        },
-                        body: JSON.stringify(formData)
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Инцидент успешно обновлен.');
-                                modal.style.display = "none";
-                                location.reload();
-                            } else {
-                                alert('Ошибка при обновлении инцидента: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Ошибка:', error);
-                            alert('Произошла ошибка при обновлении инцидента.');
-                        });
-                };
-
-                // Обработчик для закрытия модального окна
-                document.getElementById('cancelUpdateButton').onclick = function () {
-                    modal.style.display = "none";
-                };
-            };
-
-            // Обработчик закрытия модального окна по клику на крестик
-            span.onclick = function () {
-                modal.style.display = "none";
-            }
-
-            // Обработчик закрытия модального окна при клике вне его области
-            window.onclick = function (event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            }
-
-            // Функция для получения CSRF-токена
-            function getAntiForgeryToken() {
-                var tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
-                return tokenElement ? tokenElement.value : '';
-            }
-
-            // Функция для получения даты с учётом смещения часового пояса
-            function getDateWithTimezoneOffset(offset) {
-                var currentDate = new Date();
-                var utcTime = currentDate.getTime() + (currentDate.getTimezoneOffset() * 60000);
-                var targetTime = utcTime + (offset * 3600000);
-                var targetDate = new Date(targetTime);
-
-                var year = targetDate.getFullYear();
-                var month = ('0' + (targetDate.getMonth() + 1)).slice(-2);
-                var day = ('0' + targetDate.getDate()).slice(-2);
-                var hours = ('0' + targetDate.getHours()).slice(-2);
-                var minutes = ('0' + targetDate.getMinutes()).slice(-2);
-
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            }
-        });
-
-    </script>
 </body>
 
 </html>
