@@ -201,12 +201,34 @@ namespace TrackingSheet.Controllers
         {
             if (model == null || model.TaskId == Guid.Empty || model.NewColumnId == Guid.Empty)
             {
-                return BadRequest("Invalid task move request.");
+                return BadRequest(new { message = "Invalid task move request." });
             }
 
-            await _kanbanService.MoveTaskAsync(model.TaskId, model.OldColumnId, model.NewColumnId, model.NewIndex);
-            return Ok();
+            KanbanTask updatedTask;
+            try
+            {
+                updatedTask = await _kanbanService.MoveTaskAsync(model.TaskId, model.OldColumnId, model.NewColumnId, model.NewIndex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error moving task.");
+                return StatusCode(500, new { message = "An error occurred while moving the task." });
+            }
+
+            if (updatedTask == null)
+            {
+                return NotFound(new { message = "Task not found after moving." });
+            }
+
+            return Json(new
+            {
+                success = true,
+                rowVersion = Convert.ToBase64String(updatedTask.RowVersion)
+            });
         }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

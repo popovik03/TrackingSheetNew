@@ -323,16 +323,16 @@ namespace TrackingSheet.Services
             }
         }
 
-        public async Task MoveTaskAsync(Guid taskId, Guid oldColumnId, Guid newColumnId, int newIndex)
+        public async Task<KanbanTask> MoveTaskAsync(Guid taskId, Guid oldColumnId, Guid newColumnId, int newIndex)
         {
             var task = await _context.KanbanTasks.FindAsync(taskId);
 
             if (task != null)
             {
-                // Если колонка задачи изменилась
+                // If the task's column has changed
                 if (task.KanbanColumnId != newColumnId)
                 {
-                    // Удаляем задачу из старой колонки и обновляем порядок задач в старой колонке
+                    // Remove task from old column and update order
                     var oldColumnTasks = await _context.KanbanTasks
                         .Where(t => t.KanbanColumnId == oldColumnId)
                         .OrderBy(t => t.Order)
@@ -344,11 +344,11 @@ namespace TrackingSheet.Services
                         oldColumnTasks[i].Order = i;
                     }
 
-                    // Обновляем колонку задачи
+                    // Update task's column
                     task.KanbanColumnId = newColumnId;
                 }
 
-                // Обновляем порядок задач в новой колонке
+                // Update order in the new column
                 var newColumnTasks = await _context.KanbanTasks
                     .Where(t => t.KanbanColumnId == newColumnId)
                     .OrderBy(t => t.Order)
@@ -363,7 +363,10 @@ namespace TrackingSheet.Services
 
                 await _context.SaveChangesAsync();
             }
+
+            return task; // Return the updated task
         }
+
 
         public async Task<Guid> GetBoardIdByColumnIdAsync(Guid columnId)
         {

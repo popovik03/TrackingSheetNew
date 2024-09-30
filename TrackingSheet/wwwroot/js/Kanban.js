@@ -137,39 +137,35 @@ $(document).ready(function () {
     $(document).ready(function () {
         // Обработчик клика по кнопке редактирования задачи
         $('.edit-task-button').on('click', function () {
-            // Получаем JSON строку из атрибута data-task
             var taskDataJson = $(this).attr('data-task');
-            console.log("Task Data JSON:", taskDataJson); // Для отладки
+            console.log("Task Data JSON:", taskDataJson);
 
             if (!taskDataJson) {
                 console.error('No task data found in data-task attribute.');
                 return;
             }
 
-            // Парсим JSON строку в объект
             var task = JSON.parse(taskDataJson);
-            console.log("Parsed Task Data:", task); // Для отладки
+            console.log("Parsed Task Data:", task);
 
             // Заполняем поля модального окна
             $('#editTaskId').val(task.id);
             $('#editTaskName').val(task.taskName);
             $('#editTaskDescription').val(task.taskDescription);
             $('#editTaskColor').val(task.taskColor);
-            $('#editDueDate').val(task.dueDate);
+            $('#editDueDate').val(task.dueDate ? task.dueDate.split('T')[0] : '');
             $('#editPriority').val(task.priority);
             $('#editTaskAuthor').val(task.taskAuthor);
             $('#editCreatedAt').val(task.createdAt);
             $('#editTaskRowVersion').val(task.rowVersion);
             $('#editTaskColumnId').val(task.columnId);
 
-            // Заполняем подзадачи
+            // Очищаем и заполняем подзадачи
+            $('#subtasksList').empty();
             if (task.subtasks && task.subtasks.length > 0) {
-                $('#subtasksList').empty(); // Очищаем список подзадач
                 task.subtasks.forEach(function (subtask) {
                     addSubtaskToList(subtask.id, subtask.subtaskDescription, subtask.isCompleted, subtask.rowVersion);
                 });
-            } else {
-                $('#subtasksList').empty();
             }
 
             // Заполняем комментарии
@@ -184,6 +180,8 @@ $(document).ready(function () {
 
             // Устанавливаем SubtasksJson перед отправкой формы
             $('#editSubtasksJson').val(JSON.stringify(getSubtasksData()));
+
+
         });
     });
 
@@ -236,6 +234,7 @@ $(document).ready(function () {
                     console.error('Updated task data is missing in the response.');
                 }
             },
+
             error: function (xhr, status, error) {
                 console.error('Error updating task:', xhr.responseText, error);
 
@@ -282,11 +281,21 @@ function updateTaskInView(task) {
             });
         }
 
+        // Обновляем атрибут data-task на кнопке редактирования
+        var editButton = taskElement.find('.edit-task-button');
+        if (editButton.length) {
+            editButton.attr('data-task', JSON.stringify(task));
+            console.log('Updated data-task attribute in updateTaskInView:', editButton.attr('data-task'));
+        } else {
+            console.error('Edit button not found in task element.');
+        }
+
         // Обновление других данных задачи при необходимости
     } else {
         console.error('Task element not found for task ID:', task.id);
     }
 }
+
 
 
 
@@ -321,14 +330,48 @@ document.addEventListener('DOMContentLoaded', function () {
                             oldColumnId: oldColumnId,
                             newIndex: newIndex
                         }),
-                        success: function () {
-                            console.log('Task moved successfully');
+                        success: function (response) {
+                            if (response.success) {
+                                console.log('Task moved successfully');
+                                if (response.rowVersion) {
+                                    // Обновляем RowVersion в элементе задачи
+                                    var taskElement = $('.kanban-task[data-id="' + taskId + '"]');
+                                    if (taskElement.length) {
+                                        taskElement.attr('data-row-version', response.rowVersion);
+                                        console.log('RowVersion updated to:', response.rowVersion);
+                                    } else {
+                                        console.error('Task element not found in DOM.');
+                                    }
+
+                                    // Обновляем данные задачи в атрибуте data-task
+                                    var editButton = taskElement.find('.edit-task-button');
+                                    if (editButton.length) {
+                                        var taskDataJson = editButton.attr('data-task');
+                                        if (taskDataJson) {
+                                            var taskData = JSON.parse(taskDataJson);
+                                            taskData.rowVersion = response.rowVersion;
+                                            // Обновляем columnId, если задача переместилась в другую колонку
+                                            taskData.columnId = newColumnId;
+                                            editButton.attr('data-task', JSON.stringify(taskData));
+                                            console.log('Updated data-task attribute:', editButton.attr('data-task'));
+                                        } else {
+                                            console.error('No data-task attribute found on edit button.');
+                                        }
+                                    } else {
+                                        console.error('Edit button not found in task element.');
+                                    }
+                                } else {
+                                    console.warn('RowVersion not provided in response.');
+                                }
+                            } else {
+                                console.error('Task move failed:', response.message);
+                                alert('Ошибка при перемещении задачи: ' + response.message);
+                                location.reload();
+                            }
                         },
                         error: function (xhr, status, error) {
                             console.error('Error moving task:', error);
                             alert('Ошибка при перемещении задачи. Пожалуйста, попробуйте снова.');
-
-                            // Возвращаем задачу на исходное место
                             location.reload();
                         }
                     });
