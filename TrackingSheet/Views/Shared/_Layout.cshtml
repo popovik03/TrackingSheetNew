@@ -1,7 +1,8 @@
-﻿@{
-    var loggeduser = TempData.Peek("Login") as string ?? string.Empty;
+﻿@using System.Security.Claims
+@{
+    // Получение имени пользователя через User.Identity
+    var loggedUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Гость";
     var boardId = ViewBag.BoardId;
-
 }
 
 
@@ -124,7 +125,7 @@
                     </svg>
                 </div>
                 <div class="user-info">
-                    <span class="user-name">@loggeduser</span>
+                    <span class="user-name">@loggedUser</span>
                     <span class="user-username">Пользователь</span>
                 </div>
                 <div class="icon-container-settings">

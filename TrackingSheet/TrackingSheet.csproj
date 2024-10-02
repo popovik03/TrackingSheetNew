@@ -8,13 +8,9 @@
 
   <ItemGroup>
     <Compile Remove="wwwroot\NewFolder1\**" />
-    <Compile Remove="wwwroot\NewFolder\**" />
     <Content Remove="wwwroot\NewFolder1\**" />
-    <Content Remove="wwwroot\NewFolder\**" />
     <EmbeddedResource Remove="wwwroot\NewFolder1\**" />
-    <EmbeddedResource Remove="wwwroot\NewFolder\**" />
     <None Remove="wwwroot\NewFolder1\**" />
-    <None Remove="wwwroot\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +38,7 @@
     <Folder Include="Services\KanbanServices\NewFolder\" />
     <Folder Include="wwwroot\img\" />
     <Folder Include="wwwroot\js\NewFolder\" />
+    <Folder Include="wwwroot\avatars\" />
     <Folder Include="wwwroot\uploads\" />
     <Folder Include="wwwroot\vendor\" />
   </ItemGroup>

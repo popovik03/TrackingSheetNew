@@ -6,25 +6,18 @@ using TrackingSheet.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-
-
 namespace TrackingSheet.Controllers
 {
     public class AccessController : Controller
     {
-        
         public IActionResult Login()
         {
-            TempData["Login"] = "";
-            ClaimsPrincipal claimUser = HttpContext.User;
-            if (claimUser.Identity.IsAuthenticated)
-                 
+            // Проверка, аутентифицирован ли пользователь
+            if (User.Identity.IsAuthenticated)
                 return RedirectToAction("Index", "Home");
 
             return View();
         }
-
-        
 
         [HttpPost]
         public async Task<IActionResult> Login(VMLogin modelLogin)
@@ -47,40 +40,38 @@ namespace TrackingSheet.Controllers
 
             if (users.TryGetValue(modelLogin.Login431, out var expectedPassword) && expectedPassword == modelLogin.PassWord)
             {
-                
                 var claims = new List<Claim>
                 {
+                    new Claim(ClaimTypes.Name, modelLogin.Login431),
                     new Claim(ClaimTypes.NameIdentifier, modelLogin.Login431),
-                    new Claim("OtherProperties", "Example Role")
+                    // Добавьте другие клеймы, если необходимо
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties
                 {
                     AllowRefresh = true,
-                    IsPersistent = modelLogin.KeepLogged
+                    IsPersistent = modelLogin.KeepLogged,
+                    // Можно добавить другие свойства, например, время истечения
                 };
 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-                TempData["Login"] = modelLogin.Login431;
-
-                //HttpContext.Session.SetString("Logged", modelLogin.Login431); 
-                //var logged = HttpContext.Session.GetString("Logged");
-                //вернусь когда разберусь с сессиями
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
 
                 return RedirectToAction("Index", "Home");
-                
             }
 
-            
             ViewData["ValidateMessage"] = "Пользователь не найден";
-            
             return View();
         }
 
-
-
-        
-
+        [HttpPost]
+        public async Task<IActionResult> LogOut()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Access");
+        }
     }
 }

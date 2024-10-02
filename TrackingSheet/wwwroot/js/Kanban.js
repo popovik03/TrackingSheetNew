@@ -253,6 +253,14 @@ $(document).ready(function () {
         });
     });
 
+    // Обработчик клика для кнопок удаления подзадач
+    $(document).on('click', '.remove-subtask-button', function () {
+        var subtaskId = $(this).data('subtask-id');
+        $(this).closest('li').remove();
+        console.log("Удалена подзадача с ID:", subtaskId);
+    });
+
+
 });
 
 
