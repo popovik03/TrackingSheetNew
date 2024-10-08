@@ -1,0 +1,178 @@
+﻿/* Общий стиль для контейнера */
+.daily-main {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Левый блок */
+.daily-main-left {
+    width: 40%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Правый блок */
+.daily-main-right {
+    width: 60%;
+    display: flex; /* Используем Flexbox для внутреннего расположения */
+    flex-direction: row; /* Располагаем элементы в строку */
+    gap: 20px; /* Промежуток между dmr-left и dmr-right */
+    padding: 20px; /* Внутренние отступы */
+    box-sizing: border-box; /* Включаем padding в ширину элемента */
+}
+
+/* Внутренние блоки правой части */
+.dmr-left {
+    flex: 70%; /* Занимает 80% от .daily-main-right */
+    /* Если блок пуст, можно скрыть или оставить для будущего контента */
+}
+
+.dmr-right {
+    flex: 30%; /* Занимает 20% от .daily-main-right */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Расстояние между виджетами */
+    align-items: stretch; /* Выравнивание содержимого по ширине */
+    box-sizing: border-box; /* Включаем padding в ширину элемента */
+}
+
+/* Стили для приветственного заголовка */
+.dmr-left h2 {
+    text-align: left;
+    margin-bottom: 20px; /* Добавляем отступ снизу */
+    font-size: 24px;
+    color: #333;
+}
+
+/* Стили для выделенных строк таблицы */
+.flagged {
+    background: linear-gradient(to right, #FFA500, #FFFFCC, #FFFFFF);
+}
+
+/* Стили для контейнера часов */
+.clocks-container {
+    padding: 15px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    width: 100%; /* Занимает всю ширину контейнера .dmr-right */
+    box-sizing: border-box;
+}
+
+    .clocks-container h2 {
+        text-align: center;
+        margin-bottom: 15px;
+        color: #333;
+        font-size: 20px;
+    }
+
+.clock {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+    .clock h3 {
+        margin: 0;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .clock .time {
+        margin: 0;
+        font-size: 14px;
+        font-weight: bold;
+        color: #000;
+    }
+
+/* Ограничение ширины виджетов */
+.weatherwidget-io,
+[data-tockify-component="mini"],
+.clocks-container {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Дополнительные стили для виджетов */
+.weatherwidget-io {
+    margin-bottom: 20px;
+    width: 100%; /* Занимает всю доступную ширину */
+}
+
+[data-tockify-component="mini"] {
+    margin-bottom: 20px;
+    width: 100%; /* Занимает всю доступную ширину */
+}
+
+.clocks-container {
+    margin-bottom: 20px;
+}
+
+/* Стили для таблицы */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    table-layout: fixed; /* Фиксированная ширина столбцов */
+    width: 100%;
+}
+
+    .table th, .table td {
+        word-wrap: break-word;
+        word-break: break-all;
+        padding: 8px; /* Меньшие внутренние отступы */
+        font-size: 12px; /* Уменьшенный размер шрифта */
+    }
+
+    .table thead th {
+        background-color: #f2f2f2;
+        text-align: left;
+    }
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,.05);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .daily-main {
+        flex-direction: column;
+    }
+
+    .daily-main-left,
+    .daily-main-right {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .daily-main-right {
+        flex-direction: column; /* Изменяем направление на колонку */
+        align-items: center; /* Центрирование содержимого */
+    }
+
+    .dmr-right {
+        width: 100%; /* Занимает всю ширину на мобильных */
+        align-items: center;
+    }
+
+    .weatherwidget-io,
+    [data-tockify-component="mini"],
+    .clocks-container {
+        max-width: 100%; /* Убираем ограничение максимальной ширины */
+    }
+
+    .table th, .table td {
+        font-size: 12px; /* Уменьшенный размер шрифта */
+    }
+
+    .dmr-left h2 {
+        text-align: center;
+    }
+}

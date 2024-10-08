@@ -21,16 +21,14 @@ namespace TrackingSheet.Controllers
         
         private readonly ILogger<HomeController> _logger;
         private readonly MVCDbContext _context;
+        private readonly EwsService _ewsService;
 
-        public HomeController(ILogger<HomeController> logger, MVCDbContext context)
+        public HomeController(ILogger<HomeController> logger, MVCDbContext context, EwsService ewsService)
         {
             _logger = logger;
             _context = context;
+            _ewsService = ewsService;
         }
-
-        /// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-        /// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-        ///  &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&>
 
         public async Task <IActionResult> Index()
         {
@@ -41,8 +39,6 @@ namespace TrackingSheet.Controllers
                 .Where(d => d.Date >= last36Hours)
                 .ToListAsync();
             var allData = await _context.IncidentList.ToListAsync();
-
-
 
 
 
@@ -117,35 +113,32 @@ namespace TrackingSheet.Controllers
         /// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         ///   ПЕРЕДАЧА ДАННЫХ в JSON
 
-        [HttpGet]
-        public async Task<ActionResult> GetFirstQuarterStatistics()
-        {
-            DateTime startDate = new DateTime(2024, 1, 1); // Начало первого квартала 2024 года
-            DateTime endDate = new DateTime(2024, 3, 31); // Конец первого квартала 2024 года
+        //[HttpGet]
+        //public async Task<ActionResult> GetFirstQuarterStatistics()
+        //{
+        //    DateTime startDate = new DateTime(2024, 1, 1); // Начало первого квартала 2024 года
+        //    DateTime endDate = new DateTime(2024, 3, 31); // Конец первого квартала 2024 года
 
-            var firstQuarterIncidents = await _context.IncidentList
-                .Where(i => i.Date >= startDate && i.Date <= endDate)
-                .GroupBy(i => i.ProblemType)
-                .Select(g => new
-                {
-                    ProblemType = g.Key,
-                    Count = g.Count(),
-                    SuccessCount = g.Count(i => i.Status == "Success"),
-                    FailCount = g.Count(i => i.Status == "Fail"),
-                    TotalSuccessFailCount = g.Count(i => i.Status == "Success") + g.Count(i => i.Status == "Fail"),
-                    SavedNPTCount = (int)g.Sum(i => i.SavedNPT) //в базе long - предложил такой вариант, без этого не хотел
-                })
-                .ToListAsync();
+        //    var firstQuarterIncidents = await _context.IncidentList
+        //        .Where(i => i.Date >= startDate && i.Date <= endDate)
+        //        .GroupBy(i => i.ProblemType)
+        //        .Select(g => new
+        //        {
+        //            ProblemType = g.Key,
+        //            Count = g.Count(),
+        //            SuccessCount = g.Count(i => i.Status == "Success"),
+        //            FailCount = g.Count(i => i.Status == "Fail"),
+        //            TotalSuccessFailCount = g.Count(i => i.Status == "Success") + g.Count(i => i.Status == "Fail"),
+        //            SavedNPTCount = (int)g.Sum(i => i.SavedNPT) //в базе long - предложил такой вариант, без этого не хотел
+        //        })
+        //        .ToListAsync();
 
-            int totalProblemTypes = firstQuarterIncidents.Sum(i => i.Count);
-            int totalClosedCount = firstQuarterIncidents.Sum(i => i.SuccessCount) + firstQuarterIncidents.Sum(i => i.FailCount);
-            int totalSavedNPT = firstQuarterIncidents.Sum(i => i.SavedNPTCount);
+        //    int totalProblemTypes = firstQuarterIncidents.Sum(i => i.Count);
+        //    int totalClosedCount = firstQuarterIncidents.Sum(i => i.SuccessCount) + firstQuarterIncidents.Sum(i => i.FailCount);
+        //    int totalSavedNPT = firstQuarterIncidents.Sum(i => i.SavedNPTCount);
 
-            return Json(firstQuarterIncidents);
-        }
-
-        /// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-        
+        //    return Json(firstQuarterIncidents);
+        //}
 
 
         public IActionResult Privacy()
@@ -165,6 +158,8 @@ namespace TrackingSheet.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
 
         
     }

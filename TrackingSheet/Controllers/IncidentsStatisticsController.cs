@@ -33,12 +33,6 @@ namespace TrackingSheet.Controllers
             return View(incidentsStatistics); // Передаём список напрямую
         }
 
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> IncidentsStatisticsJson(int year, int quarter)
-        {
-            var incidentsStatisticsJson = await _quarterYearStatisticsService.GetIncidentStatisticsASync(year, quarter);
-            return Json(incidentsStatisticsJson);
-        }
+       
     }
 }

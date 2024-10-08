@@ -1,14 +1,10 @@
 ﻿@using static TrackingSheet.Models.AddIncidentViewModel
 @model TrackingSheet.Models.AddIncidentViewModel
-@using System.Security.Claims
 
 @{
-    // Получение имени пользователя через User.Identity
-    var loggedUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Гость";
-    var boardId = ViewBag.BoardId;
 
     ViewData["Title"] = "Новая запись";
-    //var reporter = TempData.Peek("Login") as string ?? string.Empty;
+    var reporter = TempData.Peek("Login") as string ?? string.Empty;
     var well = ViewBag.VsatInfo != null ? ViewBag.VsatInfo.WELL_NAME : string.Empty;
     var run = ViewBag.VsatInfo != null ? (int?)ViewBag.VsatInfo.MWRU_NUMBER : (int?)null;
     var customer = ViewBag.VsatInfo != null ? ViewBag.VsatInfo.CPNM_NAME : string.Empty;
@@ -110,7 +106,7 @@
 
                 <div class="input-field">
                     <label for="reporter" class="form-label">431</label>
-                    <input type="text" class="form-control form-control-sm" asp-for="Reporter" value="@loggedUser" />
+                    <input type="text" class="form-control form-control-sm" asp-for="Reporter" value="@reporter" />
                 </div>
 
                 <div class="input-field">

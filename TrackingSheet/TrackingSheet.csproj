@@ -26,6 +26,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Exchange.WebServices" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
     <PackageReference Include="SciChart.ExternalDependencies" Version="8.5.0.28148" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
@@ -35,7 +36,6 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="Models\VIewModels\" />
-    <Folder Include="Services\KanbanServices\NewFolder\" />
     <Folder Include="wwwroot\img\" />
     <Folder Include="wwwroot\js\NewFolder\" />
     <Folder Include="wwwroot\avatars\" />

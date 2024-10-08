@@ -1,6 +1,6 @@
 ﻿namespace TrackingSheet.Services
 {
-    public class FolderIndexingHostedService
+    public class WellInspectorService
     {
     }
 }

@@ -11,6 +11,7 @@
     display: flex;
     margin: 5px 15px 15px 15px;
     flex-direction: column;
+    height: 98%;
 }
 
 
@@ -35,6 +36,8 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 5px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
 }
 
 @font-face {
@@ -50,7 +53,8 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
-
+    padding: 5px 10px;
+    border-radius: 10px;
 }
 
 .note-task-icons {
@@ -155,7 +159,7 @@ button:focus {
 }
 
 .icon_note {
-    width: 25px;
+    width: 21px;
     height: auto;
     fill: none;
     stroke: #8A94A6;
@@ -164,6 +168,7 @@ button:focus {
     stroke-linejoin: round;
     transition: all .3s ease;
     background-color: white;
+    margin-left: 10px;
 }
 
   .icon_note:hover {
@@ -198,7 +203,7 @@ button:focus {
     width: 18px;
     height: auto;
     fill: none;
-    stroke: #8A94A6;
+    stroke: #697385;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -214,11 +219,12 @@ button:focus {
     width: 18px;
     height: auto;
     fill: none;
-    stroke: #8A94A6;
+    stroke: #697385;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: all .3s ease;
+    filter: saturate(4.5) contrast(0.85) brightness(0.5);
 
   }
 
@@ -243,19 +249,26 @@ button:focus {
     stroke: #03BE93;
   }
 
-  .icon_task.active {
+
+.btn.active .icon_task {
     stroke: #03BE93;
-  }
+
+}
+
+strong {
+    filter: saturate(4.5) contrast(0.85) brightness(0.5);
+}
 
   .icon_add {
     width: 20px;
     height: auto;
     fill: none;
-    stroke: #8A94A6;
+    stroke: #697385;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: all .3s ease;
+    filter: saturate(4.5) contrast(0.85) brightness(0.5);
 
   }
 
@@ -268,7 +281,7 @@ button:focus {
     background-color: #e8ebed55;
     border-radius: 20px;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-
+    height: 100%;
 }
 
 .kanban-tasks::-webkit-scrollbar{
@@ -324,14 +337,14 @@ button:focus {
     overflow-x: auto;
     gap: 10px;
     padding: 10px;
-
+    height: 100%;
 }
 
 .kanban-column {
     display: flex;
     flex-direction: column;
     flex: 0%;
-    background-color: #f8f8f8;
+    background-color: white;
     border-radius: 15px;
     box-sizing: border-box;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
@@ -345,7 +358,7 @@ button:focus {
     flex-grow: 1;
     overflow-y: auto;
     padding: 10px;
-    gap: 5px;
+    gap: 10px;
     flex-direction: column;
 }
 
@@ -354,18 +367,19 @@ button:focus {
 }
 
 .kanban-task {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
     background-color: #ffffff;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #d0d0d0;
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.4s ease; /* Плавный переход для ширины */
 
 }
 
-.kanban-task:hover {
-    scale: 1.01;
-}
+
 
 .modal {
     z-index: 1060;
@@ -376,9 +390,194 @@ button:focus {
     font-family: 'Gilroy-SemiBold';
     font-size: 22px;
     padding-top: 5px;
+    filter: saturate(4.5) contrast(0.85) brightness(0.5);
 }
 
 .task-actions {
     display: flex;
     align-items: center;
+}
+
+
+.checkbox-wrapper-4 * {
+    box-sizing: border-box;
+  }
+
+  .checkbox-wrapper-4 .cbx {
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    display: inline-block;
+  }
+
+  .checkbox-wrapper-4 .cbx:not(:last-child) {
+    margin-right: 6px;
+  }
+
+  .checkbox-wrapper-4 .cbx span {
+    float: left;
+    vertical-align: middle;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .checkbox-wrapper-4 .cbx span:first-child {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    transform: scale(1);
+    border: 1px solid #cccfdb;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 1px rgba(43, 43, 43, 0.03);
+  }
+
+  .checkbox-wrapper-4 .cbx span:first-child svg {
+    position: absolute;
+    top: 3px;
+    left: 2px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 16px;
+    stroke-dashoffset: 16px;
+    transition: all 0.3s ease;
+    transition-delay: 0.1s;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .checkbox-wrapper-4 .cbx span:last-child {
+    padding-left: 8px;
+    line-height: 18px;
+  }
+
+  .checkbox-wrapper-4 .cbx:hover span:first-child {
+    border-color: #03BE93;
+  }
+
+  .checkbox-wrapper-4 .inp-cbx {
+    position: absolute;
+    visibility: hidden;
+  }
+
+  .checkbox-wrapper-4 .inp-cbx:checked + .cbx span:first-child {
+    background: #03BE93;
+    border-color: #03BE93;
+    animation: wave-4 0.4s ease;
+  }
+
+  .checkbox-wrapper-4 .inp-cbx:checked + .cbx span:first-child svg {
+    stroke-dashoffset: 0;
+  }
+
+  .checkbox-wrapper-4 .inline-svg {
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  @media screen and (max-width: 640px) {
+    .checkbox-wrapper-4 .cbx {
+      width: 100%;
+      display: inline-block;
+    }
+  }
+  @-moz-keyframes wave-4 {
+    50% {
+      transform: scale(0.9);
+    }
+  }
+  @-webkit-keyframes wave-4 {
+    50% {
+      transform: scale(0.9);
+    }
+  }
+  @-o-keyframes wave-4 {
+    50% {
+      transform: scale(0.9);
+    }
+  }
+  @keyframes wave-4 {
+    50% {
+      transform: scale(0.9);
+    }
+  }
+
+.cbx {
+    font-size: 14px; /* Размер шрифта */
+    color: #07302D; /* Цвет текста */
+    font-family: 'Gilroy-Medium'; /* Шрифт для чекбокса */
+}
+
+label {
+    margin: 0px;
+}
+
+.list-group-item {
+    position: relative;
+    display: flex;
+    padding: 0px;
+    margin-bottom: 0px;
+    background-color: #fff;
+    border: none;
+
+}
+
+.mb-3, .my-3 {
+    margin-bottom: 0rem !important;
+
+}
+
+.description {
+    font-size: 14px; /* Размер шрифта */
+    color: #07302D; /* Цвет текста */
+    font-family: 'Gilroy-Medium'; /* Шрифт для чекбокса */
+}
+
+
+.form-control {
+    height: auto;
+}
+
+.input-group *:not(svg) {
+
+    font-family: 'Gilroy-Medium';
+    font-size: 13px;
+}
+
+.input-group svg {
+    stroke: white;
+}
+
+
+.input-group button {
+    background-color: #03BE93; /* Цвет фона кнопки */
+    color: white; /* Цвет текста кнопки */
+    border: 1px solid #03BE93; /* Граница при наведении */
+    border-radius: 10px; /* Скругление углов кнопки */
+    cursor: pointer; /* Указатель при наведении */
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+
+}
+
+
+.input-group button:hover {
+    background-color: #ffffff; /* Цвет фона при наведении */
+    color: #03BE93; /* Цвет текста при наведении */
+    border: 1px solid #CCCCCC; /* Граница при наведении */
+}
+
+.input-group button:disabled {
+    pointer-events: none;
+}
+
+.input-group button:active {
+    background-color: #F7F7F7;
 }

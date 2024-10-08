@@ -21,6 +21,7 @@ builder.Services.AddAntiforgery(options =>
 
 //Мои сервисы
 builder.Services.AddScoped<RemoteDataService>();
+builder.Services.AddScoped<WellInspectorService>();
 builder.Services.AddScoped<QuarterYearStatisticsService>();
 builder.Services.AddScoped<IKanbanService, KanbanService>();
 
@@ -30,6 +31,7 @@ string rootPath = builder.Configuration.GetValue<string>("FolderIndexing:RootPat
 string outputPath = builder.Configuration.GetValue<string>("FolderIndexing:OutputPath");
 builder.Services.AddSingleton(new PassportFolderIndexerService(rootPath, outputPath));
 builder.Services.AddSingleton(new PassportFolderSearchService(outputPath));
+builder.Services.AddSingleton<EwsService>();
 //builder.Services.AddSingleton<IConfiguration>(builder.Configuration); ;
 
 builder.Services.AddSession();
@@ -55,7 +57,7 @@ builder.Services.AddDbContext<MVCDbContext>(options =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(option => {
     option.LoginPath = "/Access/Login";
-    option.ExpireTimeSpan = TimeSpan.FromMinutes(120);
+    option.ExpireTimeSpan = TimeSpan.FromMinutes(720);
     }); 
 
 var app = builder.Build();

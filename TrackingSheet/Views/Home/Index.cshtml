@@ -1,95 +1,113 @@
 ﻿@model TrackingSheet.Models.CombinedDataViewModel
-
+@using System.Security.Claims
+@using System.IO
 
 @{
     ViewData["Title"] = "Home Page";
-   
+    var loggedUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Гость";
+    var boardId = ViewBag.BoardId;
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
+ <!-- Изменил lang на "ru" для соответствия содержимому -->
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <style>
-        /* Стили для кнопки, имитирующей btn-info из Bootstrap */
-        .btn-info {
-            background-color: #17a2b8; /* Цвет фона Bootstrap btn-info */
-            color: #fff; /* Цвет текста */
-            border: 1px solid transparent; /* Граница с прозрачным цветом */
-            border-radius: 0.25rem; /* Радиус скругления углов */
-            padding: 0.60rem 1.125rem; /* Отступы внутри кнопки */
-            font-size: 1rem; /* Размер шрифта */
-            font-weight: 400; /* Толщина шрифта */
-            text-align: center; /* Выравнивание текста */
-            text-decoration: none; /* Убирает подчеркивание текста */
-            display: inline-block; /* Отображение в виде строки */
-            cursor: pointer; /* Курсор указателя */
-            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out; /* Плавный переход цвета фона и границы */
-        }
 
-            /* Стили для кнопки при наведении */
-            .btn-info:hover {
-                background-color: #138496; /* Цвет фона при наведении */
-                border-color: #117a8b; /* Цвет границы при наведении */
-            }
+    <!-- Подключение внешнего CSS-файла -->
+    <link rel="stylesheet" href="~/css/dailymain.css" />
 
-            /* Стили для кнопки при нажатии */
-            .btn-info:active {
-                background-color: #117a8b; /* Цвет фона при нажатии */
-                border-color: #10707f; /* Цвет границы при нажатии */
-                box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125); /* Тень для кнопки при нажатии */
-            }
-    </style>
+    <!-- Подключение внешнего JS-файла -->
+    <script src="~/js/dailymain.js" defer></script>
 </head>
 
 <body>
     <h1>Главная</h1>
-    <p style="margin-bottom: 20px;"></p>
-    <div class="top-block">
-        <div class="border rounded border-dark p-3">
-
+    <div class="daily-main">
+        <div class="daily-main-left">
             <h2>Суточная сводка</h2>
-            <div class="border rounded shadow-sm p-3" style="margin-top: 10px; margin-left:20px">
-                <table class="table table-striped" style="font-size: 14px; width: 95%; margin-left: 15px; margin-right: 15px; line-height: 1.5;">
-                    <thead>
-                        <tr>
-                            <th scope="col">Дата/время</th>
-                            <th scope="col">Смена</th>
-                            <th scope="col">431</th>
-                            <th scope="col">VSAT</th>
-                            <th scope="col">Рейс</th>
-                            <th scope="col">Сохраненное НПВ</th>
-                            <th scope="col">Тип</th>
-                            <th scope="col">Описание</th>
-                            <th scope="col">Cтатус</th>
-                            <th scope="col">Метка</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var incident in Model.RecentIncidents)
-                        {
+            <div class="border rounded shadow-sm p-3" style="margin-top: 10px; margin-left:20px;">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
                             <tr>
-                                <td style="margin-left: 10px">@incident.Date</td>
-                                <td>@incident.Shift</td>
-                                <td>@incident.Reporter</td>
-                                <td>@incident.VSAT</td>
-                                <td>@incident.Run</td>
-                                <td>@incident.SavedNPT</td>
-                                <td>@incident.ProblemType</td>
-                                <td>@incident.Solution</td>
-                                <td>@incident.Status</td>
-                                <td>@incident.HighLight</td>
-
+                                <th scope="col">Дата/время</th>
+                                <th scope="col">Смена</th>
+                                <th scope="col">431</th>
+                                <th scope="col">VSAT</th>
+                                <th scope="col">Скв</th>
+                                <th scope="col">Рейс</th>
+                                <th scope="col">Тип</th>
+                                <th scope="col">Cтатус</th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var incident in Model.RecentIncidents)
+                            {
+                                var rowClass = incident.HighLight?.Contains("🚩") == true ? "flagged" : "";
+
+                                <tr class="@rowClass">
+                                    <td>@incident.Date</td>
+                                    <td>@incident.Shift</td>
+                                    <td>@incident.Reporter</td>
+                                    <td>@incident.VSAT</td>
+                                    <td>@incident.Well</td>
+                                    <td>@incident.Run</td>
+                                    <td>@incident.ProblemType</td>
+                                    <td>@incident.Status</td>
+                                   
+                                </tr>
+                                <tr class="@rowClass">
+                                    <td colspan="10">@incident.Solution</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="daily-main-right">
+            <div class="dmr-left">
+               
+                <!-- Здесь будет размещаться основной контент в будущем -->
+            </div>
+
+            <div class="dmr-right">
+                
+
+                <!-- Виджет календаря Tockify -->
+                <div data-tockify-component="mini" data-tockify-calendar="viktor.popov"></div>
+                <script data-cfasync="false" data-tockify-script="embed" src="https://public.tockify.com/browser/embed.js"></script>
+
+                <!-- Виджет отображения времени -->
+                <div class="clocks-container">
+                    <div class="clock" id="tyumen-clock">
+                        <h3>Тюмень</h3>
+                        <p class="time">--:--</p>
+                    </div>
+                    <div class="clock" id="moscow-clock">
+                        <h3>Москва</h3>
+                        <p class="time">--:--</p>
+                    </div>
+                    
+                    <div class="clock" id="leninsk-clock">
+                        <h3>Ленск</h3>
+                        <p class="time">--:--</p>
+                    </div>
+                    <div class="clock" id="yuzhno-sakhalinsk-clock">
+                        <h3>Южно-Сахалинск</h3>
+                        <p class="time">--:--</p>
+                    </div>
+                </div>
+                <!-- Виджет погоды -->
+                <a class="weatherwidget-io" href="https://forecast7.com/ru/57d1665d53/tyumen/" data-label_1="TYUMEN" data-label_2="WEATHER" data-theme="original">TYUMEN WEATHER</a>
             </div>
         </div>
     </div>
-
 </body>
 </html>
-

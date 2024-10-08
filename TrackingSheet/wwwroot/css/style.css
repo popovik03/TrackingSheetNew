@@ -43,33 +43,31 @@ body {
     overflow-y: auto;
 }
 
-body::-webkit-scrollbar{
-    width: 0.5rem;
-    height: 0.5rem;
-    transition: all .6s ease;
+    body::-webkit-scrollbar {
+        width: 0.5rem;
+        height: 0.5rem;
+        transition: all .6s ease;
+    }
 
-}
+    body::-webkit-scrollbar-thumb {
+        border-radius: .5rem;
+        background-color: #0004;
+    }
 
-body::-webkit-scrollbar-thumb{
-    border-radius: .5rem;
-    background-color: #0004;
-
-}
-
-body:hover::-webkit-scrollbar-thumb{ 
-    background-color: rgba(75, 75, 75, 0.267);
-}
+    body:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(75, 75, 75, 0.267);
+    }
 
 
 .main-header {
-    border-radius: 30px;
+    border-radius: 25px;
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-direction: row;
-    margin: 20px 20px 0px 20px;
-    height: 90px;
+    margin: 10px 10px 0px 10px;
+    height: 80px;
     min-width: 1200px; /* Устанавливаем минимальную ширину */
     padding: 20px 40px 20px 40px;
     background-image: url('../img/gradient (2).png'); /* Путь к вашей картинке */
@@ -79,7 +77,6 @@ body:hover::-webkit-scrollbar-thumb{
     position: relative;
     z-index: 10;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
-
 }
 
 .left-header {
@@ -106,19 +103,18 @@ main {
     flex-grow: 1;
     background-color: #fff;
     border-radius: 30px;
-    margin: 20px;
+    margin: 10px;
     min-width: 1200px;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
-
 }
 
 
-main.show {
-    opacity: 1;
-    transform: translateY(0);
-    visibility: visible;
-    transition-delay: 0s;
-}
+    main.show {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+        transition-delay: 0s;
+    }
 
 
 
@@ -151,7 +147,7 @@ header img {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
+}
 
 .menu-btn:hover .icon_popup,
 .menu-btn.active .icon_popup {
@@ -177,14 +173,13 @@ header img {
     max-height: 0;
     overflow: hidden;
     position: absolute;
-    top: 75px;
+    top: 70px;
     left: 20px;
     border-radius: 20px;
     background-color: #ffffff;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
-
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
     z-index: 100;
     opacity: 0;
@@ -192,42 +187,42 @@ header img {
     transition: max-height 0.5s ease, opacity 0.5s ease, visibility 0.5s;
 }
 
-.popup-menu.show {
-    max-height: 600px;
-    opacity: 1;
-    visibility: visible;
-}
+    .popup-menu.show {
+        max-height: 600px;
+        opacity: 1;
+        visibility: visible;
+    }
 
-.popup-menu ul {
-    width: 300px;
-    list-style: none;
-    margin: 10px;
-}
+    .popup-menu ul {
+        width: 300px;
+        list-style: none;
+        margin: 10px;
+    }
 
-.popup-menu li {
-    margin: 25px;
-}
+    .popup-menu li {
+        margin: 25px;
+    }
 
-.popup-menu li a {
-    font-family: 'Gilroy-Medium';    
-    color: #8A94A6;
-    text-decoration: none;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 7px;
-    border-radius: 5px;
-    transition: all 0.4s ease; /* Добавьте плавный переход */
-}
+        .popup-menu li a {
+            font-family: 'Gilroy-Medium';
+            color: #8A94A6;
+            text-decoration: none;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 7px;
+            border-radius: 5px;
+            transition: all 0.4s ease; /* Добавьте плавный переход */
+        }
 
-.popup-menu li.active a,
-.popup-menu li a:hover {
-    font-family: 'Gilroy-SemiBold';    
-    background-color: #fff;
-    color: #07302D;
-    transform: scale(1.1);
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 0.7px;
-}
+            .popup-menu li.active a,
+            .popup-menu li a:hover {
+                font-family: 'Gilroy-SemiBold';
+                background-color: #fff;
+                color: #07302D;
+                transform: scale(1.1);
+                box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 0.7px;
+            }
 
 .icon_menu {
     width: 10%;
@@ -238,36 +233,36 @@ header img {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
+}
 
 .popup-menu li a:hover .icon_menu,
 .popup-menu li.active .icon_menu {
-      stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
-  }
-  
-  .account {
-    width: 65px;
+    stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
+}
+
+.account {
+    width: 55px;
     display: flex;
     align-items: center;
     justify-content: space-around;
     transition: width 500ms cubic-bezier(.43, 1, 0.32, 1); /* Плавное изменение ширины */
     z-index: 1;
     cursor: pointer;
-    padding: 7px;
+    padding: 5px;
     overflow: hidden; /* Скрывает выходящие за пределы элементы */
     white-space: nowrap; /* Не переносит текст на новую строку */
 }
 
-.account:hover {
-    background-color: #fff;
-    border-radius: 15px;
-    width: 250px; /* Изменение ширины при наведении */
-}
+    .account:hover {
+        background-color: #fff;
+        border-radius: 15px;
+        width: 250px; /* Изменение ширины при наведении */
+    }
 
 
-.account:hover .icon_settings {
-    stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
-}
+        .account:hover .icon_settings {
+            stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
+        }
 
 .user {
     display: flex;
@@ -287,11 +282,11 @@ header img {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
+}
 
 .icon-container-acc {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     justify-content: start;
@@ -308,7 +303,7 @@ header img {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
+}
 
 
 .icon-container-settings {
@@ -320,10 +315,9 @@ header img {
 }
 
 .user-name {
-    font-family: 'Gilroy-SemiBold';    
+    font-family: 'Gilroy-SemiBold';
     font-size: 90%;
     margin: 3px;
-
 }
 
 .user-username {
@@ -331,7 +325,6 @@ header img {
     font-size: 12px;
     color: #666;
     margin: 3px;
-
 }
 
 .header {
@@ -341,10 +334,10 @@ header img {
     margin-bottom: 40px;
 }
 
-.header h1 {
-    font-size: 24px;
-    font-weight: bold;
-}
+    .header h1 {
+        font-size: 24px;
+        font-weight: bold;
+    }
 
 /* ------------НОВЫЙ ИНЦИДЕНТ------------------ */
 .container-new-incident {
@@ -353,7 +346,6 @@ header img {
     justify-items: stretch;
     padding: 40px 40px 20px 40px;
     align-items: start;
-   
 }
 
 .left {
@@ -368,39 +360,39 @@ header img {
     flex-direction: column;
 }
 
-.right .input-field-id {
-    display: none;
-}
+    .right .input-field-id {
+        display: none;
+    }
 
 h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'Gilroy-SemiBold';    
+    font-family: 'Gilroy-SemiBold';
     color: #07302D;
     padding-top: 20px;
     padding-left: 40px;
     padding-right: 40px;
 }
 
-h1 label {
-    width: 100%;
-}
+    h1 label {
+        width: 100%;
+    }
 
 h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'Gilroy-SemiBold';    
+    font-family: 'Gilroy-SemiBold';
     color: #8A94A6;
     padding-top: 5px;
     padding-left: 40px;
 }
 
-h2 label {
-    width: 100%;
-    font-size: 70%;
-}
+    h2 label {
+        width: 100%;
+        font-size: 70%;
+    }
 
 .form-label {
     display: block;
@@ -413,7 +405,6 @@ h2 label {
     padding: 10px;
     border-radius: 4px;
     font-size: 14px;
-
 }
 
 .button-container {
@@ -425,39 +416,39 @@ h2 label {
     padding-bottom: 40px;
 }
 
-.button-container button {
-    font-size: 18px; /* Размер шрифта кнопки */
-    padding: 10px 20px; /* Паддинг внутри кнопки */
-    background-color: #03BE93; /* Цвет фона кнопки */
-    color: white; /* Цвет текста кнопки */
-    border: none; /* Убираем границу */
-    border-radius: 40px; /* Скругление углов кнопки */
-    cursor: pointer; /* Указатель при наведении */
-    font-family: 'Gilroy-Bold', sans-serif; /* Шрифт кнопки */
-    width: 20%;
-    height: 50px; /* Высота кнопки */
-    text-decoration: none;
-    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    .button-container button {
+        font-size: 18px; /* Размер шрифта кнопки */
+        padding: 10px 20px; /* Паддинг внутри кнопки */
+        background-color: #03BE93; /* Цвет фона кнопки */
+        color: white; /* Цвет текста кнопки */
+        border: none; /* Убираем границу */
+        border-radius: 40px; /* Скругление углов кнопки */
+        cursor: pointer; /* Указатель при наведении */
+        font-family: 'Gilroy-Bold', sans-serif; /* Шрифт кнопки */
+        width: 20%;
+        height: 50px; /* Высота кнопки */
+        text-decoration: none;
+        transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
 
-.button-container button:hover {
-    background-color: #ffffff; /* Цвет фона при наведении */
-    color: #03BE93; /* Цвет текста при наведении */
-    border: 1px solid #CCCCCC; /* Граница при наведении */
-}
+        .button-container button:hover {
+            background-color: #ffffff; /* Цвет фона при наведении */
+            color: #03BE93; /* Цвет текста при наведении */
+            border: 1px solid #CCCCCC; /* Граница при наведении */
+        }
 
-.button-container button:disabled {
-    pointer-events: none;
-}
+        .button-container button:disabled {
+            pointer-events: none;
+        }
 
-.button-container button:active {
-    background-color: #F7F7F7;
-    transform: scale(1.025);
-}
+        .button-container button:active {
+            background-color: #F7F7F7;
+            transform: scale(1.025);
+        }
 
 .icon_plus {
     width: 25px;
@@ -467,23 +458,23 @@ h2 label {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
+}
 
 .button-container button:hover .icon_plus,
 .button-container button.active .icon_plus {
-      stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
-  }
+    stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
+}
 
 .input-field {
     min-width: 200px;
     height: 100%;
 }
 
-.input-field label {
-    font-family: 'Gilroy-SemiBold';
-    font-size: 17px; /* Размер шрифта */
-    color: #8A94A6;
-}
+    .input-field label {
+        font-family: 'Gilroy-SemiBold';
+        font-size: 17px; /* Размер шрифта */
+        color: #8A94A6;
+    }
 
 .vsat_field {
     display: flex;
@@ -499,7 +490,6 @@ h2 label {
     background-color: transparent;
     border: none;
     cursor: pointer;
-
 }
 
 .icon_get_data {
@@ -509,7 +499,7 @@ h2 label {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
+}
 
 .get_data_button .icon_get_data {
     transition: transform 0.5s ease; /* Добавляем плавный переход */
@@ -545,7 +535,7 @@ h2 label {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
+}
 
 .select-wrapper.open .select-arrow {
     transform: translateY(-50%) rotate(180deg);
@@ -653,7 +643,6 @@ tfoot input {
     stroke-linecap: round;
     stroke-linejoin: round;
     cursor: pointer;
-
 }
 
 .file-item {
@@ -699,7 +688,7 @@ tfoot input {
 .file-name {
     font-size: 12px;
     text-align: center;
-    margin-top:0;
+    margin-top: 5px;
 }
 
 .file-button {
@@ -716,12 +705,12 @@ tfoot input {
     margin-bottom: 45px;
 }
 
-.file-button:hover { 
-    transform: scale(1.15);
-    cursor: pointer;
-    background-color: white;
-    border: 2px solid #03BE93;
-}
+    .file-button:hover {
+        transform: scale(1.15);
+        cursor: pointer;
+        background-color: white;
+        border: 2px solid #03BE93;
+    }
 
 .add_file_container {
     display: flex;
@@ -738,7 +727,6 @@ tfoot input {
     stroke-linecap: round;
     stroke-linejoin: round;
     cursor: pointer;
-
 }
 
 .file-icon svg {
@@ -750,10 +738,9 @@ tfoot input {
     stroke-linecap: round;
     stroke-linejoin: round;
     cursor: pointer;
-
 }
 
-.file-button:hover svg { 
+.file-button:hover svg {
     transform: scale(1.15);
     stroke: #03BE93;
 }
@@ -790,55 +777,53 @@ tfoot input {
 
 @media print {
     .table, .table__body {
-     overflow: visible;
-     height: auto !important;
-     width: auto !important;
+        overflow: visible;
+        height: auto !important;
+        width: auto !important;
     }
-   }
+}
 
 .table_container {
     min-height: 100px;
     box-sizing: border-box;
     border-radius: 15px;
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 0.7px; 
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 0.7px;
     margin: 30px;
-
 }
 
 .table__header {
     width: 100%;
-    height: 10%;
     background-color: #fff4;
-    padding: 40px 40px 20px 40px;
+    padding: 20px 40px 20px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-.table__header .input-group {
-    width: 35%;
-    height: 100%;
-    background-color: #fff5;
-    padding: 0 .8rem;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-    transition: all .2s ease;
-}
+    .table__header .input-group {
+        width: 35%;
+        height: 100%;
+        background-color: #fff5;
+        padding: 0 .8rem;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+        transition: all .2s ease;
+    }
 
 
-.table__header .input-group input {
-    width: 100%;
-    font-size: 15px; /* Размер шрифта */
-    font-family: 'Gilroy-Medium';
-    height: 50px;
-    padding: 0 .5rem 0 .3rem;
-    background-color: transparent;
-    border: none;
-    outline: none;
-}
+        .table__header .input-group input {
+            width: 100%;
+            font-size: 15px; /* Размер шрифта */
+            font-family: 'Gilroy-Medium';
+            height: 50px;
+            padding: 0 .5rem 0 .3rem;
+            background-color: transparent;
+            border: none;
+            outline: none;
+        }
 
 .icon_search {
     width: 25px;
@@ -849,9 +834,9 @@ tfoot input {
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke: #8A94A6;
-  }
+}
 
-  input[type="search"]::-webkit-search-cancel-button {
+input[type="search"]::-webkit-search-cancel-button {
     appearance: none;
     -webkit-appearance: none;
     height: 16px;
@@ -870,20 +855,20 @@ tfoot input {
 }
 
 
-.table__body::-webkit-scrollbar{
-    width: 0.5rem;
-    height: 0.5rem;
-}
+    .table__body::-webkit-scrollbar {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
 
-.table__body::-webkit-scrollbar-thumb{
-    border-radius: .5rem;
-    background-color: #0004;
-    visibility: hidden;
-}
+    .table__body::-webkit-scrollbar-thumb {
+        border-radius: .5rem;
+        background-color: #0004;
+        visibility: hidden;
+    }
 
-.table__body:hover::-webkit-scrollbar-thumb{ 
-    visibility: visible;
-}
+    .table__body:hover::-webkit-scrollbar-thumb {
+        visibility: visible;
+    }
 
 
 table {
@@ -892,12 +877,12 @@ table {
     border-spacing: 0; /* Убираем промежутки между ячейками */
 }
 
-table th:first-child, 
-table td:first-child {
-    width: 120px; /* Укажите нужное значение ширины */
-    border-bottom-left-radius: 20px;
-    border-top-left-radius: 20px;
-}
+    table th:first-child,
+    table td:first-child {
+        width: 120px; /* Укажите нужное значение ширины */
+        border-bottom-left-radius: 20px;
+        border-top-left-radius: 20px;
+    }
 
 td img {
     width: 36px;
@@ -912,9 +897,8 @@ table, th, td {
     overflow: hidden;
     text-overflow: ellipsis;
     transition: .2s ease-in-out;
-
 }
- 
+
 thead th {
     top: 0;
     left: 0;
@@ -924,23 +908,22 @@ thead th {
     color: #778091;
     cursor: pointer;
     text-transform: capitalize;
-    
 }
 
-thead th:first-child {
-    border-top-left-radius: 15px; /* Угол слева вверху */
-    border-bottom-left-radius: 15px; /* Угол слева вверху */
-}
+    thead th:first-child {
+        border-top-left-radius: 15px; /* Угол слева вверху */
+        border-bottom-left-radius: 15px; /* Угол слева вверху */
+    }
 
-thead th:last-child {
-    border-top-right-radius: 15px; /* Угол справа вверху */
-    border-bottom-right-radius: 15px; /* Угол слева вверху */
-}
+    thead th:last-child {
+        border-top-right-radius: 15px; /* Угол справа вверху */
+        border-bottom-right-radius: 15px; /* Угол слева вверху */
+    }
 
 
-thead th:nth-last-child(2) input {
-    width: 100%;
-}
+    thead th:nth-last-child(2) input {
+        width: 100%;
+    }
 
 
 .th_container {
@@ -949,7 +932,7 @@ thead th:nth-last-child(2) input {
     align-items: center;
 }
 
-thead th:hover .icon_arrow{
+thead th:hover .icon_arrow {
     border: #8A94A6;
     border-radius: 50px;
 }
@@ -959,22 +942,22 @@ thead th:hover {
     background-color: #e7e7e7;
 }
 
-thead th.active .icon_arrow{
+thead th.active .icon_arrow {
     display: inline-block;
     border-radius: 50px;
     border: #03BE93;
 }
 
-thead th.active .icon_arrow{
+thead th.active .icon_arrow {
     stroke: #03BE93;
 }
 
 
-thead th.asc .icon_arrow{
+thead th.asc .icon_arrow {
     transform: rotate(180deg);
 }
 
-thead th.active,tbody td.active {
+thead th.active, tbody td.active {
     color: #03BE93;
 }
 
@@ -988,9 +971,9 @@ thead th.active,tbody td.active {
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: .2s ease-in-out;
-    display: none; 
+    display: none;
     margin-left: .5rem;
-  }
+}
 
 tbody tr {
     background-color: #ffffff;
@@ -998,26 +981,24 @@ tbody tr {
     transition: 0.3s ease; /* Добавляем плавный переход */
 }
 
-tbody tr:last-child {
-    border-bottom: 0px; /* Границы снизу */
-    border-radius: 20px;
+    tbody tr:last-child {
+        border-bottom: 0px; /* Границы снизу */
+        border-radius: 20px;
+    }
 
-}
+    tbody tr.hide {
+        opacity: 0;
+        border-bottom: 0px; /* Границы снизу */
+        transform: translateX(100%);
+    }
 
-tbody tr.hide {
-    opacity: 0;
-    border-bottom: 0px; /* Границы снизу */
-    transform: translateX(100%);
+    tbody tr:hover {
+        cursor: pointer;
+    }
 
-}
-
-tbody tr:hover {
-    cursor: pointer;
-}
-
-tbody tr:hover .icon_edit{
-    stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
-}
+        tbody tr:hover .icon_edit {
+            stroke: #03BE93; /* Цвет обводки иконки при наведении на родительский элемент */
+        }
 
 /* Стили, закрашивающие строки поочередно */
 table tbody tr:nth-child(odd),
@@ -1025,16 +1006,16 @@ table tbody tr:nth-child(even) {
     background-color: #ffffff;
 }
 
-table tbody tr:nth-child(odd):hover,
-table tbody tr:nth-child(even):hover {
-    background-color: #f9f9f9;
-}
+    table tbody tr:nth-child(odd):hover,
+    table tbody tr:nth-child(even):hover {
+        background-color: #f9f9f9;
+    }
 
 
 tbody tr td,
 tbody tr td p,
 tbody tr td img {
-    font-family: 'Gilroy-Medium';    
+    font-family: 'Gilroy-Medium';
     color: #07302D;
     padding-top: 15px;
     padding-bottom: 15px;
@@ -1063,7 +1044,7 @@ tbody tr.hide td p {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
+}
 
 tbody tr.hide td .icon-container-edit {
     width: 0;
@@ -1077,30 +1058,30 @@ tbody tr.hide td .icon-container-edit {
     text-align: center;
 }
 
-.status.day {
-    background-color: #fff5c2;
-    color: #cd7a36;
-}
+    .status.day {
+        background-color: #fff5c2;
+        color: #cd7a36;
+    }
 
-.status.night {
-    background-color: #35405ca1;
-    color: white;
-}
+    .status.night {
+        background-color: #35405ca1;
+        color: white;
+    }
 
-.status.success {
-    background-color: #cdefe0e8;
-    color: #219b7f;
-}
+    .status.success {
+        background-color: #cdefe0e8;
+        color: #219b7f;
+    }
 
-.status.failed {
-    background-color: #FFD5CE;
-    color: #C52046;
-}
+    .status.failed {
+        background-color: #FFD5CE;
+        color: #C52046;
+    }
 
-.status.workinprogress {
-    background-color: #FFEECE;
-    color: #EF9548;
-}
+    .status.workinprogress {
+        background-color: #FFEECE;
+        color: #EF9548;
+    }
 
 
 
@@ -1111,7 +1092,7 @@ tbody tr.hide td .icon-container-edit {
 }
 
 .export__file {
-    position: relative; 
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: stretch;
@@ -1123,101 +1104,97 @@ tbody tr.hide td .icon-container-edit {
     transition: all .2s ease-in-out;
 }
 
-.export__file .export__file-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: auto;
-    transition: .2s ease-in-out;
+    .export__file .export__file-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: auto;
+        transition: .2s ease-in-out;
+    }
 
-}
+    .export__file:hover {
+        transform: scale(1.15);
+        cursor: pointer;
+        background-color: white;
+        border: 2px solid #03BE93;
+    }
 
-.export__file:hover { 
-    transform: scale(1.15);
-    cursor: pointer;
-    background-color: white;
-    border: 2px solid #03BE93;
-}
+    .export__file input {
+        display: none;
+    }
 
-.export__file input {
-    display: none;
-}
+    .export__file .export__file-options {
+        color: white;
+        right: 10px;
+        top: 120%;
+        width: 12rem;
+        border-radius: .5rem;
+        overflow: hidden;
+        text-align: center;
+        opacity: 0;
+        transform: scale(.8);
+        transform-origin: top right;
+        box-shadow: 0 .2rem .5rem rgba(0, 0, 0, 0.1);
+        background-color: rgba(21, 34, 24, 0.418); /* Белый полупрозрачный фон для опций */
+        transition: .2s;
+    }
 
-.export__file .export__file-options {
-    color: white;
-    right: 10px;
-    top: 120%;
-    width: 12rem;
-    border-radius: .5rem;
-    overflow: hidden;
-    text-align: center;
-    opacity: 0;
-    transform: scale(.8);
-    transform-origin: top right;
-    box-shadow: 0 .2rem .5rem rgba(0, 0, 0, 0.1);
-    background-color: rgba(21, 34, 24, 0.418); /* Белый полупрозрачный фон для опций */
-    transition: .2s;
+    .export__file input:checked + .export__file-options {
+        opacity: 1;
+        transform: scale(1);
+        z-index: 100;
+        position: absolute;
+    }
 
-}
+    .export__file .export__file-options label {
+        display: block;
+        width: 100%;
+        padding: .6rem 0;
+        background-color: transparent;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        transition: .2s ease-in-out;
+    }
 
-.export__file input:checked + .export__file-options {
-    opacity: 1;
-    transform: scale(1);
-    z-index: 100;
-    position: absolute;
+    /* Стилизация для SVG внутри label */
+    .export__file .export__file-btn svg,
+    .export__file .export__file-options svg {
+        width: 30px;
+        height: auto;
+        fill: none;
+        stroke: white;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        cursor: pointer;
+    }
 
-}
-
-.export__file .export__file-options label {
-    display: block;
-    width: 100%;
-    padding: .6rem 0;
-    background-color: transparent;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    transition: .2s ease-in-out;
-}
-
-/* Стилизация для SVG внутри label */
-.export__file .export__file-btn svg,
-.export__file .export__file-options svg {
-    width: 30px;
-    height: auto;
-    fill: none;
-    stroke: white;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    cursor: pointer;
-
-}
-
-.export__file:hover .export__file-btn svg { 
-    transform: scale(1.15);
-    stroke: #03BE93;
-}
+    .export__file:hover .export__file-btn svg {
+        transform: scale(1.15);
+        stroke: #03BE93;
+    }
 
 
-.export__file .export__file-options label:first-of-type {
-    padding: 1rem 0;
-}
+    .export__file .export__file-options label:first-of-type {
+        padding: 1rem 0;
+    }
 
-.export__file .export__file-options label:hover {
-    transform: scale(1.05);
-    cursor: pointer;
-}
+    .export__file .export__file-options label:hover {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
 
-.export__file .export__file-options label:first-of-type:hover {
-    transform: none;
-    cursor: none;
-}
+    .export__file .export__file-options label:first-of-type:hover {
+        transform: none;
+        cursor: none;
+    }
 
-.export__file .export__file-options img {
-    width: 2rem;
-    height: auto;
-}
+    .export__file .export__file-options img {
+        width: 2rem;
+        height: auto;
+    }
 
 .icon-container-export {
     display: flex;
@@ -1264,39 +1241,38 @@ tbody tr.hide td .icon-container-edit {
     border-radius: 10px;
 }
 
-.toggle-switch input[type="radio"] {
-    display: none;
-}
+    .toggle-switch input[type="radio"] {
+        display: none;
+    }
 
-.toggle-switch label {
-    padding: 10px;
-    margin: 0 5px;
-    cursor: pointer;
-    color: #8A94A6;
-    border-radius: 10px;
-    transition: background-color 0.3s, color 0.3s;
-}
+    .toggle-switch label {
+        padding: 10px;
+        margin: 0 5px;
+        cursor: pointer;
+        color: #8A94A6;
+        border-radius: 10px;
+        transition: background-color 0.3s, color 0.3s;
+    }
 
-.toggle-switch input[type="radio"]:checked + label {
-    background-color: white;
-    color: #07302D;
-    box-shadow: rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(32, 32, 44, 0.1) 0px 0px 8px;
-}
+    .toggle-switch input[type="radio"]:checked + label {
+        background-color: white;
+        color: #07302D;
+        box-shadow: rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(32, 32, 44, 0.1) 0px 0px 8px;
+    }
 
-/* Стиль для активных меток при наведении курсора */
-.toggle-switch input[type="radio"]:checked + label:hover {
-    transform: scale(1.05);
-    transition: .2s ease-in-out;
+        /* Стиль для активных меток при наведении курсора */
+        .toggle-switch input[type="radio"]:checked + label:hover {
+            transform: scale(1.05);
+            transition: .2s ease-in-out;
+        }
 
-}
-
-.toggle-switch label:hover {
-    background-color: white;
-    color: #07302D;
-    box-shadow: rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(32, 32, 44, 0.1) 0px 0px 8px;
-    transform: scale(1.05);
-    transition: .2s ease-out;
-}
+    .toggle-switch label:hover {
+        background-color: white;
+        color: #07302D;
+        box-shadow: rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(32, 32, 44, 0.1) 0px 0px 8px;
+        transform: scale(1.05);
+        transition: .2s ease-out;
+    }
 
 .button-container-stat button {
     font-size: 18px; /* Размер шрифта кнопки */
@@ -1315,23 +1291,22 @@ tbody tr.hide td .icon-container-edit {
     justify-content: center;
     box-sizing: border-box;
     border: 1px solid white; /* Граница при наведении */
-
 }
 
-.button-container-stat button:hover {
-    background-color: #ffffff; /* Цвет фона при наведении */
-    color: #03BE93; /* Цвет текста при наведении */
-    border: 1px solid #CCCCCC; /* Граница при наведении */
-}
+    .button-container-stat button:hover {
+        background-color: #ffffff; /* Цвет фона при наведении */
+        color: #03BE93; /* Цвет текста при наведении */
+        border: 1px solid #CCCCCC; /* Граница при наведении */
+    }
 
-.button-container-stat button:disabled {
-    pointer-events: none;
-}
+    .button-container-stat button:disabled {
+        pointer-events: none;
+    }
 
-.button-container-stat button:active {
-    background-color: #F7F7F7;
-    transform: scale(1.025);
-}
+    .button-container-stat button:active {
+        background-color: #F7F7F7;
+        transform: scale(1.025);
+    }
 
 .year-group {
     display: flex;
@@ -1343,35 +1318,34 @@ tbody tr.hide td .icon-container-edit {
     gap: 5px;
 }
 
-.year-group input[type="number"] {
-    font-size: 20px; /* Размер шрифта */
-    font-family: 'Gilroy-Medium';
-    height: 50px;
-    width: 30%;
-    min-width: 100px;
-    border: 2px solid #868686; /* Цвет и ширина границы */
-    border-radius: 10px; /* Скругление углов */
-    box-sizing: border-box; /* Включает паддинг и границы в ширину */
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-    border: 0;
-    background: rgba(0, 0, 0, 0);
-    appearance: none;
-    padding: 15px 12px;
-    line-height: 1.4;
-    color: rgb(0, 0, 0);
-    transition: all .2s ease;
+    .year-group input[type="number"] {
+        font-size: 20px; /* Размер шрифта */
+        font-family: 'Gilroy-Medium';
+        height: 50px;
+        width: 30%;
+        min-width: 100px;
+        border: 2px solid #868686; /* Цвет и ширина границы */
+        border-radius: 10px; /* Скругление углов */
+        box-sizing: border-box; /* Включает паддинг и границы в ширину */
+        box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+        border: 0;
+        background: rgba(0, 0, 0, 0);
+        appearance: none;
+        padding: 15px 12px;
+        line-height: 1.4;
+        color: rgb(0, 0, 0);
+        transition: all .2s ease;
+    }
 
-}
+        .year-group input[type="number"]:hover {
+            box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 1px;
+        }
 
-.year-group input[type="number"]:hover {
-    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 1px;
-}
-
-.year-group input[type="number"]:focus {
-    background: #fff;
-    outline: 0;
-    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
-}
+        .year-group input[type="number"]:focus {
+            background: #fff;
+            outline: 0;
+            box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
+        }
 
 .icon_calendar {
     width: 25px;
@@ -1382,9 +1356,9 @@ tbody tr.hide td .icon-container-edit {
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke: #8A94A6;
-  }
+}
 
-  /* ------------VSAT КНБК------------------ */
+/* ------------VSAT КНБК------------------ */
 
 .ip_select_container {
     display: flex;
@@ -1392,9 +1366,9 @@ tbody tr.hide td .icon-container-edit {
     justify-content: space-between;
 }
 
-.ip_select_container .input-field{
-    margin-right: 20px;
-}
+    .ip_select_container .input-field {
+        margin-right: 20px;
+    }
 
 .container-vsat {
     display: flex;
@@ -1406,7 +1380,6 @@ tbody tr.hide td .icon-container-edit {
     border: 0;
     justify-content: center;
     flex-direction: column;
-
 }
 
 .container-vsat-info {
@@ -1419,17 +1392,17 @@ tbody tr.hide td .icon-container-edit {
     padding: 20px;
 }
 
-.container-vsat-info .info_header {
-    font-family: 'Gilroy-SemiBold';
-    font-size: 17px; /* Размер шрифта */
-    color: #8A94A6;
-}
+    .container-vsat-info .info_header {
+        font-family: 'Gilroy-SemiBold';
+        font-size: 17px; /* Размер шрифта */
+        color: #8A94A6;
+    }
 
-.container-vsat-info .info_value {
-    font-family: 'Gilroy-SemiBold';
-    font-size: 20px; /* Размер шрифта */
-}
-  
+    .container-vsat-info .info_value {
+        font-family: 'Gilroy-SemiBold';
+        font-size: 20px; /* Размер шрифта */
+    }
+
 .vsat_label {
     font-family: 'Gilroy-SemiBold';
     color: #07302D;
@@ -1453,17 +1426,16 @@ tbody tr.hide td .icon-container-edit {
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: all .3s ease;
+}
 
-  }
-
-  .icon_passport:hover {
-    stroke: #03BE93;
-  }
-
+    .icon_passport:hover {
+        stroke: #03BE93;
+    }
 
 
 
-  /* ------------ТАБЛИЦА------------------ */
+
+/* ------------ТАБЛИЦА------------------ */
 
 .header-journal {
     display: flex;
@@ -1495,10 +1467,10 @@ tbody tr.hide td .icon-container-edit {
     font-size: 20px;
 }
 
-.dt-length label{
-    display: flex;
-    gap: 15px;
-}
+    .dt-length label {
+        display: flex;
+        gap: 15px;
+    }
 
 .dt-search {
     display: flex;
@@ -1506,36 +1478,36 @@ tbody tr.hide td .icon-container-edit {
     gap: 15px;
 }
 
-.dt-search input[type="search"],
-.date-range-filter input[type="date"] {
-    font-size: 15px; /* Размер шрифта */
-    font-family: 'Gilroy-Medium';
-    height: 30px;
-    border-radius: 10px; /* Скругление углов */
-    box-sizing: border-box; /* Включает паддинг и границы в ширину */
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-    border: 0;
-    background: rgba(0, 0, 0, 0);
-    appearance: none;
-    padding: 15px;
-    line-height: 1.4;
-    color: rgb(0, 0, 0);
-    transition: all .2s ease;
-    resize: none;
-}
+    .dt-search input[type="search"],
+    .date-range-filter input[type="date"] {
+        font-size: 15px; /* Размер шрифта */
+        font-family: 'Gilroy-Medium';
+        height: 30px;
+        border-radius: 10px; /* Скругление углов */
+        box-sizing: border-box; /* Включает паддинг и границы в ширину */
+        box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+        border: 0;
+        background: rgba(0, 0, 0, 0);
+        appearance: none;
+        padding: 15px;
+        line-height: 1.4;
+        color: rgb(0, 0, 0);
+        transition: all .2s ease;
+        resize: none;
+    }
 
-/* Эффект при наведении на поля ввода */
-.dt-search input[type="search"]:hover,
-.date-range-filter input[type="date"]:hover {
-    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 1px;
-}
+        /* Эффект при наведении на поля ввода */
+        .dt-search input[type="search"]:hover,
+        .date-range-filter input[type="date"]:hover {
+            box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 1px;
+        }
 
-.dt-search input[type="search"]:focus,
-.date-range-filter input[type="date"]:focus {
-    background: #fff;
-    outline: 0;
-    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
-}
+        .dt-search input[type="search"]:focus,
+        .date-range-filter input[type="date"]:focus {
+            background: #fff;
+            outline: 0;
+            box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
+        }
 
 
 
@@ -1556,31 +1528,31 @@ tbody tr.hide td .icon-container-edit {
 }
 
 
-.dt-length select:hover {
-    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 1px;
-}
+    .dt-length select:hover {
+        box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 1px;
+    }
 
-.dt-length select:focus {
-    background: #fff;
-    outline: 0;
-    box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
-}
+    .dt-length select:focus {
+        background: #fff;
+        outline: 0;
+        box-shadow: 0 0 0 0 #fff inset, #1de9b6 0 0 0 2px;
+    }
 
 .dt-info {
     font-size: 20px;
 }
 
-.dt-paging nav{
+.dt-paging nav {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-.dt-paging nav span{
-    font-family: 'Gilroy-SemiBold';
-    color: #07302D;
-    font-size: 15px;
-}
+    .dt-paging nav span {
+        font-family: 'Gilroy-SemiBold';
+        color: #07302D;
+        font-size: 15px;
+    }
 
 button.dt-paging-button {
     font-size: 12px; /* Размер шрифта кнопки */
@@ -1597,44 +1569,43 @@ button.dt-paging-button {
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-
 }
 
-button.dt-paging-button:hover {
-    color: #03BE93; /* Цвет текста при наведении */
-    border: 1px solid #03BE93; /* Граница при наведении */
-}
+    button.dt-paging-button:hover {
+        color: #03BE93; /* Цвет текста при наведении */
+        border: 1px solid #03BE93; /* Граница при наведении */
+    }
 
-button.dt-paging-button:disabled {
-    pointer-events: none;
-}
+    button.dt-paging-button:disabled {
+        pointer-events: none;
+    }
 
-button.dt-paging-button.current  {
-    background-color: #03BE93;
-    color: #fff;
-    border: 1px solid #03BE93; /* Граница при наведении */
-}
+    button.dt-paging-button.current {
+        background-color: #03BE93;
+        color: #fff;
+        border: 1px solid #03BE93; /* Граница при наведении */
+    }
 
-button.dt-paging-button.current:hover  {
-    color: #03BE93; /* Цвет текста при наведении */
-    border: 1px solid #03BE93; /* Граница при наведении */
-    background-color: #ffffff; /* Цвет фона при наведении */
-}
+        button.dt-paging-button.current:hover {
+            color: #03BE93; /* Цвет текста при наведении */
+            border: 1px solid #03BE93; /* Граница при наведении */
+            background-color: #ffffff; /* Цвет фона при наведении */
+        }
 
-button.dt-paging-button.disabled.first,
-button.dt-paging-button.disabled.last  {
-    background-color: #03BE93;
-    color: #fff;
-    border: 1px solid #03BE93; /* Граница при наведении */
-}
+    button.dt-paging-button.disabled.first,
+    button.dt-paging-button.disabled.last {
+        background-color: #03BE93;
+        color: #fff;
+        border: 1px solid #03BE93; /* Граница при наведении */
+    }
 
 
-button.dt-paging-button.disabled.first:hover,
-button.dt-paging-button.disabled.last:hover  {
-    color: #03BE93; /* Цвет текста при наведении */
-    border: 1px solid #03BE93; /* Граница при наведении */
-    background-color: #ffffff; /* Цвет фона при наведении */
-}
+        button.dt-paging-button.disabled.first:hover,
+        button.dt-paging-button.disabled.last:hover {
+            color: #03BE93; /* Цвет текста при наведении */
+            border: 1px solid #03BE93; /* Граница при наведении */
+            background-color: #ffffff; /* Цвет фона при наведении */
+        }
 
 .search-row {
     display: flex;
@@ -1643,51 +1614,51 @@ button.dt-paging-button.disabled.last:hover  {
     align-items: center;
 }
 
-.search-row input {
-    font-size: 15px; /* Размер шрифта */
-    font-family: 'Gilroy-Medium';
-    height: 30px;
-    width: 100px;
-    border-radius: 10px; /* Скругление углов */
-    box-sizing: border-box; /* Включает паддинг и границы в ширину */
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-    border: 0;
-    background: #fff;
-    padding-left: 10px;
-    padding-right: 5px;
-    color: rgb(0, 0, 0);
-    transition: all .2s ease;
-    resize: none;
-}
+    .search-row input {
+        font-size: 15px; /* Размер шрифта */
+        font-family: 'Gilroy-Medium';
+        height: 30px;
+        width: 100px;
+        border-radius: 10px; /* Скругление углов */
+        box-sizing: border-box; /* Включает паддинг и границы в ширину */
+        box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+        border: 0;
+        background: #fff;
+        padding-left: 10px;
+        padding-right: 5px;
+        color: rgb(0, 0, 0);
+        transition: all .2s ease;
+        resize: none;
+    }
 
-.search-row input:hover {
-    box-shadow: 0 0 0 0 #fff inset, #9b9b9b 0 0 0 1px;
-}
+        .search-row input:hover {
+            box-shadow: 0 0 0 0 #fff inset, #9b9b9b 0 0 0 1px;
+        }
 
-.search-row input:focus {
-    background: #fff;
-    outline: 0;
-    box-shadow: 0 0 0 0 #fff inset, #9b9b9b 0 0 0 2px;
-}
-
-
+        .search-row input:focus {
+            background: #fff;
+            outline: 0;
+            box-shadow: 0 0 0 0 #fff inset, #9b9b9b 0 0 0 2px;
+        }
 
 
-  /* ------------О ПРОЕКТЕ------------------ */
+
+
+/* ------------О ПРОЕКТЕ------------------ */
 .about_us {
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    font-size: 18px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 18px;
     margin: 20px
 }
 
-.about_us img {
-    width: 25%;
-    margin-bottom: 100px;
-}
-  
-  /* ------------АНИМАЦИЯ------------------ */
+    .about_us img {
+        width: 25%;
+        margin-bottom: 100px;
+    }
+
+/* ------------АНИМАЦИЯ------------------ */
 
 .particle-network-animation {
     position: absolute;
@@ -1709,25 +1680,24 @@ button.dt-paging-button.disabled.last:hover  {
     background-image: radial-gradient(circle closest-side, rgba(255, 255, 255, 0.025), transparent);
 }
 
-  /* ------------РЕДАКТИРОВАТЬ ИНЦИДЕНТ------------------ */
+/* ------------РЕДАКТИРОВАТЬ ИНЦИДЕНТ------------------ */
 
-  .header_incident_editing {
+.header_incident_editing {
     display: flex;
     align-content: center;
     flex-direction: row;
     justify-content: space-between;
     padding-right: 40px;
-    max-height: 100px;
-  }
+}
 
-  .incident_editing_buttons {
+.incident_editing_buttons {
     display: flex;
     align-content: center;
     flex-direction: row;
     gap: 15px;
-  }
+}
 
-  .file-button-delete {
+.file-button-delete {
     display: inline-flex;
     align-items: center;
     padding: 0 .8rem;
@@ -1741,39 +1711,37 @@ button.dt-paging-button.disabled.last:hover  {
     margin-bottom: 45px;
 }
 
-.file-button-delete:hover { 
-    transform: scale(1.15);
-    cursor: pointer;
-    background-color: white;
-    border: 2px solid #e5525e;
-}
+    .file-button-delete:hover {
+        transform: scale(1.15);
+        cursor: pointer;
+        background-color: white;
+        border: 2px solid #e5525e;
+    }
 
-.file-button-delete svg {
-    width: 30px;
-    height: auto;
-    fill: none;
-    stroke: white;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    cursor: pointer;
+    .file-button-delete svg {
+        width: 30px;
+        height: auto;
+        fill: none;
+        stroke: white;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        cursor: pointer;
+    }
 
-}
-
-.file-button-delete:hover svg { 
-    transform: scale(1.15);
-    stroke: #e5525e;
-}
+    .file-button-delete:hover svg {
+        transform: scale(1.15);
+        stroke: #e5525e;
+    }
 
 .editing-date-field {
     display: flex;
     gap: 15px;
 }
 
-.editing-date-field .input-field {
-    min-width: 100px;
-}
-
+    .editing-date-field .input-field {
+        min-width: 100px;
+    }
 
 
 /* Стилизация модального окна */
