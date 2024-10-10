@@ -17,43 +17,61 @@ function setEditTaskModalData(task) {
     console.log("Editing task:", task);
 
     // Установка основных полей
-    $('#editTaskId').val(task.Id);
-    $('#editTaskName').val(task.TaskName);
-    $('#editTaskDescription').val(task.TaskDescription);
-    $('#editTaskColor').val(task.TaskColor);
-    $('#editDueDate').val(task.DueDate || '');
-    $('#editPriority').val(task.Priority);
-    $('#editTaskAuthor').val(task.TaskAuthor);
-    $('#editCreatedAt').val(task.CreatedAt);
+    $('#editTaskId').val(task.id);
+    $('#editTaskName').val(task.taskName);
+    $('#editTaskDescription').val(task.taskDescription);
+    $('#editTaskColor').val(task.taskColor);
+    $('#editDueDate').val(task.dueDate || '');
+    $('#editPriority').val(task.priority);
+    $('#editTaskAuthor').val(task.taskAuthor);
+    $('#editCreatedAt').val(task.createdAt);
 
     // Установка RowVersion
-    $('#editTaskRowVersion').val(task.RowVersion);
+    $('#editTaskRowVersion').val(task.rowVersion);
 
     // Очистка списка подзадач
     $('#subtasksList').empty();
 
     // Добавление подзадач в список
-    if (task.Subtasks && task.Subtasks.length > 0) {
-        task.Subtasks.forEach(function (subtask) {
-            addSubtaskToList(subtask.Id, subtask.SubtaskDescription, subtask.IsCompleted, subtask.RowVersion);
+    if (task.subtasks && task.subtasks.length > 0) {
+        task.subtasks.forEach(function (subtask) {
+            addSubtaskToList(subtask.id, subtask.subtaskDescription, subtask.isCompleted, subtask.rowVersion);
         });
     }
 
+    // Заполнение списка комментариев
+    if (task.comments && task.comments.length > 0) {
+        $('#commentsList').empty();
+        task.comments.forEach(function (comment) {
+            addCommentToList(
+                comment.id,
+                comment.commentAuthor,
+                comment.commentText,
+                comment.createdAt,
+                comment.rowVersion,
+                comment.avatarUrl // Передаём avatarUrl
+            );
+        });
+    } else {
+        $('#commentsList').empty();
+    }
+
+    // Устанавливаем SubtasksJson перед отправкой формы
+    $('#editSubtasksJson').val(JSON.stringify(getSubtasksData()));
+
     // Получаем columnId из DOM
-    var taskElement = $('.kanban-task[data-id="' + task.Id + '"]');
+    var taskElement = $('.kanban-task[data-id="' + task.id + '"]');
     if (taskElement.length) {
         var columnId = taskElement.closest('.kanban-column').data('id');
         console.log("Setting columnId:", columnId); // Логирование для проверки
         $('#editTaskColumnId').val(columnId);
     } else {
-        console.error("Task element not found for taskId:", task.Id);
+        console.error("Task element not found for taskId:", task.id);
     }
 
     // Показываем модальное окно
     $('#editTaskModal').modal('show');
 }
-
-
 // Обновленная функция для добавления подзадачи в список с RowVersion
 function addSubtaskToList(id, description, isCompleted, rowVersion) {
     var subtaskItem = `
@@ -68,9 +86,6 @@ function addSubtaskToList(id, description, isCompleted, rowVersion) {
     `;
     $('#subtasksList').append(subtaskItem);
 }
-
-
-
 
 // Функция для добавления новой подзадачи 
 function addSubtask() {
@@ -125,14 +140,29 @@ function getSubtasksData() {
     return subtasks;
 }
 
-
-
-
-
-
 $(document).ready(function () {
     console.log("JavaScript загружен и готов к работе");
 
+    // Новый обработчик клика на блок задачи
+    $(document).on('click', '.kanban-task', function (event) {
+        // Проверяем, что клик не был по кнопке или интерактивному элементу внутри задачи
+        if (!$(event.target).closest('button, .btn, input, label').length) {
+            // Извлекаем JSON-данные задачи из кнопки редактирования внутри блока
+            var taskDataJson = $(this).find('.edit-task-button').attr('data-task');
+            console.log("Task Data JSON from task block:", taskDataJson);
+
+            if (taskDataJson) {
+                try {
+                    var task = JSON.parse(taskDataJson);
+                    setEditTaskModalData(task);
+                } catch (e) {
+                    console.error("Ошибка при парсинге JSON данных задачи:", e);
+                }
+            } else {
+                console.error("Не найдено data-task в кнопке редактирования внутри блока задачи.");
+            }
+        }
+    });
     // Обработчик клика для кнопок редактирования задач
     $(document).ready(function () {
         // Обработчик клика по кнопке редактирования задачи
@@ -170,9 +200,16 @@ $(document).ready(function () {
 
             // Заполняем комментарии
             if (task.comments && task.comments.length > 0) {
-                $('#commentsList').empty(); // Очищаем список комментариев
+                $('#commentsList').empty();
                 task.comments.forEach(function (comment) {
-                    addCommentToList(comment.id, comment.commentAuthor, comment.commentText, comment.createdAt, comment.rowVersion);
+                    addCommentToList(
+                        comment.id,
+                        comment.commentAuthor,
+                        comment.commentText,
+                        comment.createdAt,
+                        comment.rowVersion,
+                        comment.avatarUrl
+                    );
                 });
             } else {
                 $('#commentsList').empty();
@@ -184,8 +221,6 @@ $(document).ready(function () {
 
         });
     });
-
-
 
     // Обработчик отправки формы редактирования задачи
     $('#editTaskForm').on('submit', function (event) {
@@ -263,7 +298,6 @@ $(document).ready(function () {
 
 });
 
-
 function updateTaskInView(task) {
     if (!task || !task.id) {
         console.error('Invalid task data:', task);
@@ -303,9 +337,6 @@ function updateTaskInView(task) {
         console.error('Task element not found for task ID:', task.id);
     }
 }
-
-
-
 
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('main').classList.add('show');
@@ -634,9 +665,6 @@ function editTask(taskId) {
 }
 
 
-
-
-
 // Функция для удаления задачи
 function deleteTask(taskId) {
     if (confirm("Вы действительно хотите удалить эту задачу?")) {
@@ -662,8 +690,6 @@ function deleteTask(taskId) {
 }
 
 
-
-
 // Привязка события к кнопке "Отмена" для редактирования колонки
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('#editColumnModal .btn-secondary').addEventListener('click', function () {
@@ -682,16 +708,11 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-
-
-
-
-
 //функция добавления комментариев в список 
-function addCommentToList(id, author, text, createdAt, rowVersion) {
+function addCommentToList(id, author, text, createdAt, rowVersion, avatarUrl) {
     // Парсим дату
     var date = new Date(createdAt);
-    // Добавляем смещение +5 часов
+    // Добавляем смещение +5 часов (если необходимо)
     date.setHours(date.getHours() + 5);
     // Форматируем дату
     var options = {
@@ -700,11 +721,19 @@ function addCommentToList(id, author, text, createdAt, rowVersion) {
     };
     var formattedDate = date.toLocaleString('ru-RU', options);
 
+    // Если avatarUrl не передан, используем стандартный путь
+    if (!avatarUrl) {
+        avatarUrl = '/avatars/default.jpg';
+    }
+
     var commentItem = `
         <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <strong>${escapeHtml(author)}</strong> (${escapeHtml(formattedDate)}):
-                <p>${escapeHtml(text)}</p>
+            <div class="d-flex align-items-center">
+                <img src="${avatarUrl}" alt="Avatar" class="avatar-image mr-2" onerror="this.onerror=null;this.src='/avatars/default.jpg';">
+                <div>
+                    <strong>${escapeHtml(author)}</strong> (${escapeHtml(formattedDate)}):
+                    <p>${escapeHtml(text)}</p>
+                </div>
             </div>
             <button type="button" class="btn btn-danger btn-sm remove-comment-button" data-comment-id="${id}" data-row-version="${rowVersion}">Удалить</button>
             <input type="hidden" name="commentsRowVersion" value="${rowVersion}">
@@ -712,6 +741,8 @@ function addCommentToList(id, author, text, createdAt, rowVersion) {
     `;
     $('#commentsList').append(commentItem);
 }
+
+
 
 //функция добавления нового комментария
 function addComment() {
@@ -749,18 +780,24 @@ function addComment() {
         success: function (response) {
             console.log(response); // Для отладки
 
-            if (response.comment) { // Используем 'comment' с маленькой буквы
+            if (response.comment) {
                 var comment = response.comment;
 
-                // Добавляем комментарий в список
-                addCommentToList(comment.id, comment.commentAuthor, comment.commentText, comment.createdAt, comment.rowVersion); // Используем camelCase
+                // Добавляем комментарий в список с avatarUrl
+                addCommentToList(
+                    comment.id,
+                    comment.commentAuthor,
+                    comment.commentText,
+                    comment.createdAt,
+                    comment.rowVersion,
+                    comment.avatarUrl // Передаём avatarUrl
+                );
 
                 // Обновляем RowVersion задачи
-                $('#editTaskRowVersion').val(response.rowVersion); // Используем camelCase
+                $('#editTaskRowVersion').val(response.rowVersion);
 
                 // Очищаем поле ввода
                 $('#newCommentText').val('');
-                updateCommentsIcon(taskId, true);
             } else {
                 console.error('Comment data is missing in the response.');
             }
@@ -772,12 +809,11 @@ function addComment() {
     });
 }
 
-
-
 $(document).on('click', '.remove-comment-button', function () {
     var commentId = $(this).data('comment-id');
     var rowVersion = $(this).data('row-version');
-    var taskId = $('#editTaskId').val();
+    var button = $(this);
+    var taskId = $('#editTaskId').val(); // Предполагается, что ID задачи хранится в скрытом поле
 
     if (confirm('Вы уверены, что хотите удалить этот комментарий?')) {
         $.ajax({
@@ -786,28 +822,31 @@ $(document).on('click', '.remove-comment-button', function () {
             contentType: 'application/json',
             data: JSON.stringify({
                 CommentId: commentId,
-                TaskId: taskId,
                 RowVersion: rowVersion
             }),
             success: function (response) {
-                console.log("Comment deleted successfully:", response);
-                if (response.success) {
-                    // Удаляем комментарий из списка
-                    $(`button[data-comment-id="${commentId}"]`).closest('li').remove();
-                    // Обновляем RowVersion задачи
+                // Удаляем элемент комментария из DOM
+                button.closest('li').remove();
+
+                // Обновляем RowVersion задачи, если сервер его вернул
+                if (response.rowVersion) {
                     $('#editTaskRowVersion').val(response.rowVersion);
-                } else {
-                    alert(response.message || 'Не удалось удалить комментарий.');
                 }
+
+                alert('Комментарий успешно удалён.');
             },
             error: function (xhr) {
-                console.error('Error deleting comment:', xhr.responseText);
-                alert('Произошла ошибка при удалении комментария.');
+                if (xhr.status === 409) { // Conflict
+                    alert('Комментарий был изменён другим процессом. Пожалуйста, обновите страницу и попробуйте снова.');
+                } else if (xhr.status === 404) { // Not Found
+                    alert('Комментарий не найден.');
+                } else {
+                    alert('Произошла ошибка при удалении комментария.');
+                }
             }
         });
     }
 });
-
 
 // Функция для удаления комментария
 function deleteComment(commentId, commentRowVersion) {
@@ -857,7 +896,6 @@ function deleteComment(commentId, commentRowVersion) {
     }
 }
 
-
 // Функция для экранирования HTML (предотвращение XSS)
 function escapeHtml(text) {
     var map = {
@@ -869,7 +907,6 @@ function escapeHtml(text) {
     };
     return text ? text.replace(/[&<>"']/g, function (m) { return map[m]; }) : '';
 }
-
 
 // Функционал для работы с файлами
 // Функция для переключения секции вложений

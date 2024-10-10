@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using TrackingSheet.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using TrackingSheet.Models.DTO;
 
 
 namespace TrackingSheet.Controllers
@@ -287,6 +288,7 @@ namespace TrackingSheet.Controllers
             // Получаем существующую задачу из базы данных
             var existingTask = await _context.KanbanTasks
                 .Include(t => t.Subtasks)
+                .Include(t => t.Comments) // Добавлено для комментариев
                 .FirstOrDefaultAsync(t => t.Id == model.TaskId);
 
             if (existingTask == null)
@@ -326,6 +328,7 @@ namespace TrackingSheet.Controllers
             // Получаем обновлённую задачу для ответа клиенту
             var updatedTask = await _context.KanbanTasks
                 .Include(t => t.Subtasks)
+                .Include(t => t.Comments) // Добавлено для комментариев
                 .FirstOrDefaultAsync(t => t.Id == model.TaskId);
 
             var updatedTaskResponse = new
@@ -353,6 +356,7 @@ namespace TrackingSheet.Controllers
                     commentAuthor = c.CommentAuthor,
                     commentText = c.CommentText,
                     createdAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                    avatarUrl = Url.Content($"~/avatars/{c.CommentAuthor}.jpg"),
                     rowVersion = Convert.ToBase64String(c.RowVersion)
                 }).ToList()
             };
@@ -410,8 +414,6 @@ namespace TrackingSheet.Controllers
             }
         }
 
-
-
         [HttpGet]
         public async Task<IActionResult> GetTaskForEdit(Guid taskId)
         {
@@ -420,11 +422,26 @@ namespace TrackingSheet.Controllers
                 return BadRequest("Invalid task ID.");
             }
 
-            var task = await _kanbanService.GetTaskByIdAsync(taskId);
+            var task = await _context.KanbanTasks
+                .Include(t => t.Subtasks)
+                .Include(t => t.Comments) // Убедитесь, что комментарии загружаются
+                .FirstOrDefaultAsync(t => t.Id == taskId);
+
             if (task == null)
             {
                 return NotFound("Task not found.");
             }
+
+            // Преобразование комментариев в DTO
+            var commentsDto = task.Comments.Select(c => new EditTaskCommentDTO
+            {
+                Id = c.Id,
+                CommentAuthor = c.CommentAuthor,
+                CommentText = c.CommentText,
+                CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                AvatarUrl = Url.Content($"~/avatars/{c.CommentAuthor}.jpg"),
+                RowVersion = Convert.ToBase64String(c.RowVersion)
+            }).ToList();
 
             var model = new EditTaskModel
             {
@@ -444,12 +461,12 @@ namespace TrackingSheet.Controllers
                     s.IsCompleted,
                     RowVersion = Convert.ToBase64String(s.RowVersion)
                 }).ToList()),
-                RowVersion = Convert.ToBase64String(task.RowVersion)
+                RowVersion = Convert.ToBase64String(task.RowVersion),
+                Comments = commentsDto // Включение комментариев
             };
 
             return Json(model);
         }
-
 
 
         [HttpPost]
@@ -532,6 +549,7 @@ namespace TrackingSheet.Controllers
                 CommentAuthor = addedComment.CommentAuthor,
                 CommentText = addedComment.CommentText,
                 CreatedAt = addedComment.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                AvatarUrl = Url.Content($"~/avatars/{addedComment.CommentAuthor}.jpg"),
                 RowVersion = Convert.ToBase64String(addedComment.RowVersion)
             };
 

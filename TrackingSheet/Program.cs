@@ -5,10 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using TrackingSheet.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+//using TrackingSheet.Services.WellInspectorServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 // Настройка MVC для использования Newtonsoft.Json с игнорированием циклических ссылок
 builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
@@ -21,7 +22,7 @@ builder.Services.AddAntiforgery(options =>
 
 //Мои сервисы
 builder.Services.AddScoped<RemoteDataService>();
-builder.Services.AddScoped<WellInspectorService>();
+//builder.Services.AddScoped<WellInspectorService>();
 builder.Services.AddScoped<QuarterYearStatisticsService>();
 builder.Services.AddScoped<IKanbanService, KanbanService>();
 
@@ -42,17 +43,20 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-//логирование
+
+//Логирование
 builder.Services.AddLogging(logging =>
 {
     logging.ClearProviders();
     logging.AddConsole();
     logging.AddDebug();
 });
+
 //Сервис Entity
 builder.Services.AddDbContext<MVCDbContext>(options => 
     options.UseSqlServer(builder.Configuration
     .GetConnectionString("MVCDbConnectionString")));
+
 //Сервис для аутентификации
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(option => {

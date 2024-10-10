@@ -14,6 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\css\newstyle.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\css\Pictures\tofs.png" />
   </ItemGroup>
 

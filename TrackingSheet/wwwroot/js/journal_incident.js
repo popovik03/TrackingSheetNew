@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     data: "highLight",
                     render: function (data) {
                         if (data && data.includes('🚩')) {
-                            return '<img src="../img/fire.gif" alt="fire">';
+                            return '';
                         }
                         return data;
                     }
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Применяем градиент, если есть отметка "🚩"
                 if (data.highLight && data.highLight.includes('🚩')) {
                     // Красим строку градиентом
-                    $(row).css('background', 'linear-gradient(to right, #FFA500, #FFFFCC, #FFFFFF)');
+                    $(row).css('background', 'rgba(255, 232, 201, 0.7)');
                 }
 
 

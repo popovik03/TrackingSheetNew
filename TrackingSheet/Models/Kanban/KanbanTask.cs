@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
+using TrackingSheet.Models.DTO;
+
 
 namespace TrackingSheet.Models.Kanban
 {
@@ -143,6 +145,9 @@ namespace TrackingSheet.Models.Kanban
         public string SubtasksJson { get; set; } // Добавлено поле для получения подзадач в формате JSON
 
         public string RowVersion { get; set; } // Добавлено для отслеживания версий 
+
+        // Инициализируем пустым списком
+        public List<EditTaskCommentDTO> Comments { get; set; } = new List<EditTaskCommentDTO>();
     }
 
     public class AddCommentModel
@@ -157,14 +162,6 @@ namespace TrackingSheet.Models.Kanban
     {
         public Guid CommentId { get; set; }
         public string RowVersion { get; set; }
-    }
-
-    public class EditTaskSubtaskDto
-    {
-        public Guid Id { get; set; }
-        public string SubtaskDescription { get; set; }
-        public bool IsCompleted { get; set; }
-        public string RowVersion { get; set; } // RowVersion как строка (Base64)
     }
 
     public class UpdateSubtaskStatusModel

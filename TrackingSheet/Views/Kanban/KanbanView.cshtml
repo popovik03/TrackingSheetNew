@@ -2,7 +2,10 @@
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Serialization;
 @using System.Linq;
-
+@using System.Security.Claims
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
+@inject IWebHostEnvironment env
 
 @{
     
@@ -13,7 +16,17 @@
         ? Model.FirstOrDefault(b => b.Id == selectedBoardId.Value)
         : Model.FirstOrDefault();
 
+    // Получение имени пользователя через User.Identity
+    var loggedUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Гость";
+    var boardId = ViewBag.BoardId;
+
+    // Используйте полное имя класса System.IO.Path.Combine, чтобы избежать затенения
+    var avatarPath = System.IO.Path.Combine("avatars", $"{loggedUser}.jpg");
+    var avatarFullPath = System.IO.Path.Combine(env.WebRootPath, avatarPath);
+    var avatarExists = System.IO.File.Exists(avatarFullPath);
+    var avatarUrl = avatarExists ? Url.Content($"~/{avatarPath}") : Url.Content("~/avatars/default.jpg");
 }
+
 
 <!DOCTYPE html>
 <html>
@@ -30,6 +43,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        var reporter = '@Html.Raw(JsonConvert.SerializeObject(reporter))';
+    </script>
     
 </head>
 <body>
@@ -149,6 +165,7 @@
                                                                 commentAuthor = c.CommentAuthor,
                                                                 commentText = c.CommentText,
                                                                 createdAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                                                                avatarUrl = Url.Content($"~/avatars/{c.CommentAuthor}.jpg"),
                                                                 rowVersion = Convert.ToBase64String(c.RowVersion)
                                                             }),
                                                             rowVersion = Convert.ToBase64String(task.RowVersion)

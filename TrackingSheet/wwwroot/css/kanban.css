@@ -581,3 +581,9 @@ label {
 .input-group button:active {
     background-color: #F7F7F7;
 }
+.avatar-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+

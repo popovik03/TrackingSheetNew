@@ -1,0 +1,131 @@
+﻿/* styles.css */
+.custom-button {
+    background-color: #34a87e;
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .custom-button:hover {
+        background-color: #318767;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .custom-button:active {
+        background-color: #1e7e34;
+        transform: translateY(0);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.5);
+    }
+
+/* Стили для меню настроек */
+.settings-menu {
+    position: absolute; /* Позволяет разместить меню относительно ближайшего позиционированного предка */
+    top: 50px; /* Расположение меню по вертикали (можно настроить под ваш дизайн) */
+    right: 20px; /* Расположение меню по горизонтали (можно настроить под ваш дизайн) */
+    width: 250px; /* Ширина меню */
+    background-color: #ffffff; /* Белый фон для контраста */
+    border: 1px solid #ddd; /* Светло-серая граница */
+    border-radius: 8px; /* Скруглённые углы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для объёма */
+    padding: 20px; /* Внутренние отступы */
+    display: none; /* Скрыто по умолчанию */
+    z-index: 1000; /* Обеспечивает, что меню будет поверх других элементов */
+    transition: opacity 0.3s ease, visibility 0.3s ease; /* Плавные переходы при появлении и исчезновении */
+}
+
+    /* Показ меню (можно управлять классом через JavaScript или CSS-переключатели) */
+    .settings-menu.show {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+    }
+
+/* Стили для формы внутри меню */
+.menu-form {
+    margin-bottom: 20px; /* Отступ снизу для разделения элементов */
+}
+
+/* Стили для каждого элемента меню */
+.menu-item {
+    margin-bottom: 15px; /* Отступ снизу между элементами */
+}
+
+/* Стили для метки "Сменить фото профиля" */
+.change-avatar-label {
+    display: inline-block; /* Позволяет задавать размеры и отступы */
+    background-color: #34a87e; /* Основной зелёный цвет */
+    color: #ffffff; /* Белый цвет текста */
+    padding: 13px 25px; /* Внутренние отступы */
+    font-size: 14px; /* Размер шрифта */
+    border-radius: 5px; /* Скруглённые углы */
+    cursor: pointer; /* Курсор в виде руки при наведении */
+    text-align: center; /* Центрирование текста */
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; /* Плавные переходы при наведении и нажатии */
+    text-decoration: none; /* Убираем подчёркивание */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Лёгкая тень для объёма */
+}
+
+    .change-avatar-label:hover {
+        background-color: #2e9073; /* Темнее зелёный при наведении */
+        transform: translateY(-2px); /* Небольшое поднятие кнопки */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* Усиленная тень */
+    }
+
+    .change-avatar-label:active {
+        background-color: #287a6b; /* Ещё более тёмный зелёный при нажатии */
+        transform: translateY(0); /* Возврат в исходное положение */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Возврат тени */
+    }
+
+    .change-avatar-label:focus {
+        outline: none; /* Убираем стандартную обводку */
+        box-shadow: 0 0 0 3px rgba(52, 168, 126, 0.5); /* Добавляем обводку при фокусе */
+    }
+
+/* Стили для скрытого файла input */
+#avatarUpload {
+    display: none; /* Скрываем стандартный инпут */
+}
+
+/* Стили для ссылки "Выйти" */
+.logout-link {
+    display: block; /* Блочное отображение для заполнения всей ширины контейнера */
+    background-color: #34a87e; /* Основной зелёный цвет */
+    color: #ffffff; /* Белый цвет текста */
+    padding: 10px 20px; /* Внутренние отступы */
+    font-size: 14px; /* Размер шрифта */
+    border-radius: 5px; /* Скруглённые углы */
+    text-align: center; /* Центрирование текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    cursor: pointer; /* Курсор в виде руки при наведении */
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; /* Плавные переходы при наведении и нажатии */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Лёгкая тень для объёма */
+}
+
+    .logout-link:hover {
+        background-color: #2e9073; /* Темнее зелёный при наведении */
+        transform: translateY(-2px); /* Небольшое поднятие кнопки */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* Усиленная тень */
+    }
+
+    .logout-link:active {
+        background-color: #287a6b; /* Ещё более тёмный зелёный при нажатии */
+        transform: translateY(0); /* Возврат в исходное положение */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Возврат тени */
+    }
+
+    .logout-link:focus {
+        outline: none; /* Убираем стандартную обводку */
+        box-shadow: 0 0 0 3px rgba(52, 168, 126, 0.5); /* Добавляем обводку при фокусе */
+    }

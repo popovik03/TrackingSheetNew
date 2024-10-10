@@ -32,7 +32,7 @@ namespace TrackingSheet.Services
         Task<Guid> GetBoardIdByColumnIdAsync(Guid columnId);
 
 
-        // комментарии
+        // Комментарии
         Task AddCommentAsync(KanbanComment comment);
         Task DeleteCommentAsync(KanbanComment comment);
         Task<KanbanComment> GetCommentByIdAsync(Guid commentId);
