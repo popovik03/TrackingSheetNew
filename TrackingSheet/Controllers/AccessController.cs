@@ -35,7 +35,7 @@ namespace TrackingSheet.Controllers
             {
                 {"admin", "admin"},
                 {"popovik01", "popovik01"},
-                {"khokrom","khokrom" },
+                {"khokromn","khokromn" },
                 {"utebtim", "utebtim"},
                 {"mostvic","mostvic" },
                 {"polomak","polomak" },

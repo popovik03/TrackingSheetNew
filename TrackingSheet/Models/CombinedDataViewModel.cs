@@ -1,5 +1,6 @@
 ﻿
 using TrackingSheet.Models.Domain;
+using TrackingSheet.Models.Telegram;
 
 namespace TrackingSheet.Models
 {
@@ -19,6 +20,8 @@ namespace TrackingSheet.Models
         public int SecondQuarterSTotalClosedCount { get; set; }
 
         public int SecondQuarterSTotalSavedNPT { get; set; }
+
+        public IEnumerable<TelegramMessage> TelegramMessages { get; set; }
 
     }
 

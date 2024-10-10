@@ -105,8 +105,14 @@ namespace TrackingSheet.Controllers
 
             };
 
-            ViewData["CurrentPage"] = "main";
+            // Получение последних 20 сообщений из Telegram
+            model.TelegramMessages = _context.TelegramMessages
+                .OrderByDescending(m => m.Date)
+                .Take(20)
+                .ToList();
+
             return View(model);
+
         }
 
         /// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

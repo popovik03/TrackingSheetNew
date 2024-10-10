@@ -43,4 +43,15 @@
 
     // Обновляем время каждую минуту, так как секунды не нужны
     setInterval(updateClocks, 60000);
+
+    // Инициализация Flatpickr с опцией inline
+    flatpickr("#flatpickr-calendar", {
+        locale: "ru", // Локализация на русский язык
+        dateFormat: "Y-m-d", // Формат даты
+        defaultDate: "today", // Установка текущей даты по умолчанию
+        showMonths: 1, // Отображение одного месяца
+        enableTime: false, // Если не требуется выбирать время
+        inline: true, // Закрепленный календарь
+    });
+
 });

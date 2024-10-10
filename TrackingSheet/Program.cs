@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TrackingSheet.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Microsoft.Exchange.WebServices.Data;
+using TrackingSheet.Services.TelegramService;
+using Telegram.Bot;
 //using TrackingSheet.Services.WellInspectorServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +29,13 @@ builder.Services.AddScoped<RemoteDataService>();
 builder.Services.AddScoped<QuarterYearStatisticsService>();
 builder.Services.AddScoped<IKanbanService, KanbanService>();
 
+// Регистрация TelegramBotClient
+var botToken = builder.Configuration["TelegramBot:Token"];
+builder.Services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(botToken));
+
+// Регистрация службы для Long Polling
+builder.Services.AddHostedService<TelegramLongPollingService>();
+
 
 
 string rootPath = builder.Configuration.GetValue<string>("FolderIndexing:RootPath");
@@ -35,7 +45,7 @@ builder.Services.AddSingleton(new PassportFolderSearchService(outputPath));
 builder.Services.AddSingleton<EwsService>();
 //builder.Services.AddSingleton<IConfiguration>(builder.Configuration); ;
 
-builder.Services.AddSession();
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {

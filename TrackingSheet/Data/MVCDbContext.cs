@@ -2,6 +2,7 @@
 using TrackingSheet.Models.Domain;
 using TrackingSheet.Models.Kanban;
 using TrackingSheet.Models.RO_Planer;
+using TrackingSheet.Models.Telegram;
 
 namespace TrackingSheet.Data
 {
@@ -31,6 +32,8 @@ namespace TrackingSheet.Data
         // Рабочий планер пока на паузе
         public DbSet<EmployeePlaner2024> EmployeePlaner2024 { get; set; }
         public DbSet<ROemployees> ROemployees { get; set; }
+
+        public DbSet<TelegramMessage> TelegramMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

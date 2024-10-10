@@ -3,7 +3,7 @@
 @using System.IO
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Главная";
     var loggedUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Гость";
     var boardId = ViewBag.BoardId;
 }
@@ -19,31 +19,37 @@
     <!-- Подключение внешнего CSS-файла -->
     <link rel="stylesheet" href="~/css/dailymain.css" />
 
+    <!-- Подключение Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-    <!-- Подключение внешнего JS-файла -->
+    <!-- Подключение Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
+
+    <!-- Подключение внешнего JS-файла с defer -->
     <script src="~/js/dailymain.js" defer></script>
 </head>
+
 
 <body>
     <h1>Главная</h1>
     <div class="daily-main">
         <div class="daily-main-left">
             <h2>Суточная сводка</h2>
-            <div class="border rounded shadow-sm p-3" style="margin-top: 10px; margin-left:20px;">
+            <div class="border shadow-sm p-3" style="margin-top: 10px; margin-left:20px;">
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table" style="table-layout: fixed; width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr>
-                                <th scope="col">Дата/время</th>
-                                <th scope="col">Смена</th>
-                                <th scope="col">431</th>
-                                <th scope="col">VSAT</th>
-                                <th scope="col">Скв</th>
-                                <th scope="col">Рейс</th>
-                                <th scope="col">Тип</th>
-                                <th scope="col">Cтатус</th>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
+                                <th scope="col" style="width: 15%;">Дата/время</th>
+                                <th scope="col" style="width: 10%;">Смена</th>
+                                <th scope="col" style="width: 10%;">431</th>
+                                <th scope="col" style="width: 10%;">VSAT</th>
+                                <th scope="col" style="width: 20%;">Скважина</th>
+                                <th scope="col" style="width: 7%;">Рейс</th>
+                                <th scope="col" style="width: 14%;">Тип</th>
+                                <th scope="col" style="width: 14%;">Статус</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -51,39 +57,56 @@
                             {
                                 var rowClass = incident.HighLight?.Contains("🚩") == true ? "flagged" : "";
 
-                                <tr class="@rowClass">
-                                    <td>@incident.Date</td>
-                                    <td>@incident.Shift</td>
-                                    <td>@incident.Reporter</td>
-                                    <td>@incident.VSAT</td>
-                                    <td>@incident.Well</td>
-                                    <td>@incident.Run</td>
-                                    <td>@incident.ProblemType</td>
-                                    <td>@incident.Status</td>
-                                   
+                                <!-- Строка с основными данными инцидента -->
+                                <tr style="background-color: #cededb;">
+                                    <!-- Округляем левый край у строки с основной информацией -->
+                                    <td style="padding: 8px; border-radius: 8px 0 0 8px;">@incident.Date</td>
+                                    <td style="padding: 8px;">@incident.Shift</td>
+                                    <td style="padding: 8px;">@incident.Reporter</td>
+                                    <td style="padding: 8px;">@incident.VSAT</td>
+                                    <td style="padding: 8px;">@incident.Well</td>
+                                    <td style="padding: 8px;">@incident.Run</td>
+                                    <td style="padding: 8px;">@incident.ProblemType</td>
+                                    <!-- Округляем правый край у строки с основной информацией -->
+                                    <td style="padding: 8px; border-radius: 0 8px 8px 0;">@incident.Status</td>
                                 </tr>
+
+                                <!-- Строка с решением помечается классом flagged, без округлых углов с левой стороны -->
                                 <tr class="@rowClass">
-                                    <td colspan="10">@incident.Solution</td>
+                                    <td colspan="10" style="padding: 8px; border-radius: 0 0 8px 0;">@incident.Solution</td>
                                 </tr>
                             }
                         </tbody>
+
+
+
                     </table>
                 </div>
             </div>
+
+
+
         </div>
 
         <div class="daily-main-right">
             <div class="dmr-left">
-               
-                <!-- Здесь будет размещаться основной контент в будущем -->
+                <h2>Сообщения из Telegram-группы</h2>
+                <div class="telegram-messages">
+                    @foreach (var message in Model.TelegramMessages)
+                    {
+                        <div class="telegram-message">
+                            <p><strong>@message.Username</strong> <em>@message.Date.ToString("g")</em></p>
+                            <p>@message.Text</p>
+                        </div>
+                    }
+                </div>
+
             </div>
 
             <div class="dmr-right">
                 
+                <input type="text" id="flatpickr-calendar" style="display: none;">
 
-                <!-- Виджет календаря Tockify -->
-                <div data-tockify-component="mini" data-tockify-calendar="viktor.popov"></div>
-                <script data-cfasync="false" data-tockify-script="embed" src="https://public.tockify.com/browser/embed.js"></script>
 
                 <!-- Виджет отображения времени -->
                 <div class="clocks-container">
@@ -105,8 +128,9 @@
                         <p class="time">--:--</p>
                     </div>
                 </div>
+
                 <!-- Виджет погоды -->
-                <a class="weatherwidget-io" href="https://forecast7.com/ru/57d1665d53/tyumen/" data-label_1="TYUMEN" data-label_2="WEATHER" data-theme="original">TYUMEN WEATHER</a>
+                <a class="weatherwidget-io" href="https://forecast7.com/ru/57d1665d53/tyumen/" data-label_1="TYUMEN" data-label_2="WEATHER" data-theme="pure">Погода в Тюмени</a>
             </div>
         </div>
     </div>

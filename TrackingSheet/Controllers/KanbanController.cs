@@ -614,11 +614,12 @@ namespace TrackingSheet.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateSubtaskStatus([FromBody] UpdateSubtaskStatusModel model)
         {
-            if (model == null || model.SubtaskId == Guid.Empty)
+            if (model == null || model.SubtaskId == Guid.Empty || string.IsNullOrWhiteSpace(model.RowVersion))
             {
-                return BadRequest(new { message = "Invalid subtask update request." });
+                return BadRequest(new { message = "Некорректный запрос обновления подзадачи." });
             }
 
             byte[] originalRowVersion;
@@ -628,49 +629,52 @@ namespace TrackingSheet.Controllers
             }
             catch (FormatException)
             {
-                return BadRequest(new { message = "Invalid RowVersion format." });
+                return BadRequest(new { message = "Некорректный формат RowVersion." });
             }
-
-            var subtask = await _context.KanbanSubtasks.FirstOrDefaultAsync(s => s.Id == model.SubtaskId);
-            if (subtask == null)
-            {
-                return NotFound(new { message = "Subtask not found." });
-            }
-
-            // Проверка RowVersion для оптимистичной блокировки
-            if (!subtask.RowVersion.SequenceEqual(originalRowVersion))
-            {
-                return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
-            }
-
-            subtask.IsCompleted = model.IsCompleted;
 
             try
             {
+                var subtask = await _context.KanbanSubtasks.FirstOrDefaultAsync(s => s.Id == model.SubtaskId);
+                if (subtask == null)
+                {
+                    return NotFound(new { message = "Подзадача не найдена." });
+                }
+
+                // Устанавливаем оригинальный RowVersion для проверки оптимистичной блокировки
+                _context.Entry(subtask).Property(s => s.RowVersion).OriginalValue = originalRowVersion;
+
+                // Обновляем статус подзадачи
+                subtask.IsCompleted = model.IsCompleted;
+
                 await _context.SaveChangesAsync();
+
+                // Возвращаем обновлённую подзадачу
+                var subtaskResponse = new
+                {
+                    id = subtask.Id,
+                    subtaskDescription = subtask.SubtaskDescription,
+                    isCompleted = subtask.IsCompleted,
+                    rowVersion = Convert.ToBase64String(subtask.RowVersion)
+                };
+
+                return Ok(new { success = true, subtask = subtaskResponse });
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
-                return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
+                _logger.LogError(ex, "Ошибка при обновлении статуса подзадачи из-за конфликта блокировки.");
+                return Conflict(new { message = "Подзадача была изменена другим процессом. Пожалуйста, обновите страницу и попробуйте снова.", error = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while updating the subtask.", error = ex.Message });
+                _logger.LogError(ex, "Ошибка при обновлении статуса подзадачи.");
+                return StatusCode(500, new { message = "Произошла ошибка при обновлении статуса подзадачи.", error = ex.Message });
             }
-
-            // Возвращаем обновленную подзадачу
-            var subtaskResponse = new
-            {
-                id = subtask.Id,
-                subtaskDescription = subtask.SubtaskDescription,
-                isCompleted = subtask.IsCompleted,
-                rowVersion = Convert.ToBase64String(subtask.RowVersion)
-            };
-
-            return Ok(new { message = "Subtask status updated successfully.", subtask = subtaskResponse });
         }
 
+
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteSubtask([FromBody] DeleteSubtaskModel model)
         {
             if (model == null || model.SubtaskId == Guid.Empty)
@@ -688,35 +692,33 @@ namespace TrackingSheet.Controllers
                 return BadRequest(new { message = "Invalid RowVersion format." });
             }
 
-            var subtask = await _context.KanbanSubtasks.FirstOrDefaultAsync(s => s.Id == model.SubtaskId);
-            if (subtask == null)
-            {
-                return NotFound(new { message = "Subtask not found." });
-            }
-
-            // Проверка RowVersion для оптимистичной блокировки
-            if (!subtask.RowVersion.SequenceEqual(originalRowVersion))
-            {
-                return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
-            }
-
-            _context.KanbanSubtasks.Remove(subtask);
-
             try
             {
+                var subtask = await _context.KanbanSubtasks.FirstOrDefaultAsync(s => s.Id == model.SubtaskId);
+                if (subtask == null)
+                {
+                    return NotFound(new { message = "Subtask not found." });
+                }
+
+                // Проверка RowVersion для оптимистичной блокировки
+                if (!subtask.RowVersion.SequenceEqual(originalRowVersion))
+                {
+                    return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
+                }
+
+                _context.KanbanSubtasks.Remove(subtask);
+
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return Conflict(new { message = "The subtask has been modified by another process. Please refresh and try again." });
+
+                return Ok(new { success = true, message = "Subtask deleted successfully." });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Ошибка при удалении подзадачи.");
                 return StatusCode(500, new { message = "An error occurred while deleting the subtask.", error = ex.Message });
             }
-
-            return Ok(new { message = "Subtask deleted successfully." });
         }
+
 
         [HttpPost]
         public async Task<IActionResult> UploadAttachments([FromForm] Guid TaskId, List<IFormFile> Files)
@@ -781,6 +783,62 @@ namespace TrackingSheet.Controllers
 
             return Ok(new { message = "Files uploaded successfully.", files = savedFiles });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddSubtask([FromBody] AddSubtaskModel model)
+        {
+            if (model == null || model.TaskId == Guid.Empty || string.IsNullOrWhiteSpace(model.SubtaskDescription))
+            {
+                return BadRequest(new { message = "Некорректные данные подзадачи." });
+            }
+
+            // Загрузка задачи без отслеживания изменений
+            var task = await _context.KanbanTasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == model.TaskId);
+            if (task == null)
+            {
+                return NotFound(new { message = "Задача не найдена." });
+            }
+
+            var newSubtask = new KanbanSubtask
+            {
+                Id = Guid.NewGuid(),
+                KanbanTaskId = task.Id,
+                SubtaskDescription = model.SubtaskDescription,
+                IsCompleted = false
+            };
+
+            // Добавление подзадачи напрямую
+            _context.KanbanSubtasks.Add(newSubtask);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Ошибка при добавлении подзадачи из-за конфликта блокировки.");
+                return StatusCode(500, new { message = "Произошла ошибка при добавлении подзадачи из-за конфликта блокировки.", error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при добавлении подзадачи.");
+                return StatusCode(500, new { message = "Произошла ошибка при добавлении подзадачи.", error = ex.Message });
+            }
+
+            // Возвращаем новую подзадачу клиенту
+            var subtaskResponse = new
+            {
+                id = newSubtask.Id,
+                subtaskDescription = newSubtask.SubtaskDescription,
+                isCompleted = newSubtask.IsCompleted,
+                rowVersion = Convert.ToBase64String(newSubtask.RowVersion)
+            };
+
+            return Ok(new { success = true, subtask = subtaskResponse });
+        }
+
+
 
 
     }

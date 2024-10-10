@@ -587,3 +587,42 @@ label {
     border-radius: 50%;
 }
 
+.subtasks .list-group-item {
+    padding-left: 20px;
+}
+
+.subtasks .subtask-checkbox {
+    margin-right: 10px;
+}
+
+.subtasks .remove-subtask-button {
+    margin-left: 10px;
+}
+
+.list-group-item {
+    transition: all 0.3s ease;
+}
+
+    .list-group-item.removing {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    .list-group-item span {
+        font-family: Gilroy, sans-serif !important; /* Пример шрифта без жирного начертания */
+        font-weight: normal !important; /* Убирает жирное выделение */
+    }
+
+
+.subtasks-section .list-group-item span {
+    font-weight: normal; /* Убирает жирное выделение */
+}
+
+.add-subtask-button {
+    padding: 2px 4px; /* Вертикальный и горизонтальный отступы */
+}
+
+.remove-subtask-button {
+    padding: 2px 4px; /* Вертикальный и горизонтальный отступы */
+}
+

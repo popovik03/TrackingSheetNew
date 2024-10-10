@@ -744,22 +744,22 @@ function addCommentToList(id, author, text, createdAt, rowVersion, avatarUrl) {
 
 
 
-//функция добавления нового комментария
+// Функция добавления нового комментария
 function addComment() {
     var taskId = $('#editTaskId').val();
-    var commentAuthor = reporter; // Используем переменную reporter
+    var commentAuthor = loggedUser; // Используем переменную loggedUser
     var commentText = $('#newCommentText').val().trim();
     var rowVersion = $('#editTaskRowVersion').val();
 
-    // Проверка наличия reporter
-    if (!commentAuthor) {
+    // Проверка наличия loggedUser
+    if (!commentAuthor || commentAuthor === "Гость") {
         commentAuthor = prompt('Пожалуйста, введите ваше имя для добавления комментария:');
         if (!commentAuthor) {
             alert('Имя автора комментария обязательно.');
             return;
         }
-        // Сохраняем введённое имя в переменную reporter
-        reporter = commentAuthor;
+        // Если пользователь ввёл своё имя, вы можете решить, сохранять ли его для будущих комментариев
+        // Например, отправить его на сервер или сохранить в локальном хранилище
     }
 
     if (commentText === '') {
@@ -808,6 +808,7 @@ function addComment() {
         }
     });
 }
+
 
 $(document).on('click', '.remove-comment-button', function () {
     var commentId = $(this).data('comment-id');

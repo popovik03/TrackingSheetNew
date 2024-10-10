@@ -172,6 +172,13 @@ namespace TrackingSheet.Models.Kanban
         public Guid TaskId { get; set; } // Если требуется
     }
 
+    public class AddSubtaskModel
+    {
+        public Guid TaskId { get; set; }
+        public string SubtaskDescription { get; set; }
+    }
+
+
     public class KanbanFile
     {
         public Guid Id { get; set; }

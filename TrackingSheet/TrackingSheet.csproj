@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPPlus" Version="7.2.2" />
+    <PackageReference Include="EPPlus" Version="7.4.0" />
     <PackageReference Include="Handsontable" Version="14.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
@@ -35,6 +35,7 @@
     <PackageReference Include="SciChart.ExternalDependencies" Version="8.5.0.28148" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.5" />
+    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
   </ItemGroup>
 
   <ItemGroup>
